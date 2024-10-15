@@ -1,0 +1,17 @@
+import { Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+
+export default function Layout() {
+	return (
+		<GestureHandlerRootView>
+			<KeyboardProvider>
+				<Stack
+					screenOptions={{
+						fullScreenGestureEnabled: true,
+					}}
+				/>
+			</KeyboardProvider>
+		</GestureHandlerRootView>
+	);
+}
