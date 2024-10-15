@@ -7,6 +7,8 @@ import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller
 import { runOnUI } from "react-native-reanimated";
 import { useLayoutEffect, useMemo } from "react";
 import type { ReanimatedContext } from "react-native-keyboard-controller";
+import { Gesture } from "react-native-gesture-handler";
+import { getScrollbar } from "./Scrollbar";
 
 export interface SkiaScrollViewProps extends ScrollGestureProps {
 	customScrollGesture?: typeof getScrollGesture;
@@ -18,6 +20,7 @@ export interface SkiaScrollViewProps extends ScrollGestureProps {
 	};
 	automaticallyAdjustKeyboardInsets?: boolean;
 	keyboard?: ReanimatedContext;
+	inverted?: boolean;
 }
 
 export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
@@ -25,6 +28,7 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 	const layout = useSharedValue({ width: 0, height: 0 });
 	const list = useMemo(() => {
 		const _nativeId = SkiaViewNativeId.current++;
+		const inverted = props.inverted ? -1 : 1;
 
 		const state = {
 			_nativeId,
@@ -43,6 +47,7 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 				SkiaViewApi.requestRedraw(_nativeId);
 			},
 			...props,
+			inverted,
 		};
 
 		const scrollState = (props.customScrollGesture || getScrollGesture)({
@@ -52,6 +57,10 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 		});
 		const { scrollY } = scrollState;
 		const { matrix, content, root, redraw } = state;
+		const scrollbar = getScrollbar({ ...scrollState, ...state });
+
+		const gesture = Gesture.Exclusive(scrollbar.gesture, scrollState.gesture);
+		// const gesture = scrollbar.gesture;
 
 		root.value.addChild(content.value);
 
@@ -60,7 +69,7 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 
 			scrollY.addListener(1, (value) => {
 				const matrixValue = matrix.value;
-				matrixValue[5] = value * -1;
+				matrixValue[5] = value * -1 * inverted;
 				content.value.setProp("matrix", matrixValue);
 
 				redraw();
@@ -70,6 +79,8 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 		return {
 			...scrollState,
 			...state,
+			Scrollbar: scrollbar.Scrollbar,
+			gesture,
 		};
 	}, []);
 

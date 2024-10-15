@@ -8,6 +8,7 @@ import type { LayoutRectangle, ViewStyle } from "react-native";
 import { useLayoutEffect, useMemo, type ReactNode } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
+import { RenderScrollBar } from "./Scrollbar";
 
 export function SkiaScrollView({
 	list,
@@ -24,7 +25,7 @@ export function SkiaScrollView({
 	debug?: boolean;
 } & SkiaScrollViewProps) {
 	const state = list || useSkiaScrollView(props);
-	const { _nativeId, gesture, layout, root, maxHeight, content } = state;
+	const { _nativeId, gesture, layout, root, maxHeight, content, Scrollbar } = state;
 
 	const fixedReconciler = useMemo(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
@@ -42,7 +43,12 @@ export function SkiaScrollView({
 	}, []);
 
 	contentReconciler.render(children);
-	fixedReconciler.render(fixedChildren);
+	fixedReconciler.render(
+		<>
+			<Scrollbar />
+			{fixedChildren}
+		</>
+	);
 
 	useLayoutEffect(() => {
 		SkiaViewApi.setJsiProperty(_nativeId, "root", root.value);
@@ -56,16 +62,13 @@ export function SkiaScrollView({
 		<GestureDetector gesture={gesture}>
 			<SkiaDomViewNativeComponent
 				onLayout={(e) => {
-					console.log("onLayout");
 					runOnUI((rect: LayoutRectangle) => {
 						"worklet";
 
 						layout.value = rect;
 
-						if (props.height) {
-							maxHeight.value = Math.max(props.height - rect.height, 1);
-							console.log("onLayout", rect, Math.max(props.height - rect.height, 1), props.height);
-						}
+						if (props.height) maxHeight.value = Math.max(props.height - rect.height, 1);
+						console.log("onLayout", rect);
 					})(e.nativeEvent.layout);
 				}}
 				nativeID={`${_nativeId}`}

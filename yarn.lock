@@ -7566,6 +7566,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-haptics@npm:~13.0.1":
+  version: 13.0.1
+  resolution: "expo-haptics@npm:13.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 5419e6451d3718dde8fb099eb710d7c90448d75d00d44e8b42ec301ec45d52bdb52e6ef2959fd0f207abcbe090b0c851b8bd94aba90343053d5435e4e545a997
+  languageName: node
+  linkType: hard
+
 "expo-keep-awake@npm:~13.0.2":
   version: 13.0.2
   resolution: "expo-keep-awake@npm:13.0.2"
@@ -13097,6 +13106,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-haptic-feedback@npm:^2.3.3":
+  version: 2.3.3
+  resolution: "react-native-haptic-feedback@npm:2.3.3"
+  peerDependencies:
+    react-native: ">=0.60.0"
+  checksum: 5ff12aaf44fa1cad8ab3d9c58046a11c631c6622955120294060efc51c625203ee4cd7ccb565663c12b27552ebbb7034a386000d9da738b9eea5ff62d58b14c0
+  languageName: node
+  linkType: hard
+
 "react-native-helmet-async@npm:2.0.4":
   version: 2.0.4
   resolution: "react-native-helmet-async@npm:2.0.4"
@@ -13177,6 +13195,7 @@ __metadata:
     expo: ~51.0.28
     expo-build-properties: ~0.12.5
     expo-constants: ~16.0.2
+    expo-haptics: ~13.0.1
     expo-linking: ~6.3.1
     expo-router: ~3.5.23
     expo-status-bar: ~1.12.1
@@ -13186,6 +13205,7 @@ __metadata:
     react-native: 0.74.5
     react-native-builder-bob: ^0.30.2
     react-native-gesture-handler: ^2.20.0
+    react-native-haptic-feedback: ^2.3.3
     react-native-keyboard-controller: ^1.14.1
     react-native-reanimated: ^3.15.5
     react-native-safe-area-context: ^4.11.0
@@ -13216,6 +13236,7 @@ __metadata:
     react-native: 0.74.5
     react-native-builder-bob: ^0.30.2
     react-native-gesture-handler: ^2.20.0
+    react-native-haptic-feedback: ^2.3.3
     react-native-keyboard-controller: ^1.14.1
     react-native-reanimated: ^3.15.5
     react-native-safe-area-context: ^4.11.0
@@ -13226,6 +13247,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-gesture-handler: ^2.20.0
+    react-native-haptic-feedback: ^2.3.3
     react-native-keyboard-controller: ^1.14.1
     react-native-reanimated: ^3.15.5
     react-native-safe-area-context: ^4.11.0

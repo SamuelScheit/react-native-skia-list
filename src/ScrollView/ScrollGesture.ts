@@ -21,10 +21,11 @@ const getDefaultState = () => ({
 	decelerationRate: 0.998,
 });
 
-type ScrollGestureState = ReturnType<typeof getDefaultState>;
+type ScrollGestureInitalState = ReturnType<typeof getDefaultState>;
 
-export interface ScrollGestureProps extends Partial<ScrollGestureState> {
+export interface ScrollGestureProps extends Partial<ScrollGestureInitalState> {
 	height?: number;
+	inverted?: boolean | number;
 	onScroll?: (
 		value: GestureUpdateEvent<PanGestureHandlerEventPayload & PanGestureChangeEventPayload> & {
 			scrollY: number;
@@ -42,6 +43,8 @@ export function getScrollGestureState(props: ScrollGestureProps = {}) {
 		...props,
 	};
 }
+
+export type ScrollGestureState = ReturnType<typeof getScrollGesture>;
 
 export function getScrollGesture(props: ScrollGestureProps) {
 	const state = getScrollGestureState(props);
@@ -61,6 +64,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 		maxHeight,
 		pressing,
 	} = state;
+	const inverted = props.inverted ? -1 : 1;
 
 	function onEndClamp() {
 		"worklet";
@@ -97,7 +101,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 			(finished) => {
 				"worklet";
 
-				if (bounces && ((finished && y.value <= maxHeight.value - offsetY.value) || y.value <= 0)) {
+				if (bounces && finished && animation.clamped) {
 					const newValue = y.value + animation.initialVelocity * 0.03;
 
 					y.value = withSpring(newValue, { duration: 100, dampingRatio: 2 }, () => {
@@ -153,7 +157,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 			onScrollBeginDrag?.();
 		})
 		.onChange((e) => {
-			const newY = startY.value + e.translationY * -1;
+			const newY = startY.value + e.translationY * -1 * inverted;
 
 			if (bounces) {
 				y.value = interpolateOutside(newY, 0, maxHeight.value - offsetY.value, 0.82);
@@ -170,7 +174,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 		})
 		.onEnd((e) => {
 			// end scroll
-			onEnd(-e.velocityY);
+			onEnd(e.velocityY * -1 * inverted);
 			onScrollEndDrag?.();
 		})
 		.onFinalize((_, success) => {
@@ -186,5 +190,6 @@ export function getScrollGesture(props: ScrollGestureProps) {
 		...state,
 		scrollTo,
 		scrollToEnd,
+		startMomentumScroll: onEnd,
 	};
 }

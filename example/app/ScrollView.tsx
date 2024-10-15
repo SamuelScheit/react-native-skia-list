@@ -1,4 +1,4 @@
-import { Circle, Skia } from "@shopify/react-native-skia";
+import { Circle, Rect, Skia } from "@shopify/react-native-skia";
 import { SkiaScrollView } from "react-native-skia-list";
 
 const paint = Skia.Paint();
@@ -9,7 +9,7 @@ export default function ScrollView() {
 		<SkiaScrollView
 			height={1300}
 			debug
-			style={{ backgroundColor: "white", flex: 1 }}
+			style={{ backgroundColor: "white", flex: 1, margin: 0 }}
 			// fixedChildren={<Fill invertClip clip={{ x: 6, y: 5, width: 130, height: 17 }} color="white" />}
 		>
 			<Circle cx={200} cy={50} r={50} paint={paint} />

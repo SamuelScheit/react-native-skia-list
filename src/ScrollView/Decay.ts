@@ -26,6 +26,7 @@ export function rigidDecay(animation: InnerDecayMatrixAnimation, now: number, co
 	if (config.clamp) {
 		if (y < config.clamp[0] || y > config.clamp[1]) {
 			// animation.current = toValue;
+			animation.clamped = true;
 			return true;
 		}
 	}
@@ -77,6 +78,7 @@ export const withDecay = function (userConfig: DecayConfig, callback?: Animation
 		startTimestamp: 0,
 		reduceMotion: ReduceMotion.Never,
 		clamp: config.clamp,
+		clamped: false,
 		velocity: initialVelocity,
 	} as any;
 } as unknown as withDecayType;
