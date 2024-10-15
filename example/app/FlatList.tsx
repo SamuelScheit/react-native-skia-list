@@ -1,17 +1,21 @@
 import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import { Skia } from "@shopify/react-native-skia";
+import { matchFont, Skia } from "@shopify/react-native-skia";
 import { SkiaFlatList } from "react-native-skia-list";
 
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("rgb(91, 128, 218)"));
 
+const white = Skia.Paint();
+white.setColor(Skia.Color("#fff"));
+
+const font = matchFont({ fontSize: 20, fontFamily: "Arial" });
+
 export default function FlatList() {
 	return (
 		<SkiaFlatList
-			height={1300}
 			debug
 			style={{ backgroundColor: "white", flex: 1 }}
-			initialData={() => Array.from({ length: 100 }, (_, i) => i)}
+			initialData={() => Array.from({ length: 1000 }, (_, i) => i)}
 			renderItem={(element, item, index, state) => {
 				"worklet";
 
@@ -24,6 +28,16 @@ export default function FlatList() {
 						width: 130,
 						height: 80,
 						paint,
+					})
+				);
+
+				element.addChild(
+					SkiaDomApi.TextNode({
+						text: `${item}`,
+						font,
+						x: 50,
+						y: 40,
+						paint: white,
 					})
 				);
 

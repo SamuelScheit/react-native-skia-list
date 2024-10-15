@@ -20,7 +20,6 @@ export interface SkiaFlatListProps<T> extends SkiaScrollViewProps {
 	 *  */
 	maintainVisibleContentPosition?: boolean;
 	estimatedItemHeight?: number;
-	inverted?: boolean;
 	keyExtractor?: (item: T, index: number) => string;
 	renderItem?: (element: RenderNode<GroupProps> | undefined, item: T, index: number, state: any) => number;
 }
@@ -34,7 +33,8 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 		const rowOffsets = makeMutable({} as Record<string, number>);
 		const firstRenderIndex = makeMutable(0);
 		const firstRenderHeight = makeMutable(0);
-		const data = makeMutable(props.initialData?.() ?? []);
+		const initialData = props.initialData?.() ?? [];
+		const data = makeMutable(initialData);
 		const keyExtractor =
 			props.keyExtractor ??
 			((_item, index) => {
@@ -48,10 +48,10 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 				return 0;
 			});
 		const maintainVisibleContentPosition = props.maintainVisibleContentPosition ?? true;
-		const inverted = props.inverted ? -1 : 1;
+		const estimatedItemHeight = props.estimatedItemHeight ?? 100;
 		const addThreshold = 0;
 
-		const { maxHeight, scrollY, startY, redraw, pressing, layout, safeArea, content } = scrollView;
+		const { maxHeight, scrollY, startY, redraw, pressing, layout, safeArea, content, inverted } = scrollView;
 
 		const state = {
 			...scrollView,
@@ -62,11 +62,9 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 			firstRenderIndex,
 			firstRenderHeight,
 			maintainVisibleContentPosition,
-			estimatedItemHeight: props.estimatedItemHeight ?? 100,
 			keyExtractor,
 			renderItem,
 			data,
-			inverted,
 		};
 
 		function getItemsHeight(data: T[], indexOffset = 0) {
@@ -98,18 +96,18 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 			return rowY;
 		}
 
-		function isBelowStart(rowY: number, itemHeight: number) {
+		function isBeforeStart(rowY: number, itemHeight: number) {
 			"worklet";
 			// item is below the start
 			// when inverted it is below the bottom of the screen
-			return rowY + itemHeight < -scrollY.value * inverted - (addThreshold - safeArea.value.bottom) * inverted;
+			return rowY + itemHeight < scrollY.value * inverted - (addThreshold - safeArea.value.bottom) * inverted;
 		}
 
-		function isAboveEnd(rowY: number, height: number) {
+		function isAfterEnd(rowY: number, height: number) {
 			"worklet";
 			// item is above the end
 			// when inverted it is above the top of the screen
-			return rowY - (addThreshold - safeArea.value.top) > -scrollY.value * inverted + height;
+			return rowY - (addThreshold - safeArea.value.top) > scrollY.value * inverted + height;
 		}
 
 		function unmountElement(index: number | undefined, item: T | undefined) {
@@ -159,13 +157,11 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 			const { width, height } = layout.value;
 			if (width === 0 || height === 0) return;
 
-			const y = -scrollY.value;
 			const dataValue = data.value;
 			const elementsValue = elements.value;
 			const heightsValue = heights.value;
 
-			const removeThreshold = height * 3; // only remove elements that are 2 screens away
-			// const removeThreshold = 0;
+			// const removeThreshold = 1000; // only remove elements that are 2 screens away
 
 			let rowY = firstRenderHeight.value;
 			let firstWasSet = false;
@@ -183,17 +179,17 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 				let itemHeight = heightsValue[id];
 				if (!itemHeight) continue;
 
-				const aboveEnd = isAboveEnd(rowY, height);
-				const belowStart = isBelowStart(rowY, itemHeight);
+				const afterEnd = isAfterEnd(rowY, height);
+				const beforeStart = isBeforeStart(rowY, itemHeight);
 
-				if (belowStart || aboveEnd) {
+				if (beforeStart) {
 					item = data.value[index];
 					if (!item) break;
 					id = keyExtractor(item, index);
 
 					const itemHeight2 = heightsValue[id] || 0;
 
-					if (!isBelowStart(rowY, itemHeight + itemHeight2)) {
+					if (!isBeforeStart(rowY + itemHeight, itemHeight2)) {
 						// prevent item from not being rendered if scrolling back to start
 						firstRenderIndex.value = index;
 						firstRenderHeight.value = rowY;
@@ -221,20 +217,20 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 				let element = elementsValue[id];
 				let itemHeight = heightsValue[id] || 0;
 
-				const belowStart = isBelowStart(rowY, itemHeight);
-				const aboveEnd = isAboveEnd(rowY, height);
+				const beforeStart = isBeforeStart(rowY, itemHeight);
+				const afterEnd = isAfterEnd(rowY, height);
 
-				if (belowStart || aboveEnd) {
-					const aboveScreenRemove = rowY + itemHeight < y - removeThreshold;
-					const belowScreenRemove = rowY - removeThreshold > y + height;
-					if (element && (aboveScreenRemove || belowScreenRemove)) {
+				if (beforeStart || afterEnd) {
+					if (element) {
 						// console.log("removing", id);
 						unmountElement(index, item);
+					} else if (!itemHeight) {
+						itemHeight = renderItem(undefined, item, index, state);
 					}
 
 					rowY += itemHeight;
 
-					if (aboveEnd) {
+					if (afterEnd) {
 						// continue if next element also needs to be unmounted
 						const nextItem = dataValue[index + 1];
 						if (!nextItem) break;
@@ -243,7 +239,7 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 						const nextElement = elementsValue[id];
 						if (nextElement) continue;
 						else break;
-					} else if (belowStart) continue;
+					} else if (beforeStart) continue;
 				}
 
 				if (!firstWasSet) {
@@ -254,7 +250,7 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 
 				if (!element) {
 					itemHeight = mountElement(rowY, item, index);
-					// console.log("adding", id, aboveScreen, belowScreen, rowY);
+					// console.log("adding", id, rowY);
 				}
 
 				rowY += itemHeight;
@@ -262,7 +258,7 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 
 			const diff = performance.now() - start;
 			if (diff > 2) {
-				// console.log("Draw time", performance.now() - start, rows.children().length);
+				// console.log("Draw time", performance.now() - start, content.value.children().length);
 			}
 			redraw();
 		}
@@ -336,6 +332,12 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 			scrollY.addListener(2, () => {
 				onScroll();
 			});
+			layout.addListener(1, (value) => {
+				console.log("layout changed");
+				maxHeight.value = estimatedItemHeight * initialData.length - value.height;
+
+				onScroll();
+			});
 		})();
 
 		onScroll();
@@ -344,11 +346,12 @@ export function useSkiaFlatList<T>(props: SkiaFlatListProps<T> = {}) {
 	}, []);
 
 	useLayoutEffect(() => {
-		const { scrollY } = list;
+		const { scrollY, layout } = list;
 		return runOnUI(() => {
 			"worklet";
 
 			scrollY.removeListener(2);
+			layout.removeListener(1);
 		});
 	}, []);
 
