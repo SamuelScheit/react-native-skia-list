@@ -1,6 +1,6 @@
 # react-native-skia-list
 
-Worlds fastest react-native list rendered based on skia
+Worlds fastest react-native list renderer based on skia
 
 ## Installation
 
@@ -10,15 +10,7 @@ npm install react-native-skia-list
 
 ## Usage
 
-
-```js
-import { multiply } from 'react-native-skia-list';
-
-// ...
-
-const result = await multiply(3, 7);
-```
-
+_Coming soon_
 
 ## Contributing
 
@@ -27,7 +19,3 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 ## License
 
 MIT
-
----
-
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
