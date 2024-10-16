@@ -5,6 +5,7 @@ import { interpolate, interpolateBackoff, interpolateClamp, interpolateOutside }
 import { Gesture } from "react-native-gesture-handler";
 import { trigger as vibrate } from "react-native-haptic-feedback";
 import { debounce, throttle } from "../Util/timing";
+import { clearAnimatedTimeout, setAnimatedTimeout } from "./timeout";
 
 const primary = Skia.Paint();
 primary.setColor(Skia.Color("rgb(91, 128, 218)"));
@@ -13,29 +14,32 @@ const grey = Skia.Paint();
 grey.setColor(Skia.Color("rgb(226, 226, 226)"));
 
 export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
-	const { layout, scrollY, maxHeight, redraw, startMomentumScroll } = state;
+	const { layout, scrollY, maxHeight, redraw, startMomentumScroll, inverted, invertedFactor } = state;
 	const visible = makeMutable(0);
 	const dragging = makeMutable(0);
 	const beginY = makeMutable(0);
 
-	const onScroll = throttle(function onScroll() {
-		console.log("scroll");
-		visible.value = withTiming(1, { duration: 200 });
-	}, 500);
-
-	const onScrollEnd = debounce(function onScrollEnd() {
-		console.log("scroll end");
-		if (dragging.value !== 1) {
-			visible.value = withTiming(0, { duration: 200 });
-		}
-	}, 1000);
-
 	runOnUI(() => {
 		dragging.addListener(1, () => redraw());
 		visible.addListener(1, () => redraw());
+		let timeout: number | undefined;
 		scrollY.addListener(3, () => {
-			if (visible.value === 0) runOnJS(onScroll)();
-			runOnJS(onScrollEnd)();
+			requestAnimationFrame(() => {
+				if (visible.value === 0) {
+					visible.value = withTiming(1, { duration: 200 });
+				}
+
+				if (timeout) {
+					clearAnimatedTimeout(timeout);
+					timeout = undefined;
+				}
+
+				timeout = setAnimatedTimeout(() => {
+					if (dragging.value !== 1) {
+						visible.value = withTiming(0, { duration: 200 });
+					}
+				}, 1000);
+			});
 		});
 	})();
 
@@ -59,19 +63,22 @@ export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
 		.onTouchesUp((_, state) => {
 			state.end();
 			dragging.value = withTiming(0, { duration: 200 });
-			runOnJS(onScrollEnd)();
+
+			if (dragging.value !== 1) {
+				visible.value = withTiming(0, { duration: 200 });
+			}
 		})
 		.manualActivation(true)
 		.onStart(() => {})
 		.onChange((e) => {
-			const dragPercentage = e.translationY / layout.value.height;
+			const dragPercentage = (e.translationY * invertedFactor) / layout.value.height;
 			const newPercentage = beginY.value + dragPercentage;
 			const yValue = newPercentage * maxHeight.value;
 			scrollY.value = yValue;
 		})
 		.onEnd((e) => {
 			const percentage = Math.max(maxHeight.value / layout.value.height, 1);
-			startMomentumScroll(e.velocityY * percentage);
+			startMomentumScroll(e.velocityY * percentage * invertedFactor);
 		});
 
 	function Scrollbar() {
@@ -97,7 +104,8 @@ export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
 			const percentage = scrollY.value / maxHeight.value;
 			const end = layout.value.height - scrollBarHeight.value;
 
-			return Math.min(Math.max(percentage * end, 0), end);
+			const result = Math.min(Math.max(percentage * end, 0), end);
+			return inverted ? layout.value.height - result - scrollBarHeight.value : result;
 		});
 
 		return (
