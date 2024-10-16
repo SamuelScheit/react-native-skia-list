@@ -26,6 +26,7 @@ export default function App() {
 		<View style={{ flex: 1 }}>
 			<Button href="/ScrollView">ScrollView</Button>
 			<Button href="/FlatList">FlatList</Button>
+			<Button href="/MessageList">MessageList</Button>
 		</View>
 	);
 }
