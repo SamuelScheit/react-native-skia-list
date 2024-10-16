@@ -8,7 +8,6 @@ import type { LayoutRectangle, ViewStyle } from "react-native";
 import { useLayoutEffect, useMemo, type ReactNode } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
-import { RenderScrollBar } from "./Scrollbar";
 
 export function SkiaScrollView({
 	list,

@@ -10,25 +10,26 @@ import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
 
-export interface SkiaScrollViewProps extends ScrollGestureProps {
-	customScrollGesture?: typeof getScrollGesture;
-	safeAreaInsets?: {
-		top?: number;
-		bottom?: number;
-		left?: number;
-		right?: number;
+export type SkiaScrollViewProps<Additional = {}> = Additional &
+	ScrollGestureProps & {
+		customScrollGesture?: typeof getScrollGesture;
+		safeAreaInsets?: {
+			top?: number;
+			bottom?: number;
+			left?: number;
+			right?: number;
+		};
+		automaticallyAdjustKeyboardInsets?: boolean;
+		keyboard?: ReanimatedContext;
+		inverted?: boolean;
 	};
-	automaticallyAdjustKeyboardInsets?: boolean;
-	keyboard?: ReanimatedContext;
-	inverted?: boolean;
-}
 
-export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
+export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additional> = {} as any) {
 	const keyboard = useReanimatedKeyboardAnimation();
 	const layout = useSharedValue({ width: 0, height: 0 });
 	const list = useMemo(() => {
 		const _nativeId = SkiaViewNativeId.current++;
-		const inverted = props.inverted ? -1 : 1;
+		const invertedFactor = props.inverted ? -1 : 1;
 
 		const state = {
 			_nativeId,
@@ -44,14 +45,15 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 			redraw() {
 				"worklet";
 
-				SkiaViewApi.requestRedraw(_nativeId);
+				// SkiaViewApi.requestRedraw(_nativeId);
 			},
 			...props,
-			inverted,
+			invertedFactor,
 		};
 
 		const scrollState = (props.customScrollGesture || getScrollGesture)({
 			...props,
+			content: state.content,
 			layout,
 			offsetY: props.automaticallyAdjustKeyboardInsets !== false ? keyboard.height : makeMutable(0),
 		});
@@ -66,14 +68,22 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 
 		runOnUI(() => {
 			"worklet";
+			let height = invertedFactor === -1 ? layout.value.height : 0;
 
-			scrollY.addListener(1, (value) => {
+			layout.addListener(1, (value) => {
+				height = invertedFactor === -1 ? value.height : 0;
+				onScroll(scrollY.value);
+			});
+
+			function onScroll(value: number) {
 				const matrixValue = matrix.value;
-				matrixValue[5] = value * -1 * inverted;
+				matrixValue[5] = value * -1 * invertedFactor + height;
 				content.value.setProp("matrix", matrixValue);
 
 				redraw();
-			});
+			}
+
+			scrollY.addListener(1, onScroll);
 		})();
 
 		return {
@@ -90,6 +100,7 @@ export function useSkiaScrollView(props: SkiaScrollViewProps = {}) {
 			"worklet";
 
 			scrollY.removeListener(1);
+			layout.removeListener(1);
 		});
 	}, []);
 

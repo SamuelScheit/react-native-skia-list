@@ -25,7 +25,7 @@ type ScrollGestureInitalState = ReturnType<typeof getDefaultState>;
 
 export interface ScrollGestureProps extends Partial<ScrollGestureInitalState> {
 	height?: number;
-	inverted?: boolean | number;
+	inverted?: boolean;
 	onScroll?: (
 		value: GestureUpdateEvent<PanGestureHandlerEventPayload & PanGestureChangeEventPayload> & {
 			scrollY: number;
@@ -157,13 +157,15 @@ export function getScrollGesture(props: ScrollGestureProps) {
 			onScrollBeginDrag?.();
 		})
 		.onChange((e) => {
-			const newY = startY.value + e.translationY * -1 * inverted;
+			let newY = startY.value + e.translationY * -1 * inverted;
 
 			if (bounces) {
-				y.value = interpolateOutside(newY, 0, maxHeight.value - offsetY.value, 0.82);
+				newY = interpolateOutside(newY, 0, maxHeight.value - offsetY.value, 0.82);
 			} else {
-				y.value = clamp(newY, 0, maxHeight.value - offsetY.value);
+				newY = clamp(newY, 0, maxHeight.value - offsetY.value);
 			}
+
+			y.value = newY;
 
 			if (onScroll) {
 				const event = e as typeof e & { scrollY: number };
@@ -188,6 +190,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 	return {
 		gesture,
 		...state,
+		invertedFactor: inverted,
 		scrollTo,
 		scrollToEnd,
 		startMomentumScroll: onEnd,

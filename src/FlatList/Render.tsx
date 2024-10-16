@@ -7,7 +7,7 @@ export function SkiaFlatList<T>({
 	list,
 	...props
 }: {
-	list?: SkiaFlatListState;
+	list?: SkiaFlatListState<T>;
 	style?: ViewStyle;
 	fixedChildren?: ReactNode;
 	debug?: boolean;
