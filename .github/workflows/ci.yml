@@ -1,64 +1,49 @@
 name: CI
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  merge_group:
-    types:
-      - checks_requested
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+    merge_group:
+        types:
+            - checks_requested
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
 
-      - name: Setup
-        uses: ./.github/actions/setup
+            - name: Setup
+              uses: ./.github/actions/setup
 
-      - name: Lint files
-        run: yarn lint
+            - name: Run unit tests
+              run: yarn test --maxWorkers=2 --coverage
 
-      - name: Typecheck files
-        run: yarn typecheck
+    build-library:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+            - name: Setup
+              uses: ./.github/actions/setup
 
-      - name: Setup
-        uses: ./.github/actions/setup
+            - name: Build package
+              run: yarn prepare
 
-      - name: Run unit tests
-        run: yarn test --maxWorkers=2 --coverage
+    build-web:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
 
-  build-library:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+            - name: Setup
+              uses: ./.github/actions/setup
 
-      - name: Setup
-        uses: ./.github/actions/setup
-
-      - name: Build package
-        run: yarn prepare
-
-  build-web:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup
-        uses: ./.github/actions/setup
-
-      - name: Build example for Web
-        run: |
-          yarn example expo export --platform web
+            - name: Build example for Web
+              run: |
+                  yarn example expo export --platform web

@@ -45,7 +45,7 @@ export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additio
 			redraw() {
 				"worklet";
 
-				// SkiaViewApi.requestRedraw(_nativeId);
+				SkiaViewApi.requestRedraw(_nativeId);
 			},
 			...props,
 			invertedFactor,

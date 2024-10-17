@@ -358,11 +358,13 @@ export function useMessageListState(props: MessageListProps) {
 
 const RenderMessageList = function RenderMessageList({
 	style,
+	list,
 	...props
 }: MessageListProps & {
 	style?: ViewStyle;
+	list?: ReturnType<typeof useMessageListState>;
 }) {
-	const list = useMessageListState(props);
+	list ||= useMessageListState(props);
 
 	return <SkiaFlatList debug style={style || { flex: 1 }} list={list} />;
 };

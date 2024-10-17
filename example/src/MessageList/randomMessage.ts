@@ -13,18 +13,6 @@ import { lipsum } from "./lipsum";
 import { black, emojiBuilder, scale, white } from "./ContextMenu";
 import type { MessageItem } from "./State";
 
-const userAvatarPromise1 = loadData(
-	`https://avatar.iran.liara.run/public`,
-	Skia.Image.MakeImageFromEncoded.bind(Skia.Image),
-	console.log
-);
-const userAvatarPromise2 = loadData(
-	`https://avatar.iran.liara.run/public`,
-	Skia.Image.MakeImageFromEncoded.bind(Skia.Image),
-	console.log
-);
-const attachmentImagePromise = loadImage(400, 400);
-
 const paragraphStyle: SkTextStyle = {
 	fontSize: 18,
 	color: black,
@@ -171,11 +159,11 @@ export function getRandomMessage({ my_user_id, i }: { my_user_id: string; i: num
 		return reactions;
 	}
 
-	const attachments = Math.random() < 0.1 ? [attachment] : [];
+	const attachments = Math.random() < 0.1 ? [null] : [];
 	if (attachments.length && Math.random() < 0.5) text = undefined;
 	// const attachments = [] as any[];
 
-	let avatar = user_id === "1" ? null : user_id === "2" ? avatar1 : avatar2;
+	let avatar = user_id === "1" ? null : user_id === "2" ? null : null;
 
 	return {
 		text: text ? textBuilder.addText(text).build() : undefined,
@@ -189,44 +177,3 @@ export function getRandomMessage({ my_user_id, i }: { my_user_id: string; i: num
 		id: i.toString(),
 	} as MessageItem;
 }
-
-// userAvatarPromise2.then((img) => {
-// 	runOnUI(() => {
-// 		data.value.forEach((item) => {
-// 			if (item.user_id === "2") {
-// 				item.avatar = img;
-// 				unmountElement(undefined, item);
-// 			}
-// 		});
-// 		onDraw();
-// 	})();
-// 	avatar2 = img;
-// });
-
-// attachmentImagePromise.then((img) => {
-// 	runOnUI(() => {
-// 		data.value.forEach((item) => {
-// 			item.attachments = item.attachments.map((x) => img);
-// 			unmountElement(undefined, item);
-// 		});
-// 		onDraw();
-// 	})();
-// 	attachment = img;
-// });
-
-// userAvatarPromise1.then((img) => {
-// 	runOnUI(() => {
-// 		data.value.forEach((item) => {
-// 			if (item.user_id === "3") {
-// 				item.avatar = img;
-// 				unmountElement(undefined, item);
-// 			}
-// 		});
-// 		onDraw();
-// 	})();
-// 	avatar1 = img;
-// });
-
-let attachment: SkImage | null = null;
-let avatar1: SkImage | null = null;
-let avatar2: SkImage | null = null;

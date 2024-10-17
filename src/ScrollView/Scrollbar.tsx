@@ -1,10 +1,9 @@
-import { Rect, Skia, RoundedRect, Group } from "@shopify/react-native-skia";
+import { Skia, RoundedRect } from "@shopify/react-native-skia";
 import type { ScrollGestureState } from "./ScrollGesture";
 import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable } from "react-native-reanimated";
-import { interpolate, interpolateBackoff, interpolateClamp, interpolateOutside } from "./Interpolate";
+import { interpolateClamp } from "./Interpolate";
 import { Gesture } from "react-native-gesture-handler";
 import { trigger as vibrate } from "react-native-haptic-feedback";
-import { debounce, throttle } from "../Util/timing";
 import { clearAnimatedTimeout, setAnimatedTimeout } from "./timeout";
 
 const primary = Skia.Paint();
@@ -28,12 +27,10 @@ export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
 				if (visible.value === 0) {
 					visible.value = withTiming(1, { duration: 200 });
 				}
-
 				if (timeout) {
 					clearAnimatedTimeout(timeout);
 					timeout = undefined;
 				}
-
 				timeout = setAnimatedTimeout(() => {
 					if (dragging.value !== 1) {
 						visible.value = withTiming(0, { duration: 200 });
