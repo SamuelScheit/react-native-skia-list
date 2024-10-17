@@ -49,7 +49,9 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 		const rowOffsets = makeMutable({} as Record<string, number>);
 		const firstRenderIndex = makeMutable(0);
 		const firstRenderHeight = makeMutable(0);
+		const start = performance.now();
 		const initialData = props.initialData?.() ?? [];
+		console.log("initialData", performance.now() - start, initialData.length);
 		const data = makeMutable(initialData);
 		const keyExtractor =
 			props.keyExtractor ??

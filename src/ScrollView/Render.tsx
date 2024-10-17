@@ -71,8 +71,8 @@ export function SkiaScrollView({
 					})(e.nativeEvent.layout);
 				}}
 				nativeID={`${_nativeId}`}
-				mode={"continuous"}
-				// mode={"default"}
+				// mode={"continuous"}
+				mode={"default"}
 				debug={debug}
 				style={style || { flex: 1 }}
 			/>

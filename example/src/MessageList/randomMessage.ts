@@ -100,7 +100,60 @@ export function biasedRandomNumber() {
 }
 
 let acc = 0;
-let id = 0;
+
+export function getRandomMessageRaw(i: number) {
+	authorBuilder.reset();
+
+	const date = new Date(Date.now() * Math.random());
+	const hours = date.getHours().toString().padStart(2, "0");
+	const minutes = date.getMinutes().toString().padStart(2, "0");
+	const dateString = `${hours}:${minutes}`;
+
+	const random = Math.random();
+	// const user_id: string = "1";
+	const user_id = random < 0.33 ? "1" : random < 0.66 ? "2" : "3";
+	// const user_id: any = random < 0.5 ? "2" : "3";
+
+	const authorName = user_id === "1" ? "Me" : user_id === "2" ? "John" : "Jane";
+
+	let len = biasedRandomNumber();
+	// let len = 20;
+	let text: string | undefined = `${i}${lipsum.slice(acc % lipsum.length, (acc % lipsum.length) + len).trim()} `;
+	// let text: string | undefined = `${i}${lipsum.slice(0, len).trim()}`;
+	// lipsum = lipsum.slice(i * 3);
+	acc += len;
+
+	function getReactions() {
+		const reactions = [] as any;
+		const list = ["👍", "❤️", "😂", "😮", "😢", "😡", "🙏", "💯"];
+
+		while (Math.random() > 0.8) {
+			const emoji = list[Math.floor(Math.random() * list.length)]!;
+			const count = Math.floor(Math.random() * 11 + 1).toString();
+
+			reactions.push({
+				emoji,
+				count,
+			});
+		}
+		return reactions;
+	}
+
+	const attachments = Math.random() < 0.1 ? [null] : [];
+	if (attachments.length && Math.random() < 0.5) text = undefined;
+	// const attachments = [] as any[];
+
+	return {
+		text: text,
+		author: authorName,
+		user_id,
+		reactions: getReactions(),
+		attachments,
+		dateString,
+		// id: Math.random().toString(),
+		id: i.toString(),
+	};
+}
 
 export function getRandomMessage({ my_user_id, i }: { my_user_id: string; i: number }) {
 	authorBuilder.reset();

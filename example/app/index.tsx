@@ -24,10 +24,10 @@ function Button(props: LinkProps) {
 export default function App() {
 	return (
 		<View style={{ flex: 1 }}>
-			<Button href="/ScrollView">ScrollView</Button>
-			<Button href="/FlatList">FlatList</Button>
-			<Button href="/MessageList">MessageList</Button>
-			<Button href="/Test">Test</Button>
+			<Button href="/ScrollView">SkiaScrollView</Button>
+			<Button href="/FlatList">SkiaFlatList</Button>
+			<Button href="/MessageList">SkiaMessageList</Button>
+			<Button href="/FlashList">FlashList</Button>
 		</View>
 	);
 }

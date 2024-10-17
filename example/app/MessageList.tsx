@@ -1,6 +1,6 @@
 import { loadData, Skia, type SkImage } from "@shopify/react-native-skia";
 import { getRandomMessage, loadImage } from "../src/MessageList/randomMessage";
-import { MessageList, useMessageListState } from "../src/MessageList/Render";
+import { MessageList, useMessageListState, type MessageListProps } from "../src/MessageList/Render";
 import { runOnUI } from "react-native-reanimated";
 import type { MessageItem } from "../src/MessageList/State";
 
@@ -22,11 +22,12 @@ let avatar2: SkImage | null = null;
 
 export default function SkiaMessageList() {
 	const my_user_id = "1";
-	const props = {
+	const props: MessageListProps = {
 		my_user_id,
 		is_group: true,
 		bubble: true,
 		inverted: true,
+		estimatedItemHeight: 200,
 		keyExtractor: (item: MessageItem) => {
 			"worklet";
 			return item.id;

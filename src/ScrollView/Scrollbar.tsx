@@ -53,7 +53,7 @@ export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
 
 				visible.value = withTiming(1, { duration: 200 });
 				dragging.value = withTiming(1, { duration: 200 });
-				runOnJS(vibrate)("impactHeavy");
+				runOnJS(vibrate)("impactHeavy", { ignoreAndroidSystemSettings: true });
 				beginY.value = scrollY.value / maxHeight.value;
 			}
 		})
