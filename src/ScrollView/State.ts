@@ -30,9 +30,12 @@ export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additio
 	const list = useMemo(() => {
 		const _nativeId = SkiaViewNativeId.current++;
 		const invertedFactor = props.inverted ? -1 : 1;
+		let animations = makeMutable(0);
+		const mode = makeMutable("continuous" as "continuous" | "default");
 
 		const state = {
 			_nativeId,
+			mode,
 			root: makeMutable(SkiaDomApi.GroupNode({})),
 			content: makeMutable(SkiaDomApi.GroupNode({})),
 			matrix: makeMutable(Skia.Matrix().translate(0, 0).get()),
@@ -45,14 +48,31 @@ export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additio
 			redraw() {
 				"worklet";
 
-				SkiaViewApi.requestRedraw(_nativeId);
+				// SkiaViewApi.requestRedraw(_nativeId);
 			},
 			...props,
 			invertedFactor,
+			startedAnimation() {
+				"worklet";
+
+				animations.value++;
+				mode.value = "continuous";
+			},
+			finishedAnimation() {
+				"worklet";
+
+				animations.value--;
+				if (animations.value <= 0) {
+					mode.value = "default";
+					animations.value = 0;
+				}
+			},
 		};
 
 		const scrollState = (props.customScrollGesture || getScrollGesture)({
 			...props,
+			startedAnimation: state.startedAnimation,
+			finishedAnimation: state.finishedAnimation,
 			content: state.content,
 			layout,
 			offsetY: props.automaticallyAdjustKeyboardInsets !== false ? keyboard.height : makeMutable(0),

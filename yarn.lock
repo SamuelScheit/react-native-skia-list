@@ -13838,6 +13838,7 @@ __metadata:
     react-native-reanimated: ^3.15.5
     react-native-safe-area-context: ^4.11.0
     react-native-screens: 3.31.1
+    react-native-url-polyfill: ^2.0.0
     react-native-web: ~0.19.10
     zeego: ^2.0.1
   languageName: unknown
@@ -13882,6 +13883,17 @@ __metadata:
     react-native-safe-area-context: ^4.11.0
   languageName: unknown
   linkType: soft
+
+"react-native-url-polyfill@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "react-native-url-polyfill@npm:2.0.0"
+  dependencies:
+    whatwg-url-without-unicode: 8.0.0-3
+  peerDependencies:
+    react-native: "*"
+  checksum: 1a2e1030a62fd093764b5330ce0ff34d72246e581dd2892cddc347d8621931aeb2c9ea3e054960484a1259230e8461e569e1890f1ff452d3c5c0adef70190fc3
+  languageName: node
+  linkType: hard
 
 "react-native-web@npm:~0.19.10":
   version: 0.19.12

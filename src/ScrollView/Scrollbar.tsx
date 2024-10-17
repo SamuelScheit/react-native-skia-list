@@ -12,8 +12,20 @@ primary.setColor(Skia.Color("rgb(91, 128, 218)"));
 const grey = Skia.Paint();
 grey.setColor(Skia.Color("rgb(226, 226, 226)"));
 
-export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
-	const { layout, scrollY, maxHeight, redraw, startMomentumScroll, inverted, invertedFactor } = state;
+export function getScrollbar(
+	state: ScrollGestureState & { redraw: Function; startedAnimation: Function; finishedAnimation: Function }
+) {
+	const {
+		layout,
+		scrollY,
+		maxHeight,
+		redraw,
+		startMomentumScroll,
+		inverted,
+		invertedFactor,
+		startedAnimation,
+		finishedAnimation,
+	} = state;
 	const visible = makeMutable(0);
 	const dragging = makeMutable(0);
 	const beginY = makeMutable(0);
@@ -42,6 +54,8 @@ export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
 
 	const gesture = Gesture.Pan()
 		.onTouchesDown((e, state) => {
+			startedAnimation();
+
 			const [touch] = e.allTouches;
 			if (!touch) return;
 
@@ -58,8 +72,12 @@ export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
 			}
 		})
 		.onTouchesUp((_, state) => {
+			console.log("scrollbar touches up");
 			state.end();
-			dragging.value = withTiming(0, { duration: 200 });
+
+			if (dragging.value === 1) {
+				dragging.value = withTiming(0, { duration: 200 });
+			}
 
 			if (dragging.value !== 1) {
 				visible.value = withTiming(0, { duration: 200 });
@@ -76,6 +94,9 @@ export function getScrollbar(state: ScrollGestureState & { redraw: Function }) {
 		.onEnd((e) => {
 			const percentage = Math.max(maxHeight.value / layout.value.height, 1);
 			startMomentumScroll(e.velocityY * percentage * invertedFactor);
+		})
+		.onFinalize(() => {
+			finishedAnimation();
 		});
 
 	function Scrollbar() {

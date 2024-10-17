@@ -1,3 +1,4 @@
+import "react-native-url-polyfill/auto";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";

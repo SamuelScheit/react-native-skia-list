@@ -1,6 +1,7 @@
 import { Link } from "expo-router";
 import type { ComponentProps } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { runOnUI } from "react-native-reanimated";
 
 type LinkProps = ComponentProps<typeof Link>;
 
@@ -21,13 +22,17 @@ function Button(props: LinkProps) {
 	);
 }
 
+runOnUI(() => {
+	console.log("runOnUIImmediately");
+})();
+
 export default function App() {
 	return (
-		<View style={{ flex: 1 }}>
+		<ScrollView style={{ flex: 1 }}>
 			<Button href="/ScrollView">SkiaScrollView</Button>
 			<Button href="/FlatList">SkiaFlatList</Button>
 			<Button href="/MessageList">SkiaMessageList</Button>
 			<Button href="/FlashList">FlashList</Button>
-		</View>
+		</ScrollView>
 	);
 }

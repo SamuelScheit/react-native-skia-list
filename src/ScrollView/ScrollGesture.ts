@@ -35,9 +35,11 @@ export interface ScrollGestureProps extends Partial<ScrollGestureInitalState> {
 	onScrollEndDrag?: () => void;
 	onMomentumScrollEnd?: () => void;
 	onMomentumScrollBegin?: () => void;
+	startedAnimation: Function;
+	finishedAnimation: Function;
 }
 
-export function getScrollGestureState(props: ScrollGestureProps = {}) {
+export function getScrollGestureState(props: ScrollGestureProps) {
 	return {
 		...getDefaultState(),
 		...props,
@@ -50,11 +52,12 @@ export function getScrollGesture(props: ScrollGestureProps) {
 	const state = getScrollGestureState(props);
 
 	const {
+		startedAnimation,
+		finishedAnimation,
 		onScroll,
 		onScrollBeginDrag,
 		onScrollEndDrag,
 		onMomentumScrollBegin,
-		onMomentumScrollEnd,
 		bounces,
 		decelerationRate,
 		scrolling,
@@ -66,31 +69,36 @@ export function getScrollGesture(props: ScrollGestureProps) {
 	} = state;
 	const inverted = props.inverted ? -1 : 1;
 
+	const onMomentumScrollEndProps = props.onMomentumScrollEnd;
+
+	function onMomentumScrollEnd() {
+		"worklet";
+
+		finishedAnimation();
+		onMomentumScrollEndProps?.();
+	}
+
 	function onEndClamp() {
 		"worklet";
 
 		const val = clamp(y.value, 0, maxHeight.value - offsetY.value);
 
-		if (!bounces && y.value !== val) {
-			onMomentumScrollEnd?.();
-			return true;
+		if (!bounces) {
+			y.value = val;
+
+			onMomentumScrollEnd();
+			return;
 		}
 
-		if (y.value === val || maxHeight.value - offsetY.value === 0) {
-			return false;
-		}
-
-		y.value = withSpring(val, { stiffness: 80, damping: 12, mass: 0.2 }, () => {
-			onMomentumScrollEnd?.();
-		});
-
-		return true;
+		y.value = withSpring(val, { stiffness: 80, damping: 12, mass: 0.2 }, onMomentumScrollEnd);
 	}
 
 	function onEnd(velocityY: number) {
 		"worklet";
 
 		onMomentumScrollBegin?.();
+
+		startedAnimation();
 
 		const animation = withDecay(
 			{
@@ -104,9 +112,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 				if (bounces && finished && animation.clamped) {
 					const newValue = y.value + animation.initialVelocity * 0.03;
 
-					y.value = withSpring(newValue, { duration: 100, dampingRatio: 2 }, () => {
-						onEndClamp();
-					});
+					y.value = withSpring(newValue, { duration: 100, dampingRatio: 2 }, onEndClamp);
 				} else {
 					onEndClamp();
 				}
@@ -149,6 +155,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 		.onBegin(() => {
 			// begin touch down
 			cancelAnimation(y); // hold down finger to stop scrolling
+			startedAnimation();
 		})
 		.onStart(() => {
 			// begin scroll
@@ -181,10 +188,12 @@ export function getScrollGesture(props: ScrollGestureProps) {
 		})
 		.onFinalize((_, success) => {
 			// end touch up
+
 			scrolling.value = false;
 			if (!success) {
-				onEndClamp();
 			}
+
+			finishedAnimation();
 		});
 
 	return {

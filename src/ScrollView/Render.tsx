@@ -2,10 +2,12 @@
 import { GestureDetector } from "react-native-gesture-handler";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "./State";
 import { Skia } from "@shopify/react-native-skia";
-import SkiaDomViewNativeComponent from "@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent";
-import { runOnUI } from "react-native-reanimated";
-import type { LayoutRectangle, ViewStyle } from "react-native";
-import { useLayoutEffect, useMemo, type ReactNode } from "react";
+import SkiaDomViewNativeComponent, {
+	type NativeProps,
+} from "@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent";
+import { runOnUI, runOnJS } from "react-native-reanimated";
+import type { LayoutRectangle, NativeMethods, ViewStyle } from "react-native";
+import { useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 
@@ -23,8 +25,25 @@ export function SkiaScrollView({
 	fixedChildren?: ReactNode;
 	debug?: boolean;
 } & SkiaScrollViewProps) {
+	const ref = useRef<(React.Component<NativeProps, {}, any> & Readonly<NativeMethods>) | null>(null);
 	const state = list || useSkiaScrollView(props);
-	const { _nativeId, gesture, layout, root, maxHeight, content, Scrollbar } = state;
+	const { _nativeId, gesture, layout, root, maxHeight, content, Scrollbar, mode } = state;
+
+	useLayoutEffect(() => {
+		function setMode(value: string) {
+			ref.current?.setNativeProps({ mode: value });
+		}
+
+		runOnUI(() => {
+			mode.addListener(1, (value) => {
+				runOnJS(setMode)(value);
+			});
+		})();
+
+		return runOnUI(() => {
+			mode.removeListener(1);
+		});
+	}, []);
 
 	const fixedReconciler = useMemo(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
@@ -60,6 +79,7 @@ export function SkiaScrollView({
 	return (
 		<GestureDetector gesture={gesture}>
 			<SkiaDomViewNativeComponent
+				ref={(x) => (ref.current = x)}
 				onLayout={(e) => {
 					runOnUI((rect: LayoutRectangle) => {
 						"worklet";
