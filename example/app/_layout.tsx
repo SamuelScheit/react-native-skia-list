@@ -10,6 +10,7 @@ export default function Layout() {
 				<Stack
 					screenOptions={{
 						fullScreenGestureEnabled: true,
+						headerShown: false,
 					}}
 				/>
 			</KeyboardProvider>

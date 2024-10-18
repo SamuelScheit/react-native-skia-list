@@ -27,7 +27,7 @@ export function SkiaScrollView({
 } & SkiaScrollViewProps) {
 	const ref = useRef<(React.Component<NativeProps, {}, any> & Readonly<NativeMethods>) | null>(null);
 	const state = list || useSkiaScrollView(props);
-	const { _nativeId, gesture, layout, root, maxHeight, content, Scrollbar, mode } = state;
+	const { _nativeId, gesture, layout, root, safeArea, maxHeight, content, Scrollbar, mode } = state;
 
 	useLayoutEffect(() => {
 		function setMode(value: string) {
@@ -86,7 +86,13 @@ export function SkiaScrollView({
 
 						layout.value = rect;
 
-						if (props.height) maxHeight.value = Math.max(props.height - rect.height, 1);
+						if (props.height) {
+							maxHeight.value = Math.max(
+								props.height - rect.height + safeArea.value.top + safeArea.value.bottom,
+								1
+							);
+						}
+
 						console.log("onLayout", rect);
 					})(e.nativeEvent.layout);
 				}}

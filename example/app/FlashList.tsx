@@ -28,7 +28,7 @@ function RenderMessage({ item }: { item: any }) {
 						style={[
 							style,
 							{
-								margin: 10,
+								marginTop: 20,
 								marginHorizontal: 15,
 								flex: 1,
 							},
@@ -42,50 +42,52 @@ function RenderMessage({ item }: { item: any }) {
 								/>
 							</TouchableOpacity>
 							<View style={{ flexDirection: "column", flexShrink: 1 }}>
-								<Text style={{ marginLeft: 15, fontSize: 16, marginBottom: 2 }}>{item.author}</Text>
-								{item.text ? (
-									<View
-										style={{
-											flexShrink: 1,
-											paddingVertical: 10,
-											paddingHorizontal: 15,
-											backgroundColor: "white",
-											borderRadius: 20,
-										}}
-									>
-										{/* <Hyperlinks text={item.text} style={{ fontSize: 17 }} /> */}
-										<Text style={{ fontSize: 17 }}>{item.text}</Text>
-									</View>
-								) : null}
+								<View style={{ flexDirection: "column", flexShrink: 1 }}>
+									<Text style={{ marginLeft: 15, fontSize: 16, marginBottom: 2 }}>{item.author}</Text>
+									{item.text ? (
+										<View
+											style={{
+												flexShrink: 1,
+												paddingVertical: 10,
+												paddingHorizontal: 15,
+												backgroundColor: "white",
+												borderRadius: 20,
+											}}
+										>
+											{/* <Hyperlinks text={item.text} style={{ fontSize: 17 }} /> */}
+											<Text style={{ fontSize: 17 }}>{item.text}</Text>
+										</View>
+									) : null}
+								</View>
+								<View style={{ flexDirection: "row", marginTop: 5, gap: 5 }}>
+									{item.attachments.map((reaction: any, i) => (
+										<TouchableOpacity key={i}>
+											<Image
+												source={{ uri: "https://picsum.photos/600/600" }}
+												style={{ width: 300, height: 300, borderRadius: 10 }}
+											/>
+										</TouchableOpacity>
+									))}
+								</View>
+								<View style={{ flexDirection: "row", marginTop: 5, gap: 5 }}>
+									{item.reactions.map((reaction: any, i) => (
+										<TouchableOpacity
+											key={i}
+											style={{
+												flexDirection: "row",
+												gap: 5,
+												backgroundColor: "lightgrey",
+												borderRadius: 10,
+												width: 50,
+												padding: 5,
+											}}
+										>
+											<Text>{reaction.emoji}</Text>
+											<Text>{reaction.count}</Text>
+										</TouchableOpacity>
+									))}
+								</View>
 							</View>
-						</View>
-						<View style={{ flexDirection: "row", marginLeft: 45, marginTop: 5, gap: 5 }}>
-							{item.attachments.map((reaction: any, i) => (
-								<TouchableOpacity key={i}>
-									<Image
-										source={{ uri: "https://picsum.photos/600/600" }}
-										style={{ width: 300, height: 300, borderRadius: 10 }}
-									/>
-								</TouchableOpacity>
-							))}
-						</View>
-						<View style={{ flexDirection: "row", marginLeft: 45, marginTop: 5, gap: 5 }}>
-							{item.reactions.map((reaction: any, i) => (
-								<TouchableOpacity
-									key={i}
-									style={{
-										flexDirection: "row",
-										gap: 5,
-										backgroundColor: "lightgrey",
-										borderRadius: 10,
-										width: 50,
-										padding: 5,
-									}}
-								>
-									<Text>{reaction.emoji}</Text>
-									<Text>{reaction.count}</Text>
-								</TouchableOpacity>
-							))}
 						</View>
 					</Animated.View>
 				</GestureDetector>
@@ -102,8 +104,9 @@ export default function FlashListTest() {
 	return (
 		<FlashList
 			inverted
+			contentInsetAdjustmentBehavior="automatic"
 			estimatedItemSize={100}
-			data={Array.from({ length: 300 }, (_, i) => getRandomMessageRaw(i))}
+			data={Array.from({ length: 1000 }, (_, i) => getRandomMessageRaw(i))}
 			renderItem={({ item }) => {
 				return <RenderMessage key={item.id} item={item} />;
 			}}

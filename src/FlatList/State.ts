@@ -165,7 +165,7 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 			"worklet";
 			// item is below the start
 			// when inverted it is below the bottom of the screen
-			return rowY + itemHeight < scrollY.value - addThreshold;
+			return rowY + itemHeight < scrollY.value - addThreshold - safeArea.value.top;
 		}
 
 		function isAfterEnd(rowY: number) {
@@ -336,7 +336,7 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 			}
 
 			if (index === dataValue.length) {
-				maxHeight.value = rowY - layout.value.height;
+				maxHeight.value = rowY - layout.value.height + safeArea.value.bottom + safeArea.value.top;
 			}
 
 			const diff = performance.now() - start;
@@ -419,7 +419,11 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 			});
 			layout.addListener(2, (value) => {
 				console.log("layout changed");
-				maxHeight.value = estimatedItemHeight * initialData.length - value.height;
+				maxHeight.value =
+					estimatedItemHeight * initialData.length -
+					value.height +
+					safeArea.value.bottom +
+					safeArea.value.top;
 
 				onScroll();
 			});
