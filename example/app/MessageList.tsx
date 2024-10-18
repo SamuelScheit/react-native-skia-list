@@ -1,9 +1,10 @@
 import { loadData, Skia, type SkImage } from "@shopify/react-native-skia";
 import { getRandomMessage, loadImage } from "../src/MessageList/randomMessage";
-import { MessageList, useMessageListState, type MessageListProps } from "../src/MessageList/Render";
 import { runOnUI } from "react-native-reanimated";
-import type { MessageItem } from "../src/MessageList/State";
+import { useMessageListState, type MessageItem } from "../src/MessageList/State";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { MessageListProps } from "../src/MessageList/Render";
+import { MessageList } from "../src/MessageList";
 
 const userAvatarPromise1 = loadData(
 	`https://avatar.iran.liara.run/public`,
@@ -28,7 +29,6 @@ export default function SkiaMessageList() {
 		my_user_id,
 		is_group: true,
 		bubble: true,
-		inverted: true,
 		estimatedItemHeight: 200,
 		safeArea,
 		initialData: () =>
@@ -58,7 +58,7 @@ export default function SkiaMessageList() {
 	attachmentImagePromise.then((img) => {
 		runOnUI(() => {
 			data.value.forEach((item) => {
-				item.attachments = item.attachments.map((x) => img);
+				item.attachments = item.attachments.map((x: any) => img);
 				unmountElement(undefined, item);
 			});
 			redrawItems();

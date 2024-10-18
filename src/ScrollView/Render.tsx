@@ -63,8 +63,8 @@ export function SkiaScrollView({
 	contentReconciler.render(children);
 	fixedReconciler.render(
 		<>
-			<Scrollbar />
 			{fixedChildren}
+			<Scrollbar />
 		</>
 	);
 

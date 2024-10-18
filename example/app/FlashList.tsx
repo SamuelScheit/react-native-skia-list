@@ -1,11 +1,10 @@
 import { FlashList } from "@shopify/flash-list";
-import { Pressable, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { getRandomMessageRaw } from "../src/MessageList/randomMessage";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Image } from "expo-image";
 import * as ContextMenu from "zeego/context-menu";
-import Hyperlinks from "react-native-hyperlinks";
 
 function RenderMessage({ item }: { item: any }) {
 	const gesture = Gesture.LongPress();

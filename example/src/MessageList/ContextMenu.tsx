@@ -181,7 +181,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		redrawItems,
 	} = state;
 
-	const scrollListenerId = _nativeId + 1000;
+	const scrollListenerId = 4;
 	const actionsScale = makeMutable(0);
 	const actionsOpacity = makeMutable(0);
 	const contextMenuActivated = makeMutable(false);
