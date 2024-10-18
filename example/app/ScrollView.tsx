@@ -1,4 +1,5 @@
 import { Circle, Rect, Skia } from "@shopify/react-native-skia";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SkiaScrollView } from "react-native-skia-list";
 
 const paint = Skia.Paint();
@@ -7,8 +8,11 @@ paint.setColor(Skia.Color("rgb(91, 128, 218)"));
 const circleCount = 100;
 
 export default function ScrollView() {
+	const safeArea = useSafeAreaInsets();
+
 	return (
 		<SkiaScrollView
+			safeArea={safeArea}
 			height={circleCount * 100}
 			debug
 			style={{ backgroundColor: "white", flex: 1, margin: 0 }}

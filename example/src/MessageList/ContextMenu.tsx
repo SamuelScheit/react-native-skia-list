@@ -28,7 +28,13 @@ import type { EdgeInsets } from "react-native-safe-area-context";
 import React, { type ReactNode, useLayoutEffect } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/commonjs/renderer/Reconciler";
 import { NATIVE_DOM } from "@shopify/react-native-skia/lib/commonjs/renderer/HostComponents";
-import { isInBound, type Dimensions, type SkiaFlatListProps, type TapResult } from "react-native-skia-list";
+import {
+	isInBound,
+	useSkiaFlatList,
+	type Dimensions,
+	type SkiaFlatListProps,
+	type TapResult,
+} from "react-native-skia-list";
 import { trigger } from "react-native-haptic-feedback";
 
 export const dpi = 1;
@@ -94,13 +100,6 @@ const emojiRadius0 = { x: 0, y: 0 };
 const actionRadiusFull = { x: actionRadius, y: actionRadius };
 const emojiRadiusFull = { x: emojiRadius, y: emojiRadius };
 
-const rect = {
-	x: 0,
-	y: 0,
-	width: 0,
-	height: 0,
-};
-
 export const opacityPaint = Skia.Paint();
 opacityPaint.setColor(white);
 
@@ -158,23 +157,13 @@ function ReactSkiaRender(children: ReactNode, redraw: () => void) {
 	const root = new SkiaRoot(Skia, NATIVE_DOM, redraw);
 
 	root.render(children);
-	console.log("render", performance.now() - start);
 
 	return root;
 }
 
-export interface ContextMenuProps {
-	getItemFromTouch: (e: PointProp) => TapResult<any> | undefined;
-	renderItem: SkiaFlatListProps<any>["renderItem"];
-	unmountElement(index: number | undefined, item: any | undefined): void;
-	redraw: () => void;
+export interface ContextMenuProps extends ReturnType<typeof useSkiaFlatList> {
 	contextMenuMessage: SharedValue<TapResult<any> | undefined>;
-	y: SharedValue<number>;
-	layout: SharedValue<Dimensions>;
-	safeArea: SharedValue<EdgeInsets>;
-	list: RenderNode<GroupProps>;
-	_nativeId: number;
-	user_id: any;
+	my_user_id: any;
 }
 
 export function getContextMenu(state: ContextMenuProps) {
@@ -182,15 +171,16 @@ export function getContextMenu(state: ContextMenuProps) {
 		getItemFromTouch,
 		renderItem,
 		unmountElement,
-		redraw,
 		contextMenuMessage,
-		y: scrollY,
+		scrollY,
 		layout,
 		safeArea,
-		list,
+		root: list,
 		_nativeId,
-		user_id,
+		my_user_id: user_id,
+		redrawItems,
 	} = state;
+
 	const scrollListenerId = _nativeId + 1000;
 	const actionsScale = makeMutable(0);
 	const actionsOpacity = makeMutable(0);
@@ -241,7 +231,7 @@ export function getContextMenu(state: ContextMenuProps) {
 							contextMenuY.value,
 							x,
 							absoluteY + contextMenuOffsetY.value,
-							emojisWidth,
+							emoji.width,
 							emoji.height,
 							0
 						)
@@ -264,13 +254,13 @@ export function getContextMenu(state: ContextMenuProps) {
 					}
 				}
 
-				contextMenuX.addListener(_nativeId + i, onMove);
-				contextMenuY.addListener(_nativeId + i, onMove);
+				contextMenuX.addListener(_nativeId + i + 100, onMove);
+				contextMenuY.addListener(_nativeId + i + 100, onMove);
 			})();
 
 			return runOnUI(() => {
-				contextMenuX.removeListener(_nativeId + i);
-				contextMenuY.removeListener(_nativeId + i);
+				contextMenuX.removeListener(_nativeId + i + 100);
+				contextMenuY.removeListener(_nativeId + i + 100);
 			});
 		}, []);
 
@@ -281,17 +271,22 @@ export function getContextMenu(state: ContextMenuProps) {
 						rect: {
 							x,
 							y,
-							width: emojisWidth,
+							width: emoji.width,
 							height: emoji.height,
 						},
-						bottomLeft: lastemoji ? emojiRadiusFull : emojiRadius0,
+						bottomLeft: firstemoji ? emojiRadiusFull : emojiRadius0,
 						topLeft: firstemoji ? emojiRadiusFull : emojiRadius0,
 						bottomRight: lastemoji ? emojiRadiusFull : emojiRadius0,
-						topRight: firstemoji ? emojiRadiusFull : emojiRadius0,
+						topRight: lastemoji ? emojiRadiusFull : emojiRadius0,
 					}}
 					paint={paint}
 				/>
-				<Paragraph paragraph={emoji.paragraph} x={x + emojisPaddingX} y={y + emojisPaddingY} width={300} />
+				<Paragraph
+					paragraph={emoji.paragraph}
+					x={x + emojisPaddingX}
+					y={y + emojisPaddingY}
+					width={emoji.width}
+				/>
 			</React.Fragment>
 		);
 	}
@@ -405,18 +400,19 @@ export function getContextMenu(state: ContextMenuProps) {
 		}
 
 		let alignRight = tap.item.user_id === user_id;
-		let rowY = inverted === -1 ? -actionsHeight - actionsSpacing : tap.height + actionsSpacing;
+		let rowY =
+			inverted === -1 ? -emojisHeight - actionsSpacing * 2 - actionsHeight : -emojisHeight - actionsSpacing;
 
 		let x = (safeArea.value.left || 15) + 40 + 7;
 		if (alignRight) {
-			x = layout.value.width - actionsWidth - (safeArea.value.right || 15);
+			x = layout.value.width - emojisWidth - (safeArea.value.right || 15);
 		}
 
 		return emojis.map((emoji, i) => {
 			const result = (
 				<Emoji absoluteY={tap.absoluteY + rowY} key={emoji.label} emoji={emoji} x={x} y={rowY} i={i} />
 			);
-			rowY += emoji.height;
+			x += emoji.width;
 			return result;
 		});
 	}
@@ -453,7 +449,7 @@ export function getContextMenu(state: ContextMenuProps) {
 			SkiaViewApi.requestRedraw(_nativeId);
 		});
 		const result = root.dom as any;
-		list.addChild(result);
+		list.value.addChild(result);
 
 		actionRoot.value = {
 			dom: result,
@@ -474,7 +470,7 @@ export function getContextMenu(state: ContextMenuProps) {
 			mode: "clamp",
 		});
 		filter.addChild(blurFilter);
-		list.addChild(filter);
+		list.value.addChild(filter);
 		backdropFilter.value = filter;
 
 		// item
@@ -483,10 +479,10 @@ export function getContextMenu(state: ContextMenuProps) {
 			matrix: translation,
 		});
 		item.value = element;
-		list.addChild(element);
+		list.value.addChild(element);
 
 		unmountElement(result.index, result.item);
-		renderItem!(element, result.item, result.index, layout);
+		renderItem!(element, result.item, result.index, state);
 
 		runOnJS(RenderActions)(translation, result);
 
@@ -509,7 +505,6 @@ export function getContextMenu(state: ContextMenuProps) {
 			actionRoot.value?.dom.setProp("layer", opacityPaint);
 		});
 	}
-	2;
 
 	function onCloseContextMenu(e: { x: number; y: number }) {
 		"worklet";
@@ -518,14 +513,14 @@ export function getContextMenu(state: ContextMenuProps) {
 		contextMenuY.value = e.y;
 		contextMenuOpen.value = false;
 		contextMenuBlur.value = withTiming(0, { duration: 300 }, () => {
-			if (backdropFilter.value) list.removeChild(backdropFilter.value);
-			if (item.value) list.removeChild(item.value);
+			if (backdropFilter.value) list.value.removeChild(backdropFilter.value);
+			if (item.value) list.value.removeChild(item.value);
 			if (actionRoot.value) {
-				list.removeChild(actionRoot.value.dom);
+				list.value.removeChild(actionRoot.value.dom);
 				runOnJS(actionRoot.value.unmount)();
 			}
 
-			redraw();
+			redrawItems();
 		});
 		contextMenuOffsetY.value = withTiming(0, { duration: 300 });
 		actionsScale.value = withSpring(0, { mass: 1, damping: 40, stiffness: 306 });
@@ -577,6 +572,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		actionsScale.value = withSpring(1, { mass: 1, damping: 28, stiffness: 306 });
 		actionsOpacity.value = withTiming(1, { duration: 300 });
 		actionLastSelected.value = null;
+		emojiLastSelected.value = null;
 
 		const height = layout.value.height;
 
@@ -619,34 +615,22 @@ export function getContextMenu(state: ContextMenuProps) {
 		// pressedAvatars.clear();
 	}
 
-	function onPressIn(e: { touchX: number; touchY: number }) {
-		"worklet";
-
-		if (!contextMenuOpen.value) return true;
-
-		contextMenuX.value = e.touchX;
-		contextMenuY.value = e.touchY;
-
-		if (!onLongPress({ x: e.touchX, y: e.touchY })) {
-			onCloseContextMenu({
-				x: e.touchX,
-				y: e.touchY,
-			});
-		}
-
-		return false;
-	}
-
 	const gesture = Gesture.Manual()
 		.onTouchesDown((e, manager) => {
 			const [touch] = e.allTouches;
 			if (!touch) return manager.fail();
 			if (contextMenuOpen.value) {
-				manager.activate();
-				manager.begin();
+				contextMenuX.value = touch.x;
+				contextMenuY.value = touch.y;
+
+				if (!onLongPress(touch)) {
+					onCloseContextMenu(touch);
+				}
+
+				manager.fail();
+
 				return;
 			}
-
 			contextMenuActivated.value = false;
 			contextMenuFailed.value = false;
 			contextMenuStartX.value = touch.x;
@@ -721,6 +705,5 @@ export function getContextMenu(state: ContextMenuProps) {
 
 	return {
 		gesture,
-		onPressIn,
 	};
 }

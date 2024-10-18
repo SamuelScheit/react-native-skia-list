@@ -3,6 +3,7 @@ import { getRandomMessage, loadImage } from "../src/MessageList/randomMessage";
 import { MessageList, useMessageListState, type MessageListProps } from "../src/MessageList/Render";
 import { runOnUI } from "react-native-reanimated";
 import type { MessageItem } from "../src/MessageList/State";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const userAvatarPromise1 = loadData(
 	`https://avatar.iran.liara.run/public`,
@@ -22,16 +23,14 @@ let avatar2: SkImage | null = null;
 
 export default function SkiaMessageList() {
 	const my_user_id = "1";
+	const safeArea = useSafeAreaInsets();
 	const props: MessageListProps = {
 		my_user_id,
 		is_group: true,
 		bubble: true,
 		inverted: true,
 		estimatedItemHeight: 200,
-		keyExtractor: (item: MessageItem) => {
-			"worklet";
-			return item.id;
-		},
+		safeArea,
 		initialData: () =>
 			new Array(500).fill(0).map((x, i) => {
 				return getRandomMessage({

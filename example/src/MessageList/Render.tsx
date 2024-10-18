@@ -1,9 +1,11 @@
 import { type GroupProps, type ImageProps, type RenderNode, Skia } from "@shopify/react-native-skia";
 import { type MessageItem } from "./State";
 import { makeMutable, useSharedValue } from "react-native-reanimated";
-import { memo } from "react";
-import { SkiaFlatList, useSkiaFlatList, type SkiaFlatListProps } from "react-native-skia-list";
+import { memo, useLayoutEffect } from "react";
+import { SkiaFlatList, useSkiaFlatList, type SkiaFlatListProps, type TapResult } from "react-native-skia-list";
 import type { ViewStyle } from "react-native";
+import { Gesture, type ComposedGesture } from "react-native-gesture-handler";
+import { getContextMenu } from "./ContextMenu";
 
 const rectRadius = 20;
 
@@ -350,8 +352,27 @@ export type MessageListProps = Partial<SkiaFlatListProps<MessageItem>> & {
 
 export function useMessageListState(props: MessageListProps) {
 	const avatars = useSharedValue({} as Record<string, RenderNode<ImageProps> | undefined>);
+	const contextMenuMessage = useSharedValue<TapResult<MessageItem> | undefined>(undefined);
 	const renderItem: any = getRenderMessageItem(props);
-	const list = useSkiaFlatList({ ...props, renderItem, avatars });
+	const list = useSkiaFlatList({
+		...props,
+		contextMenuMessage,
+		renderItem,
+		avatars,
+		keyExtractor: (item: any) => {
+			"worklet";
+			return item.id;
+		},
+	});
+	useLayoutEffect(() => {
+		list.content.value.addChild(
+			SkiaDomApi.FillNode({
+				color: "white",
+			})
+		);
+	}, []);
+	const contextMenu = getContextMenu(list);
+	list.gesture = Gesture.Exclusive(contextMenu.gesture, list.gesture);
 
 	return list;
 }

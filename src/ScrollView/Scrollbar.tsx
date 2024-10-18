@@ -13,7 +13,7 @@ const grey = Skia.Paint();
 grey.setColor(Skia.Color("rgb(226, 226, 226)"));
 
 export function getScrollbar(
-	state: ScrollGestureState & { redraw: Function; startedAnimation: Function; finishedAnimation: Function }
+	state: ScrollGestureState & { redraw: () => void; startedAnimation: () => void; finishedAnimation: () => void }
 ) {
 	const {
 		layout,
@@ -29,24 +29,25 @@ export function getScrollbar(
 	const visible = makeMutable(0);
 	const dragging = makeMutable(0);
 	const beginY = makeMutable(0);
+	const timeout = makeMutable<number | undefined>(undefined);
 
 	runOnUI(() => {
 		dragging.addListener(1, () => redraw());
 		visible.addListener(1, () => redraw());
-		let timeout: number | undefined;
 		scrollY.addListener(3, () => {
 			requestAnimationFrame(() => {
 				if (visible.value === 0) {
-					visible.value = withTiming(1, { duration: 200 });
+					startedAnimation();
+					visible.value = withTiming(1, { duration: 200 }, finishedAnimation as any);
 				}
-				if (timeout) {
-					clearAnimatedTimeout(timeout);
-					timeout = undefined;
+				if (timeout.value) {
+					clearAnimatedTimeout(timeout.value);
+					timeout.value = undefined;
 				}
-				timeout = setAnimatedTimeout(() => {
-					if (dragging.value !== 1) {
-						visible.value = withTiming(0, { duration: 200 });
-					}
+				timeout.value = setAnimatedTimeout(() => {
+					if (dragging.value === 1) return;
+					startedAnimation();
+					visible.value = withTiming(0, { duration: 200 }, finishedAnimation as any);
 				}, 1000);
 			});
 		});
@@ -72,19 +73,23 @@ export function getScrollbar(
 			}
 		})
 		.onTouchesUp((_, state) => {
-			console.log("scrollbar touches up");
 			state.end();
 
-			if (dragging.value === 1) {
-				dragging.value = withTiming(0, { duration: 200 });
+			startedAnimation();
+			dragging.value = withTiming(0, { duration: 200 }, finishedAnimation as any);
+
+			if (timeout.value) {
+				clearAnimatedTimeout(timeout.value);
+				timeout.value = undefined;
 			}
 
-			if (dragging.value !== 1) {
-				visible.value = withTiming(0, { duration: 200 });
-			}
+			timeout.value = setAnimatedTimeout(() => {
+				if (dragging.value === 1) return;
+				startedAnimation();
+				visible.value = withTiming(0, { duration: 200 }, finishedAnimation as any);
+			}, 1000);
 		})
 		.manualActivation(true)
-		.onStart(() => {})
 		.onChange((e) => {
 			const dragPercentage = (e.translationY * invertedFactor) / layout.value.height;
 			const newPercentage = beginY.value + dragPercentage;

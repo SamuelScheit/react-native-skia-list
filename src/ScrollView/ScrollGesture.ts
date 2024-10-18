@@ -35,8 +35,6 @@ export interface ScrollGestureProps extends Partial<ScrollGestureInitalState> {
 	onScrollEndDrag?: () => void;
 	onMomentumScrollEnd?: () => void;
 	onMomentumScrollBegin?: () => void;
-	startedAnimation: Function;
-	finishedAnimation: Function;
 }
 
 export function getScrollGestureState(props: ScrollGestureProps) {
@@ -48,12 +46,16 @@ export function getScrollGestureState(props: ScrollGestureProps) {
 
 export type ScrollGestureState = ReturnType<typeof getScrollGesture>;
 
-export function getScrollGesture(props: ScrollGestureProps) {
+export function getScrollGesture(
+	props: ScrollGestureProps & {
+		startedAnimation: () => void;
+		finishedAnimation: () => void;
+	}
+) {
 	const state = getScrollGestureState(props);
 
+	const { startedAnimation, finishedAnimation } = props;
 	const {
-		startedAnimation,
-		finishedAnimation,
 		onScroll,
 		onScrollBeginDrag,
 		onScrollEndDrag,
@@ -144,6 +146,7 @@ export function getScrollGesture(props: ScrollGestureProps) {
 	const gesture = Gesture.Pan()
 		.minDistance(10)
 		.onTouchesDown((e, manager) => {
+			startedAnimation();
 			const [touch] = e.allTouches;
 			if (!touch) return manager.fail();
 			pressing.value = true;
@@ -155,7 +158,6 @@ export function getScrollGesture(props: ScrollGestureProps) {
 		.onBegin(() => {
 			// begin touch down
 			cancelAnimation(y); // hold down finger to stop scrolling
-			startedAnimation();
 		})
 		.onStart(() => {
 			// begin scroll
