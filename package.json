@@ -51,14 +51,14 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/respondchat/react-native-skia-list.git"
+		"url": "git+https://github.com/samuelscheit/react-native-skia-list.git"
 	},
 	"author": "samuelscheit <github@samuelscheit.com> (https://github.com/SamuelScheit)",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/respondchat/react-native-skia-list/issues"
+		"url": "https://github.com/samuelscheit/react-native-skia-list/issues"
 	},
-	"homepage": "https://github.com/respondchat/react-native-skia-list#readme",
+	"homepage": "https://github.com/samuelscheit/react-native-skia-list#readme",
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org/"
 	},
