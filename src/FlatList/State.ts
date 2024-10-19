@@ -70,19 +70,7 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 		const estimatedItemHeight = props.estimatedItemHeight ?? 100;
 		const addThreshold = 0;
 
-		const {
-			maxHeight,
-			scrollY,
-			startY,
-			redraw,
-			pressing,
-			layout,
-			safeArea,
-			content,
-			invertedFactor,
-			startedAnimation,
-			finishedAnimation,
-		} = scrollView;
+		const { maxHeight, scrollY, startY, redraw, pressing, layout, safeArea, content, invertedFactor } = scrollView;
 
 		const state = {
 			...scrollView,
