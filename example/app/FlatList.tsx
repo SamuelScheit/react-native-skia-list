@@ -1,53 +1,89 @@
-import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import { matchFont, Skia } from "@shopify/react-native-skia";
-import { SkiaFlatList } from "react-native-skia-list";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { getRandomMessageRaw } from "../src/MessageList/randomMessage";
+import { Profiler, useRef } from "react";
+import { SharedText } from "../src/Util/SharedText";
+import { useSharedValue } from "react-native-reanimated";
+import { Message } from "../src/Message";
 
-const paint = Skia.Paint();
-paint.setColor(Skia.Color("rgb(91, 128, 218)"));
+export default function FlatListTest() {
+	const ref = useRef<FlatList>();
+	const time = useRef(0);
+	const text = useSharedValue("");
+	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageRaw(i));
 
-const white = Skia.Paint();
-white.setColor(Skia.Color("#fff"));
+	async function scrollToEnd(index = 0) {
+		"worklet";
 
-const font = matchFont({ fontSize: 20, fontFamily: "Arial" });
+		if (index >= data.length) return;
 
-export default function FlatList() {
-	const safeArea = useSafeAreaInsets();
+		ref.current?.scrollToIndex({ index, animated: false });
+
+		setTimeout(() => scrollToEnd(index + 1), 10);
+	}
 
 	return (
-		<SkiaFlatList
-			debug
-			safeArea={safeArea}
-			style={{ backgroundColor: "white", flex: 1 }}
-			initialData={() => Array.from({ length: 1000 }, (_, i) => i)}
-			renderItem={(element, item, index, state) => {
-				"worklet";
+		<>
+			<Profiler
+				id={"list"}
+				onRender={(id, phase, actualDuration) => {
+					time.current += actualDuration;
+					text.value = `Total Render time: ${time.current.toFixed(2)}ms`;
+				}}
+			>
+				<FlatList
+					ref={ref}
+					data={data}
+					inverted
+					contentInsetAdjustmentBehavior="automatic"
+					estimatedItemSize={100}
+					renderItem={({ item }) => {
+						return <Message key={item.id} item={item} />;
+					}}
+				/>
+			</Profiler>
+			<View
+				style={{
+					position: "absolute",
+					top: 40,
+					left: 0,
+					width: "100%",
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<TouchableOpacity
+					onPress={() => scrollToEnd()}
+					style={{
+						padding: 5,
+						borderRadius: 10,
+						backgroundColor: "white",
+						zIndex: 1000,
+					}}
+				>
+					<Text>Scroll to End</Text>
+				</TouchableOpacity>
+			</View>
 
-				if (!element) return 100;
-
-				element?.addChild(
-					SkiaDomApi.RectNode({
-						x: 0,
-						y: 0,
-						width: 130,
-						height: 80,
-						paint,
-					})
-				);
-
-				element.addChild(
-					SkiaDomApi.TextNode({
-						text: `${item}`,
-						font,
-						x: 50,
-						y: 40,
-						paint: white,
-					})
-				);
-
-				return 100;
-			}}
-			// fixedChildren={<Fill invertClip clip={{ x: 6, y: 5, width: 130, height: 17 }} color="white" />}
-		/>
+			<View
+				style={{
+					position: "absolute",
+					bottom: 20,
+					left: 0,
+					width: "100%",
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<View
+					style={{
+						backgroundColor: "white",
+						padding: 5,
+						borderRadius: 10,
+					}}
+				>
+					<SharedText shared={text} />
+				</View>
+			</View>
+		</>
 	);
 }

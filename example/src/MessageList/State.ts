@@ -8,6 +8,7 @@ import { trigger } from "react-native-haptic-feedback";
 import { replyIconFactory } from "./Assets";
 import { Skia, type ImageProps, type RenderNode, type SkImage, type SkParagraph } from "@shopify/react-native-skia";
 import { getRenderMessageItem, type MessageListProps } from "./Render";
+import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 
 export type MessageItem = {
 	text: SkParagraph | undefined;
@@ -122,7 +123,7 @@ export function useMessageListState(props: MessageListProps) {
 
 				const replyIconSize = interpolateClamp(value, -swipeTreshold, 0, 1, 0);
 
-				const spacingRight = layout.value.width - replyIconSize - safeArea.value.right + 5;
+				const spacingRight = layout.value.width - replyIconSize - safeArea.value.right - 5;
 
 				const replyX = spacingRight + value;
 				const replyY = y + itemHeight / 2 - replyIconSize * 15;
@@ -147,7 +148,7 @@ export function useMessageListState(props: MessageListProps) {
 	}, []);
 
 	const contextMenu = getContextMenu(list);
-	list.gesture = Gesture.Exclusive(contextMenu.gesture, swipeGesture, list.gesture);
+	list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture);
 
 	return list;
 }

@@ -1,6 +1,4 @@
 {
-  "extends": "../tsconfig",
-  "compilerOptions": {
-    // Avoid expo-cli auto-generating a tsconfig
-  }
+	"extends": "../tsconfig",
+	"compilerOptions": {}
 }

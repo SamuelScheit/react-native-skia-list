@@ -1,7 +1,7 @@
 {
 	"name": "react-native-skia-list",
 	"version": "0.1.0",
-	"description": "Worlds fastest react-native list renderer",
+	"description": "The fastest react-native list renderer based on skia",
 	"source": "./src/index.ts",
 	"main": "./lib/commonjs/index.js",
 	"module": "./lib/module/index.js",
@@ -75,6 +75,7 @@
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-prettier": "^5.0.1",
 		"jest": "^29.7.0",
+		"patch-package": "^8.0.0",
 		"prettier": "^3.0.3",
 		"react": "18.2.0",
 		"react-native": "0.74.5",
@@ -86,17 +87,17 @@
 		"@types/react": "^18.2.44"
 	},
 	"peerDependencies": {
-		"@shopify/react-native-skia": "^1.4.2",
+		"@shopify/react-native-skia": "*",
 		"react": "*",
 		"react-native": "*",
-		"react-native-gesture-handler": "^2.20.0",
-		"react-native-haptic-feedback": "^2.3.3",
-		"react-native-keyboard-controller": "^1.14.1",
-		"react-native-reanimated": "^3.15.5",
-		"react-native-safe-area-context": "^4.11.0"
+		"react-native-gesture-handler": "*",
+		"react-native-haptic-feedback": "*",
+		"react-native-keyboard-controller": "*",
+		"react-native-reanimated": "*"
 	},
 	"workspaces": [
-		"example"
+		"example",
+		"docs"
 	],
 	"packageManager": "yarn@3.6.1",
 	"jest": {
@@ -200,11 +201,10 @@
 		"version": "0.41.2"
 	},
 	"dependencies": {
-		"@shopify/react-native-skia": "^1.4.2",
+		"@shopify/react-native-skia": "^1.5.0",
 		"react-native-gesture-handler": "^2.20.0",
 		"react-native-haptic-feedback": "^2.3.3",
 		"react-native-keyboard-controller": "^1.14.1",
-		"react-native-reanimated": "^3.15.5",
-		"react-native-safe-area-context": "^4.11.0"
+		"react-native-reanimated": "^3.15.5"
 	}
 }

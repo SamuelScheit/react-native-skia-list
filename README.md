@@ -1,6 +1,5 @@
-# react-native-skia-list
-
-Worlds fastest react-native list renderer based on skia
+![](./docs/static/img/banner-dark.png#gh-dark-mode-only)
+![](./docs/static/img/banner-light.png#gh-light-mode-only)
 
 ## Installation
 

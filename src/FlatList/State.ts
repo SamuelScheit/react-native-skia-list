@@ -42,6 +42,7 @@ export type TapResult<T> = {
 export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Additional> = {} as any) {
 	const scrollView = useSkiaScrollView(props);
 	const list = useMemo(() => {
+		const renderTime = makeMutable(0);
 		const renderMutex = makeMutable(false);
 		const elements = makeMutable({} as Record<string, RenderNode<GroupProps> | undefined>);
 		const presses = makeMutable({} as Record<string, { x: number; y: number } | undefined>);
@@ -69,7 +70,19 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 		const estimatedItemHeight = props.estimatedItemHeight ?? 100;
 		const addThreshold = 0;
 
-		const { maxHeight, scrollY, startY, redraw, pressing, layout, safeArea, content, invertedFactor } = scrollView;
+		const {
+			maxHeight,
+			scrollY,
+			startY,
+			redraw,
+			pressing,
+			layout,
+			safeArea,
+			content,
+			invertedFactor,
+			startedAnimation,
+			finishedAnimation,
+		} = scrollView;
 
 		const state = {
 			...scrollView,
@@ -83,6 +96,7 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 			keyExtractor,
 			renderItem,
 			data,
+			renderTime,
 		};
 
 		function getItemFromTouch(e: PointProp): TapResult<T> | undefined {
@@ -130,6 +144,42 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 				absoluteY,
 				height: itemHeight,
 			};
+		}
+
+		function scrollToIndex(index: number, animated = true) {
+			"worklet";
+
+			let rowY = 0;
+			const dataValue = data.value;
+			const heightsValue = heights.value;
+
+			let start = performance.now();
+
+			for (let i = 0; i < index; i++) {
+				const item = dataValue[i];
+				if (!item) continue;
+
+				const id = keyExtractor(item, i);
+				let itemHeight = heightsValue[id] || 0;
+
+				if (itemHeight === undefined) {
+					itemHeight = renderItem(undefined, item, i, state);
+					heightsValue[id] = itemHeight;
+				}
+
+				rowY += itemHeight;
+			}
+
+			console.log("scrollToIndex", index, rowY, performance.now() - start);
+
+			const newY = Math.min(rowY, maxHeight.value);
+
+			if (animated) {
+				scrollY.value = withTiming(newY, { duration: 350 });
+			} else {
+				scrollY.value = newY;
+				redraw();
+			}
 		}
 
 		function getItemsHeight(data: T[], indexOffset = 0) {
@@ -343,7 +393,7 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 			if (diff > 2) {
 				// console.log("Draw time", performance.now() - start, content.value.children().length);
 			}
-			redraw();
+			renderTime.value += diff;
 
 			renderMutex.value = false;
 		}
@@ -431,7 +481,15 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 
 		onScroll();
 
-		return { ...state, resetData, insertAt, getItemFromTouch, unmountElement, redrawItems: onScroll };
+		return {
+			...state,
+			resetData,
+			insertAt,
+			getItemFromTouch,
+			unmountElement,
+			redrawItems: onScroll,
+			scrollToIndex,
+		};
 	}, []);
 
 	useLayoutEffect(() => {

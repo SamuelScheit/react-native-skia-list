@@ -1,0 +1,13 @@
+diff --git a/node_modules/@shopify/react-native-skia/package.json b/node_modules/@shopify/react-native-skia/package.json
+index 5efe5b2..874ead1 100644
+--- a/node_modules/@shopify/react-native-skia/package.json
++++ b/node_modules/@shopify/react-native-skia/package.json
+@@ -12,7 +12,7 @@
+   "main": "lib/module/index.js",
+   "react-native": "src/index.ts",
+   "module": "lib/module/index.js",
+-  "types": "lib/typescript/index.d.ts",
++  "types": "lib/module/index.d.ts",
+   "files": [
+     "src/**",
+     "lib/**",

@@ -29,10 +29,11 @@ runOnUI(() => {
 export default function App() {
 	return (
 		<ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }}>
-			<Button href="/ScrollView">SkiaScrollView</Button>
-			<Button href="/FlatList">SkiaFlatList</Button>
-			<Button href="/MessageList">SkiaMessageList</Button>
+			<Button href="/SkiaScrollView">SkiaScrollView</Button>
+			<Button href="/SkiaFlatList">SkiaFlatList</Button>
+			<Button href="/SkiaMessageList">SkiaMessageList</Button>
 			<Button href="/FlashList">FlashList</Button>
+			<Button href="/FlatList">FlatList</Button>
 		</ScrollView>
 	);
 }

@@ -10,7 +10,13 @@ import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
 import type { ComposedGesture } from "react-native-gesture-handler";
-import type { EdgeInsets } from "react-native-safe-area-context";
+
+interface EdgeInsets {
+	top: number;
+	right: number;
+	bottom: number;
+	left: number;
+}
 
 export type InitialScrollViewState = {
 	_nativeId: number;
@@ -64,7 +70,7 @@ export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additio
 			redraw() {
 				"worklet";
 
-				// SkiaViewApi.requestRedraw(_nativeId);
+				SkiaViewApi.requestRedraw(_nativeId);
 			},
 			...props,
 			layout,
@@ -107,7 +113,7 @@ export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additio
 		const customGesture =
 			props.customGesture || (({ scrollbar, gesture }) => Gesture.Exclusive(scrollbar.gesture, gesture));
 
-		const gesture = customGesture({ scrollbar, ...scrollState, ...state });
+		const gesture = customGesture({ scrollbar, ...scrollState, ...state } as any);
 
 		root.value.addChild(content.value);
 
@@ -136,6 +142,8 @@ export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additio
 			...state,
 			Scrollbar: scrollbar.Scrollbar,
 			gesture,
+			scrollGesture: scrollState.gesture,
+			scrollbarGesture: scrollbar.gesture,
 		};
 	}, []);
 

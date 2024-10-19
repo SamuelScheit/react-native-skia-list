@@ -24,17 +24,10 @@ import {
 } from "react-native-reanimated";
 import { Gesture, type TouchData } from "react-native-gesture-handler";
 import { type PointProp, PixelRatio } from "react-native";
-import type { EdgeInsets } from "react-native-safe-area-context";
 import React, { type ReactNode, useLayoutEffect } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/commonjs/renderer/Reconciler";
 import { NATIVE_DOM } from "@shopify/react-native-skia/lib/commonjs/renderer/HostComponents";
-import {
-	isInBound,
-	useSkiaFlatList,
-	type Dimensions,
-	type SkiaFlatListProps,
-	type TapResult,
-} from "react-native-skia-list";
+import { isInBound, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { trigger } from "react-native-haptic-feedback";
 
 export const dpi = 1;
@@ -153,7 +146,6 @@ const emojis = [{ label: "❤️" }, { label: "👍" }, { label: "👎" }, { lab
 });
 
 function ReactSkiaRender(children: ReactNode, redraw: () => void) {
-	const start = performance.now();
 	const root = new SkiaRoot(Skia, NATIVE_DOM, redraw);
 
 	root.render(children);
