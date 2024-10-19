@@ -8,7 +8,7 @@ const config: Config = {
 	favicon: "img/favicon.ico",
 
 	// Set the production url of your site here
-	url: "https://samuelscheit.github.com",
+	url: "https://samuelscheit.github.io",
 	// Set the /<baseUrl>/ pathname under which your site is served
 	// For GitHub pages deployment, it is often '/<projectName>/'
 	baseUrl: process.env.NODE_ENV === "production" ? "/react-native-skia-list/" : "/",
@@ -68,7 +68,7 @@ const config: Config = {
 			respectPrefersColorScheme: true,
 		},
 		// Replace with your project's social card
-		image: "/img/banner.jpg",
+		image: "/img/banner.png",
 		navbar: {
 			title: "React Native Skia List",
 			logo: {
