@@ -30,8 +30,8 @@ jobs:
 
             - name: Upload Build Artifact
               uses: actions/upload-pages-artifact@v3
-              working-directory: ./docs/
               with:
+                  working-directory: ./docs/
                   path: build
 
     deploy:
