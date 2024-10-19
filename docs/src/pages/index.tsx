@@ -1,11 +1,10 @@
 import Link from "@docusaurus/Link";
-import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
 import styles from "./index.module.css";
 
 export default function Home(): JSX.Element {
 	return (
-		<Layout wrapperClassName="main">
+		<Layout wrapperClassName="main" description="The fastest react-native list renderer">
 			<div className="bg-white dark:bg-black">
 				<div className="min-h-[100vh] flex flex-col justify-center items-center px-8 py-20">
 					<div

@@ -69,10 +69,15 @@
 
 @media (max-width: 640px) {
 	.grid {
-		font-size: 1.1rem;
+		font-size: 0.9rem;
+		gap: 0.5rem;
 	}
 
 	.big {
-		font-size: 1.5rem;
+		font-size: 1.4rem;
+	}
+
+	.card {
+		padding: 1rem 0.8rem;
 	}
 }
