@@ -1,0 +1,80 @@
+.grid {
+	/* grid-template-rows: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(7, minmax(0, 1fr)); */
+	grid-template-areas:
+		". bidirectional bidirectional ."
+		"keyboard hero hero gesture"
+		"performance hero hero rendering"
+		". animations animations .";
+}
+
+#bidirectional {
+	grid-area: bidirectional;
+}
+
+#keyboard {
+	grid-area: keyboard;
+}
+
+#hero {
+	grid-area: hero;
+	/* background: none; */
+}
+
+#gesture {
+	grid-area: gesture;
+}
+
+#performance {
+	grid-area: performance;
+}
+
+#rendering {
+	grid-area: rendering;
+}
+
+#animations {
+	grid-area: animations;
+}
+
+.big {
+	@apply flex flex-row justify-center items-center gap-2 text-5xl text-center font-extrabold bg-clip-text text-transparent  leading-normal;
+}
+
+.card {
+	@apply shadow-md dark:shadow-2xl items-center  rounded-2xl py-6 px-6 gap-3 flex flex-col;
+	/* bg-gray-50 dark:bg-gray-900 */
+	background-color: #00000007;
+
+	font-weight: 800;
+}
+
+@media (max-width: 1280px) {
+	.grid {
+		grid-template-areas:
+			"hero hero"
+			"performance rendering "
+			"animations bidirectional"
+			"gesture keyboard";
+		font-size: 1.1rem;
+		gap: 1.5rem;
+	}
+
+	.big {
+		font-size: 2rem;
+	}
+
+	#hero {
+		background: none;
+	}
+}
+
+@media (max-width: 640px) {
+	.grid {
+		font-size: 1.1rem;
+	}
+
+	.big {
+		font-size: 1.5rem;
+	}
+}
