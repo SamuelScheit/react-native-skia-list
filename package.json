@@ -84,9 +84,7 @@
 		"typescript": "^5.2.2"
 	},
 	"resolutions": {
-		"@types/react": "^18.2.44",
-		"typedoc-plugin-markdown": "portal:/Users/user/Developer/respond/typedoc-plugin-markdown/packages/typedoc-plugin-markdown",
-		"docusaurus-plugin-typedoc": "portal:/Users/user/Developer/respond/typedoc-plugin-markdown/packages/docusaurus-plugin-typedoc"
+		"@types/react": "^18.2.44"
 	},
 	"peerDependencies": {
 		"@shopify/react-native-skia": "*",
