@@ -1,6 +1,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import {} from "docusaurus-plugin-typedoc";
 
 const config: Config = {
 	title: "React Native Skia List",
@@ -43,6 +44,59 @@ const config: Config = {
 				},
 			};
 		},
+		[
+			"docusaurus-plugin-typedoc",
+			{
+				out: "./docs/",
+				watch: process.env.TYPEDOC_WATCH,
+				entryPoints: [
+					// "../src/index.ts",
+					// "../src/ScrollView/ScrollGesture.ts",
+					"../src/ScrollView/index.ts",
+					// "../src/ScrollView/Render.tsx",
+					// "../src/ScrollView/State.ts",
+					"../src/FlatList/index.ts",
+				],
+				tsconfig: "../tsconfig.json",
+				entryPointStrategy: "expand",
+				skipErrorChecking: true,
+				readme: "./README.md",
+				mergeReadme: true,
+				excludeNotDocumented: true,
+				flattenOutputFiles: false,
+				outputFileStrategy: "members",
+				membersWithOwnFile: [],
+				name: "React Native Skia List",
+				useCodeBlocks: false,
+				useHTMLEncodedBrackets: false,
+				useHTMLAnchors: true,
+				hidePageTitle: false,
+				hideGroupHeadings: true,
+				categorizeByGroup: false,
+				disableSources: true,
+				expandObjects: false,
+				sort: [],
+				groupOrder: ["*"],
+				kindSortOrder: [],
+				expandParameters: false,
+				hideBreadcrumbs: true,
+				parametersFormat: "list",
+				interfacePropertiesFormat: "list",
+				classPropertiesFormat: "list",
+				enumMembersFormat: "list",
+				typeDeclarationFormat: "list",
+				propertyMembersFormat: "list",
+				tableColumnSettings: {
+					hideDefaults: false,
+					hideInherited: false,
+					hideModifiers: false,
+					hideOverrides: false,
+					hideSources: false,
+					hideValues: false,
+					leftAlignHeaders: false,
+				},
+			},
+		],
 	],
 	presets: [
 		[

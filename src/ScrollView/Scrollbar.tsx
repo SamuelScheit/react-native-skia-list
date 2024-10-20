@@ -1,10 +1,10 @@
 import { Skia, RoundedRect } from "@shopify/react-native-skia";
 import type { ScrollGestureState } from "./ScrollGesture";
 import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable } from "react-native-reanimated";
-import { interpolateClamp } from "./Interpolate";
-import { Gesture } from "react-native-gesture-handler";
+import { interpolateClamp } from "../Util/Interpolate";
+import { Gesture, type ComposedGesture, type GestureType } from "react-native-gesture-handler";
 import { trigger as vibrate } from "react-native-haptic-feedback";
-import { clearAnimatedTimeout, setAnimatedTimeout } from "./timeout";
+import { clearAnimatedTimeout, setAnimatedTimeout } from "../Util/timeout";
 
 const primary = Skia.Paint();
 primary.setColor(Skia.Color("rgb(91, 128, 218)"));
@@ -12,9 +12,20 @@ primary.setColor(Skia.Color("rgb(91, 128, 218)"));
 const grey = Skia.Paint();
 grey.setColor(Skia.Color("rgb(226, 226, 226)"));
 
-export function getScrollbar(
-	state: ScrollGestureState & { redraw: () => void; startedAnimation: () => void; finishedAnimation: () => void }
-) {
+/** */
+export type ScrollbarProps = ScrollGestureState & {
+	redraw: () => void;
+	startedAnimation: () => void;
+	finishedAnimation: () => void;
+};
+
+/** */
+export type ScrollbarState = {
+	gesture: GestureType | ComposedGesture;
+	Scrollbar: () => JSX.Element;
+};
+
+export function getScrollbar(state: ScrollbarProps): ScrollbarState {
 	const {
 		layout,
 		scrollY,

@@ -4,7 +4,6 @@ import {
 	FontWidth,
 	loadData,
 	Skia,
-	type SkImage,
 	type SkParagraphStyle,
 	type SkTextStyle,
 	TextAlign,

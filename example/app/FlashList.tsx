@@ -9,7 +9,7 @@ import { Message } from "../src/Message";
 export default function FlashListTest() {
 	const ref = useRef<FlashList<any>>();
 	const time = useRef(0);
-	const text = useSharedValue("");
+	const text = useSharedValue<any>("");
 	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageRaw(i));
 
 	async function scrollToEnd(index = 0) {
@@ -26,13 +26,13 @@ export default function FlashListTest() {
 		<>
 			<Profiler
 				id={"list"}
-				onRender={(id, phase, actualDuration) => {
+				onRender={(_id, _phase, actualDuration) => {
 					time.current += actualDuration;
 					text.value = `Total Render time: ${time.current.toFixed(2)}ms`;
 				}}
 			>
 				<FlashList
-					ref={ref}
+					ref={ref as any}
 					data={data}
 					inverted
 					contentInsetAdjustmentBehavior="automatic"

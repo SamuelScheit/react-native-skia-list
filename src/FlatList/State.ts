@@ -1,7 +1,7 @@
 import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import { useSkiaScrollView, type SkiaScrollViewProps } from "../ScrollView";
+import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "../ScrollView";
 import { useLayoutEffect, useMemo } from "react";
-import { makeMutable, cancelAnimation, withTiming, runOnUI } from "react-native-reanimated";
+import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
 import { Skia } from "@shopify/react-native-skia";
 import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/module/";
 import type { PointProp } from "react-native";
@@ -11,14 +11,14 @@ export interface Dimensions {
 	height: number;
 }
 
-export type SkiaFlatListProps<T = any, Additional = {}> = Additional &
+/** */
+export type SkiaFlatListProps<T = any, A = {}> = A &
 	SkiaScrollViewProps & {
 		initialData?: () => T[];
 		/**
 		 * Rough estimate of the height of each item in the list.
 		 * Used to calculate the maximum scroll height.
 		 * Not required because max height will be calculated if user reaches the end of the list.
-		 * @default 100
 		 *  */
 		maintainVisibleContentPosition?: boolean;
 		estimatedItemHeight?: number;
@@ -26,6 +26,7 @@ export type SkiaFlatListProps<T = any, Additional = {}> = Additional &
 		renderItem?: (element: RenderNode<GroupProps> | undefined, item: T, index: number, state: any) => number;
 	};
 
+/** */
 export type TapResult<T> = {
 	item: T;
 	id: number | string;
@@ -39,7 +40,30 @@ export type TapResult<T> = {
 	height: number;
 };
 
-export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Additional> = {} as any) {
+/** */
+export type SkiaFlatListState<T, A> = {
+	elements: SharedValue<Record<string, RenderNode<GroupProps> | undefined>>;
+	presses: SharedValue<Record<string, { x: number; y: number } | undefined>>;
+	heights: SharedValue<Record<string, number>>;
+	rowOffsets: SharedValue<Record<string, number>>;
+	firstRenderIndex: SharedValue<number>;
+	firstRenderHeight: SharedValue<number>;
+	maintainVisibleContentPosition: boolean;
+	keyExtractor: (item: T, index: number) => string;
+	renderItem: (element: RenderNode<GroupProps> | undefined, item: T, index: number, state: any) => number;
+	data: SharedValue<T[]>;
+	renderTime: SharedValue<number>;
+	scrollToIndex: (index: number, animated?: boolean) => void;
+	resetData: (newData?: T[]) => void;
+	insertAt: (d: T | T[], index: number, animated?: boolean) => void;
+	getItemFromTouch: (e: PointProp) => TapResult<T> | undefined;
+	unmountElement: (index: number | undefined, item: T | undefined) => void;
+	redrawItems: () => void;
+} & SkiaScrollViewState &
+	A;
+
+/** */
+export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any): SkiaFlatListState<T, A> {
 	const scrollView = useSkiaScrollView(props);
 	const list = useMemo(() => {
 		const renderTime = makeMutable(0);
@@ -490,7 +514,5 @@ export function useSkiaFlatList<T, Additional>(props: SkiaFlatListProps<T, Addit
 		});
 	}, []);
 
-	return list;
+	return list as SkiaFlatListState<T, A>;
 }
-
-export type SkiaFlatListState<T = any, Additional = {}> = ReturnType<typeof useSkiaFlatList<T, Additional>>;

@@ -58,7 +58,7 @@ function RenderMessage({ item }: { item: any }) {
 									) : null}
 								</View>
 								<View style={{ flexDirection: "row", marginTop: 5, gap: 5 }}>
-									{item.attachments.map((reaction: any, i) => (
+									{item.attachments.map((_attachment: any, i: any) => (
 										<TouchableOpacity key={i}>
 											<Image
 												source={{ uri: "https://picsum.photos/600/600" }}
@@ -68,7 +68,7 @@ function RenderMessage({ item }: { item: any }) {
 									))}
 								</View>
 								<View style={{ flexDirection: "row", marginTop: 5, gap: 5 }}>
-									{item.reactions.map((reaction: any, i) => (
+									{item.reactions.map((reaction: any, i: any) => (
 										<TouchableOpacity
 											key={i}
 											style={{
@@ -92,6 +92,7 @@ function RenderMessage({ item }: { item: any }) {
 			</ContextMenu.Trigger>
 
 			<ContextMenu.Content>
+				{/* @ts-ignore */}
 				<ContextMenu.Item key="test" textValue="Test" />
 			</ContextMenu.Content>
 		</ContextMenu.Root>

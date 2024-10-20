@@ -1,15 +1,61 @@
 import { cancelAnimation, clamp, makeMutable, withSpring, type SharedValue } from "react-native-reanimated";
-import { withDecay } from "./Decay";
+import { withDecay } from "../Util/Decay";
 import { Gesture } from "react-native-gesture-handler";
 import type {
+	ComposedGesture,
+	GestureType,
 	GestureUpdateEvent,
 	PanGestureChangeEventPayload,
 	PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
-import { interpolateOutside } from "./Interpolate";
+import { interpolateOutside } from "../Util/Interpolate";
 import type { Animation, DecayAnimation } from "react-native-reanimated";
 
-const getDefaultState = () => ({
+/**
+ */
+export type ScrollGestureInitalState = {
+	/**
+	 * Contains the width and height of the scroll view.
+	 * Will automatically update when the layout changes.
+	 */
+	layout: SharedValue<{ width: number; height: number }>;
+	/**
+	 * The current scroll Y position.
+	 */
+	scrollY: SharedValue<number>;
+	/**
+	 * @internal
+	 * Used internally to keep track of the start Y position when dragging.
+	 */
+	startY: SharedValue<number>;
+	/**
+	 * Used to indepentently control the scroll position without affecting the scrollY value (which is used by the gesture handler) e.g. used for keyboard handling.
+	 */
+	offsetY: SharedValue<number>;
+	/**
+	 * The maximum height the scroll view can scroll to.
+	 * Automatically updated when the layout/data changes.
+	 */
+	maxHeight: SharedValue<number>;
+	/**
+	 * Shared value that indicates if the view is currently being scrolled.
+	 */
+	scrolling: SharedValue<boolean>;
+	/**
+	 * Shared value that indicates if the view is currently being pressed.
+	 */
+	pressing: SharedValue<boolean>;
+	/**
+	 * If the scroll view should bounce when reaching the top or bottom.
+	 */
+	bounces: boolean;
+	/**
+	 * The deceleration rate for momentum scrolling. Default is 0.998.
+	 */
+	decelerationRate: number;
+};
+
+const getDefaultState = (): ScrollGestureInitalState => ({
 	layout: makeMutable({ width: 0, height: 0 }) as SharedValue<{ width: number; height: number }>,
 	scrollY: makeMutable(0) as SharedValue<number>,
 	startY: makeMutable(0) as SharedValue<number>,
@@ -21,21 +67,76 @@ const getDefaultState = () => ({
 	decelerationRate: 0.998,
 });
 
-type ScrollGestureInitalState = ReturnType<typeof getDefaultState>;
+// export type ScrollGestureInitalState = ReturnType<typeof getDefaultState>;
 
-export interface ScrollGestureProps extends Partial<ScrollGestureInitalState> {
+export type ScrollEvent = GestureUpdateEvent<PanGestureHandlerEventPayload & PanGestureChangeEventPayload> & {
+	scrollY: number;
+};
+
+/**
+ *
+ */
+export type ScrollGestureProps = {
+	/**
+	 * Sets the initial value for `maxHeight` while taking the layout height into consideration.
+	 * :::warning
+	 * You need to set this value for SkiaScrollView to be able to scroll.
+	 * :::
+	 */
 	height?: number;
+	/**
+	 * Inverts the scroll direction of the Gesture Handler. Used in conjunction with `inverted` of [SkiaScrollViewProps](#skiascrollviewprops).
+	 */
 	inverted?: boolean;
-	onScroll?: (
-		value: GestureUpdateEvent<PanGestureHandlerEventPayload & PanGestureChangeEventPayload> & {
-			scrollY: number;
-		}
-	) => void;
+	/**
+	 * Callback that is invoked every time the scroll position changes.
+	 * Needs to be a worklet function.
+	 * You need to implement throttling yourself:
+	 *
+	 * ```tsx
+	 * function onScroll(event: ScrollEvent) {
+	 * 	"worklet";
+	 * 	const { scrollY } = event;
+	 * 	// do something with scrollY, e.g. update the position of a sticky header
+	 * }
+	 *
+	 * <SkiaScrollView onScroll={onScroll} />
+	 * ```
+	 */
+	onScroll?: (value: ScrollEvent) => void;
+	/**
+	 * Callback that is invoked when the user starts dragging the scroll view.
+	 * Needs to be a worklet function.
+	 */
 	onScrollBeginDrag?: () => void;
+	/**
+	 * Callback that is invoked when the user stops dragging the scroll view.
+	 * Needs to be a worklet function.
+	 */
 	onScrollEndDrag?: () => void;
+	/**
+	 * Callback that is invoked when the momentum scroll begins.
+	 * Needs to be a worklet function.
+	 */
 	onMomentumScrollEnd?: () => void;
+	/**
+	 * Callback that is invoked when the momentum scroll ends.
+	 * Needs to be a worklet function.
+	 */
 	onMomentumScrollBegin?: () => void;
-}
+	/**
+	 * Call this function when you start animating an SharedValue to enable continous rendering mode.
+	 */
+	startedAnimation?: () => void;
+	/**
+	 * Call this function when you finish animating an SharedValue to return to default rendering mode.
+	 *
+	 * :::warning
+	 * Ensure that you have the equal amount of `startedAnimation` and `finishedAnimation` calls to avoid unecessary re-renders when idling.
+	 * :::
+	 */
+	finishedAnimation?: () => void;
+} & Partial<ScrollGestureInitalState>;
 
 export function getScrollGestureState(props: ScrollGestureProps) {
 	return {
@@ -44,14 +145,33 @@ export function getScrollGestureState(props: ScrollGestureProps) {
 	};
 }
 
-export type ScrollGestureState = ReturnType<typeof getScrollGesture>;
+/**
+ *
+ */
+export type ScrollGestureState = {
+	gesture: GestureType | ComposedGesture;
+	/**
+	 * Scroll to a certain Y position.
+	 */
+	scrollTo: (opts: { x: number; y: number; animated?: boolean }) => void;
+	/**
+	 * Scroll to the end of the scroll view (inferred by maxHeight).
+	 */
+	scrollToEnd: (opts: { animated?: boolean }) => void;
+	/**
+	 * If you manually handle scrolling, e.g. with a custom ScrollBar, you can call this function to start momentum scrolling.
+	 */
+	startMomentumScroll: (velocityY: number) => void;
+	/**
+	 * @hidden
+	 */
+	invertedFactor: number;
+} & ScrollGestureInitalState &
+	ScrollGestureProps;
 
-export function getScrollGesture(
-	props: ScrollGestureProps & {
-		startedAnimation: () => void;
-		finishedAnimation: () => void;
-	}
-) {
+/**
+ */
+export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState {
 	const state = getScrollGestureState(props);
 
 	const { startedAnimation, finishedAnimation } = props;
@@ -76,7 +196,7 @@ export function getScrollGesture(
 	function onMomentumScrollEnd() {
 		"worklet";
 
-		finishedAnimation();
+		finishedAnimation?.();
 		onMomentumScrollEndProps?.();
 	}
 
@@ -100,7 +220,7 @@ export function getScrollGesture(
 
 		onMomentumScrollBegin?.();
 
-		startedAnimation();
+		startedAnimation?.();
 
 		const animation = withDecay(
 			{
@@ -146,7 +266,7 @@ export function getScrollGesture(
 	const gesture = Gesture.Pan()
 		.minDistance(10)
 		.onTouchesDown((e, manager) => {
-			startedAnimation();
+			startedAnimation?.();
 			const [touch] = e.allTouches;
 			if (!touch) return manager.fail();
 			pressing.value = true;
@@ -177,7 +297,7 @@ export function getScrollGesture(
 			y.value = newY;
 
 			if (onScroll) {
-				const event = e as typeof e & { scrollY: number };
+				const event = e as ScrollEvent;
 				event.scrollY = y.value;
 
 				onScroll?.(event);
@@ -195,7 +315,7 @@ export function getScrollGesture(
 			if (!success) {
 			}
 
-			finishedAnimation();
+			finishedAnimation?.();
 		});
 
 	return {

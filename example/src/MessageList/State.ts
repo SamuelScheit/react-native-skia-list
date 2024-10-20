@@ -148,7 +148,7 @@ export function useMessageListState(props: MessageListProps) {
 	}, []);
 
 	const contextMenu = getContextMenu(list);
-	list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture);
+	list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, contextMenu.gesture, list.scrollGesture);
 
 	return list;
 }

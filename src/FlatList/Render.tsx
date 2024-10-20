@@ -3,16 +3,18 @@ import { useSkiaFlatList, type SkiaFlatListProps, type SkiaFlatListState } from 
 import type { ReactNode } from "react";
 import { SkiaScrollView } from "../ScrollView";
 
-export function SkiaFlatList<T>({
-	list,
-	...props
-}: {
-	list?: SkiaFlatListState<T>;
+/** */
+export type SkiaFlatListElementProps<T, A> = {
+	list?: SkiaFlatListState<T, A>;
 	style?: ViewStyle;
 	fixedChildren?: ReactNode;
 	debug?: boolean;
-} & SkiaFlatListProps<T>) {
-	const state = list || useSkiaFlatList(props);
+} & SkiaFlatListProps<T>;
 
-	return <SkiaScrollView {...props} list={state} />;
+/** */
+export function SkiaFlatList<T, A>(props: SkiaFlatListElementProps<T, A>) {
+	const { list, ...p } = props;
+	const state = list || useSkiaFlatList(p);
+
+	return <SkiaScrollView {...p} list={state} />;
 }

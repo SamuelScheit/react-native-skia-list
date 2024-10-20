@@ -1,4 +1,4 @@
-import { Circle, Rect, Skia } from "@shopify/react-native-skia";
+import { Circle, Skia } from "@shopify/react-native-skia";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SkiaScrollView } from "react-native-skia-list";
 

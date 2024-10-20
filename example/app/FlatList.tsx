@@ -8,7 +8,7 @@ import { Message } from "../src/Message";
 export default function FlatListTest() {
 	const ref = useRef<FlatList>();
 	const time = useRef(0);
-	const text = useSharedValue("");
+	const text = useSharedValue<any>("");
 	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageRaw(i));
 
 	async function scrollToEnd(index = 0) {
@@ -25,17 +25,16 @@ export default function FlatListTest() {
 		<>
 			<Profiler
 				id={"list"}
-				onRender={(id, phase, actualDuration) => {
+				onRender={(_id, _phase, actualDuration) => {
 					time.current += actualDuration;
 					text.value = `Total Render time: ${time.current.toFixed(2)}ms`;
 				}}
 			>
 				<FlatList
-					ref={ref}
+					ref={ref as any}
 					data={data}
 					inverted
 					contentInsetAdjustmentBehavior="automatic"
-					estimatedItemSize={100}
 					renderItem={({ item }) => {
 						return <Message key={item.id} item={item} />;
 					}}

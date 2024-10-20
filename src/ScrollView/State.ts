@@ -9,7 +9,7 @@ import { useLayoutEffect, useMemo } from "react";
 import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
-import type { ComposedGesture } from "react-native-gesture-handler";
+import type { ComposedGesture, GestureType } from "react-native-gesture-handler";
 
 interface EdgeInsets {
 	top: number;
@@ -32,27 +32,56 @@ export type InitialScrollViewState = {
 	finishedAnimation: () => void;
 };
 
-export type SkiaScrollViewProps<Additional = {}> = Additional &
+/**
+ */
+export type SkiaScrollViewProps<A = {}> = A &
 	ScrollGestureProps & {
+		/**
+		 * Specify a custom scroll gesture.
+		 */
 		customScrollGesture?: typeof getScrollGesture;
+		/**
+		 * Specify a custom gesture handler.
+		 * E.g. to implement scrolling and swiping list items horizontally.
+		 */
 		customGesture?: (
 			props: ScrollGestureState &
 				InitialScrollViewState & {
 					scrollbar: ReturnType<typeof getScrollbar>;
 				}
 		) => ComposedGesture;
-		safeArea?: {
-			top?: number;
-			bottom?: number;
-			left?: number;
-			right?: number;
-		};
+		/**
+		 * Specify offsets for the content of the scroll view.
+		 *
+		 * e.g. `{ top: 30, bottom: 20, left: 15, right: 15 }`
+		 */
+		safeArea?: EdgeInsets;
+		/**
+		 * Set to `false` to disable the automatic keyboard adjustment.
+		 */
 		automaticallyAdjustKeyboardInsets?: boolean;
+		/**
+		 * Specify a custom keyboard handler
+		 */
 		keyboard?: ReanimatedContext;
+		/**
+		 * SkiaScrollView so that the elements start rendering from the bottom screen to the top.
+		 */
 		inverted?: boolean;
 	};
 
-export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additional> = {} as any) {
+export type SkiaScrollViewState = InitialScrollViewState &
+	ScrollGestureState & {
+		scrollGesture: GestureType | ComposedGesture;
+		scrollbarGesture: GestureType | ComposedGesture;
+		Scrollbar: () => JSX.Element;
+		gesture: ComposedGesture;
+	};
+
+/**
+ *
+ */
+export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any): SkiaScrollViewState {
 	const keyboard = useReanimatedKeyboardAnimation();
 	const layout = useSharedValue({ width: 0, height: 0 });
 	const list = useMemo(() => {
@@ -164,5 +193,3 @@ export function useSkiaScrollView<Additional>(props: SkiaScrollViewProps<Additio
 
 	return list;
 }
-
-export type SkiaScrollViewState = ReturnType<typeof useSkiaScrollView>;

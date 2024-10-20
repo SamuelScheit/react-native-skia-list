@@ -682,7 +682,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		.onTouchesCancelled((_, manager) => {
 			manager.fail();
 		})
-		.onEnd((e) => {
+		.onEnd(() => {
 			onLongPress({
 				x: contextMenuStartX.value,
 				y: contextMenuStartY.value,

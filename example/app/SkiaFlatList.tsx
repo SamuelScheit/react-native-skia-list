@@ -20,7 +20,7 @@ export default function FlatList() {
 			safeArea={safeArea}
 			style={{ backgroundColor: "white", flex: 1 }}
 			initialData={() => Array.from({ length: 1000 }, (_, i) => i)}
-			renderItem={(element, item, index, state) => {
+			renderItem={(element, item, _index, _state) => {
 				"worklet";
 
 				if (!element) return 100;

@@ -1,14 +1,13 @@
-import { loadData, Skia, type SkImage } from "@shopify/react-native-skia";
+import { loadData, Skia } from "@shopify/react-native-skia";
 import { getRandomMessage, loadImage } from "../src/MessageList/randomMessage";
 import { runOnUI, useSharedValue } from "react-native-reanimated";
-import { useMessageListState, type MessageItem } from "../src/MessageList/State";
+import { useMessageListState } from "../src/MessageList/State";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { MessageListProps } from "../src/MessageList/Render";
 import { MessageList } from "../src/MessageList";
 import { SharedText } from "../src/Util/SharedText";
 import { useLayoutEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { sleep } from "../src/Util/time";
 
 const userAvatarPromise1 = loadData(
 	`https://avatar.iran.liara.run/public`,
@@ -22,10 +21,6 @@ const userAvatarPromise2 = loadData(
 );
 const attachmentImagePromise = loadImage(400, 400);
 
-let attachment: SkImage | null = null;
-let avatar1: SkImage | null = null;
-let avatar2: SkImage | null = null;
-
 export default function SkiaMessageList() {
 	const my_user_id = "1";
 	const safeArea = useSafeAreaInsets();
@@ -36,7 +31,7 @@ export default function SkiaMessageList() {
 		estimatedItemHeight: 200,
 		safeArea,
 		initialData: () =>
-			new Array(500).fill(0).map((x, i) => {
+			new Array(500).fill(0).map((_, i) => {
 				return getRandomMessage({
 					my_user_id,
 					i,
@@ -45,7 +40,7 @@ export default function SkiaMessageList() {
 	};
 	const list = useMessageListState(props);
 	const { unmountElement, data, redrawItems, renderTime, scrollToIndex } = list;
-	const text = useSharedValue("");
+	const text = useSharedValue<any>("");
 
 	userAvatarPromise2.then((img) => {
 		runOnUI(() => {
@@ -57,18 +52,16 @@ export default function SkiaMessageList() {
 			});
 			redrawItems();
 		})();
-		avatar2 = img;
 	});
 
 	attachmentImagePromise.then((img) => {
 		runOnUI(() => {
 			data.value.forEach((item) => {
-				item.attachments = item.attachments.map((x: any) => img);
+				item.attachments = item.attachments.map(() => img);
 				unmountElement(undefined, item);
 			});
 			redrawItems();
 		})();
-		attachment = img;
 	});
 
 	userAvatarPromise1.then((img) => {
@@ -81,19 +74,16 @@ export default function SkiaMessageList() {
 			});
 			redrawItems();
 		})();
-		avatar1 = img;
 	});
 
-	async function scrollToEnd(index = 0, time = 0) {
+	async function scrollToEnd(index = 0) {
 		"worklet";
 
-		const diff = performance.now() - time;
-		// if (diff < 10) return requestAnimationFrame(() => scrollToEnd(index, time));
 		if (index >= data.value.length) return;
 
 		scrollToIndex(index, false);
 
-		return requestAnimationFrame(() => scrollToEnd(index + 1, performance.now()));
+		return requestAnimationFrame(() => scrollToEnd(index + 1));
 	}
 
 	useLayoutEffect(() => {

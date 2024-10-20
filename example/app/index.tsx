@@ -1,7 +1,6 @@
 import { Link } from "expo-router";
 import type { ComponentProps } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { runOnUI } from "react-native-reanimated";
+import { ScrollView, Text, TouchableOpacity } from "react-native";
 
 type LinkProps = ComponentProps<typeof Link>;
 
@@ -21,10 +20,6 @@ function Button(props: LinkProps) {
 		</Link>
 	);
 }
-
-runOnUI(() => {
-	console.log("runOnUIImmediately");
-})();
 
 export default function App() {
 	return (
