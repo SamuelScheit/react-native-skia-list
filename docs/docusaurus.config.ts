@@ -1,7 +1,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
-import {} from "docusaurus-plugin-typedoc";
+import TypeDoc from "docusaurus-plugin-typedoc";
 
 const config: Config = {
 	title: "React Native Skia List",
@@ -148,7 +148,7 @@ const config: Config = {
 			links: [
 				{
 					label: "Docs",
-					to: "/docs/intro",
+					to: "/docs/",
 				},
 				{
 					label: "GitHub",

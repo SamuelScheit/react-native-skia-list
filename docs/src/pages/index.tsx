@@ -185,7 +185,7 @@ export default function Home(): JSX.Element {
 							backgroundImage: `linear-gradient(50deg, #5d00ff 0%, #342dff 25%, #0079ff 50%, #00c5ff 75%)`,
 						}}
 						className="bg-gradient-to-l !text-white text-xl font-bold py-3 px-5 rounded-lg !no-underline  bg-pos-0 hover:bg-pos-100 bg-size-200 transition-all duration-300 ease-in-out"
-						to="/docs/intro"
+						to="/docs/"
 					>
 						Get Started
 					</Link>
