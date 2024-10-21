@@ -1,5 +1,5 @@
 import { runOnJS, runOnUI, useSharedValue } from "react-native-reanimated";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { interpolateClamp, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { Gesture } from "react-native-gesture-handler";
 import { getContextMenu } from "./ContextMenu";
@@ -64,6 +64,7 @@ export function useMessageListState(props: MessageListProps) {
 	});
 
 	const swipeTreshold = 30;
+	const { getItemFromTouch, scrollY, _nativeId, elements, rowOffsets, heights, layout, safeArea } = list;
 
 	const [replyIconElement] = useState(() => {
 		const swipeGesture = getSwipeGesture({
@@ -112,8 +113,6 @@ export function useMessageListState(props: MessageListProps) {
 
 		return replyIconElement;
 	});
-
-	const { getItemFromTouch, scrollY, _nativeId, elements, rowOffsets, heights, layout, safeArea } = list;
 
 	useLayoutEffect(() => {
 		runOnUI(() => {

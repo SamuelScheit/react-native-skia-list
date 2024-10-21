@@ -7,7 +7,7 @@ import SkiaDomViewNativeComponent, {
 } from "@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent";
 import { runOnUI, runOnJS } from "react-native-reanimated";
 import { type LayoutRectangle, type NativeMethods, type ScrollViewProps, type ViewStyle } from "react-native";
-import { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 

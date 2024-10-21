@@ -1,23 +1,14 @@
 import { loadData, Skia } from "@shopify/react-native-skia";
 import { getRandomMessage, loadImage } from "../src/MessageList/randomMessage";
-import Animated, { runOnUI, useAnimatedStyle, useDerivedValue, useSharedValue } from "react-native-reanimated";
+import Animated, { runOnUI, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useMessageListState } from "../src/MessageList/State";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { MessageListProps } from "../src/MessageList/Render";
 import { MessageList } from "../src/MessageList";
 import { SharedText } from "../src/Util/SharedText";
 import { useLayoutEffect } from "react";
-import {
-	InputAccessoryView,
-	LogBox,
-	ScrollView,
-	StatusBar,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from "react-native";
-import { useKeyboardHandler, useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
+import { LogBox, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useKeyboardHandler } from "react-native-keyboard-controller";
 
 const userAvatarPromise1 = loadData(
 	`https://avatar.iran.liara.run/public`,
@@ -57,7 +48,7 @@ export default function SkiaMessageList() {
 
 	useKeyboardHandler(
 		{
-			onStart: (e) => {
+			onStart: () => {
 				"worklet";
 				// console.log("onStart", e);
 			},
@@ -140,7 +131,7 @@ export default function SkiaMessageList() {
 	useLayoutEffect(() => {
 		runOnUI(() => {
 			renderTime.addListener(1, (value) => {
-				text.value = `Total Render time: ${value.toFixed(2)}ms`;
+				text.value = `Render time: ${value.toFixed(2)}ms`;
 			});
 		})();
 
@@ -180,11 +171,11 @@ export default function SkiaMessageList() {
 			<View
 				style={{
 					position: "absolute",
-					bottom: 20,
+					top: 40,
 					left: 0,
 					width: "100%",
 					justifyContent: "center",
-					alignItems: "center",
+					alignItems: "flex-start",
 				}}
 			>
 				<View

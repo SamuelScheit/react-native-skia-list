@@ -127,7 +127,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 					}
 				}
 			},
-			onEnd: (e) => {
+			onEnd: () => {
 				"worklet";
 			},
 		},

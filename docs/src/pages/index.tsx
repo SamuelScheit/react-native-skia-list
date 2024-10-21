@@ -182,17 +182,26 @@ export default function Home(): JSX.Element {
 						</div>
 					</div>
 				</div>
-				<div className="flex justify-center py-20">
-					<Link
-						style={{
-							backgroundImage: `linear-gradient(50deg, #5d00ff 0%, #342dff 25%, #0079ff 50%, #00c5ff 75%)`,
-						}}
-						className="bg-gradient-to-l !text-white text-xl font-bold py-3 px-5 rounded-lg !no-underline  bg-pos-0 hover:bg-pos-100 bg-size-200 transition-all duration-300 ease-in-out"
-						to="/docs/"
-					>
-						Get Started
-					</Link>
-				</div>
+				<section className="flex flex-col container items-center text-center pt-0 pb-40">
+					<h2 className="text-5xl mb-8">Demo</h2>
+
+					<video className="max-w-72 w-[100vw] rounded-sm" controls loop muted autoPlay playsinline>
+						<source src="./demo.mov" type="video/mp4" />
+					</video>
+
+					<div className="flex justify-center mt-24">
+						<Link
+							className="
+							!text-white
+							border-1 border-solid border-black
+							bg-gradient-to-r from-gray-700 to-gray-900
+							text-2xl font-bold py-3 px-5 rounded-lg !no-underline  bg-pos-0 hover:bg-pos-100 bg-size-200 transition-all duration-300 ease-in-out"
+							to="/docs/"
+						>
+							Documentation
+						</Link>
+					</div>
+				</section>
 			</div>
 		</Layout>
 	);

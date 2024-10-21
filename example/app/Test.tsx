@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Text, View } from "react-native";
 
 declare global {
@@ -8,7 +8,7 @@ declare global {
 globalThis.index ||= 0;
 
 export default function Test() {
-	const state = useState(() => globalThis.index++);
+	const [state] = useState(() => globalThis.index++);
 	const index = useMemo(() => globalThis.index++, []);
 
 	return (

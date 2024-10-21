@@ -2,7 +2,6 @@ import { cancelAnimation, clamp, makeMutable, withSpring, type SharedValue } fro
 import { withDecay } from "../Util/Decay";
 import { Gesture } from "react-native-gesture-handler";
 import type {
-	ComposedGesture,
 	GestureType,
 	GestureUpdateEvent,
 	PanGestureChangeEventPayload,

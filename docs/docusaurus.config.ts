@@ -59,7 +59,7 @@ const config: Config = {
 				tsconfig: "../tsconfig.json",
 				entryPointStrategy: "expand",
 				skipErrorChecking: true,
-				readme: "./README.md",
+				readme: "../README.md",
 				mergeReadme: true,
 				excludeNotDocumented: true,
 				flattenOutputFiles: false,

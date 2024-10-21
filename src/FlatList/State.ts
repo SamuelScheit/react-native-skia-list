@@ -1,6 +1,6 @@
 import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "../ScrollView";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
 import { Skia } from "@shopify/react-native-skia";
 import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/module/";
@@ -519,7 +519,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 		};
 	});
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const { scrollY, layout } = list;
 		return runOnUI(() => {
 			"worklet";
