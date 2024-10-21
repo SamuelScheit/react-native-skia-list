@@ -12,7 +12,7 @@ export default function Home(): JSX.Element {
 
 		function updateBackgrounds() {
 			cards.forEach((card) => {
-				const id = card.id + "-background";
+				const id = "background" + card.id;
 				const existing = document.getElementById(id);
 
 				const div = existing || document.createElement("div");
@@ -94,14 +94,14 @@ export default function Home(): JSX.Element {
 							</div>
 							<div>adjustment</div>
 						</div>
-						<div id={styles.hero} className={" justify-center !py-10 !px-20 gap-3 " + styles.card}>
+						<div id={styles.hero} className={" justify-center !py-10 !px-10 gap-3 " + styles.card}>
 							<h1 style={{}} className="text-6xl text-center gap-0 flex flex-col items-center">
 								<div className={"inline-block text-transparent " + styles.big}>Skia List</div>
-								<div className="font-medium text-3xl">for</div>
+								<div className="font-medium text-4xl">for</div>
 								<div className={"inline-block text-transparent " + styles.big}>React Native</div>
 							</h1>
 
-							<div className="font-medium">The fastest react-native list renderer</div>
+							<div className="font-medium text-lg">The fastest react-native list renderer</div>
 						</div>
 						<div id={styles.gesture} className={styles.card}>
 							<div>Customizable</div>
