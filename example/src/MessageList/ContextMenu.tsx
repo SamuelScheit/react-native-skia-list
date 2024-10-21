@@ -464,7 +464,6 @@ export function getContextMenu(state: ContextMenuProps) {
 		filter.addChild(blurFilter);
 		list.value.addChild(filter);
 		backdropFilter.value = filter;
-
 		// item
 		const translation = Skia.Matrix().translate(0, result.absoluteY).get();
 		const element = SkiaDomApi.GroupNode({

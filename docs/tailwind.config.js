@@ -14,7 +14,7 @@ module.exports = {
 			...colors,
 			gray: {
 				...colors.gray,
-				900: "#080808",
+				900: "#131313",
 			},
 		},
 		extend: {

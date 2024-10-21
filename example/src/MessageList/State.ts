@@ -1,5 +1,5 @@
 import { runOnJS, runOnUI, useSharedValue } from "react-native-reanimated";
-import { useLayoutEffect, useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { interpolateClamp, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { Gesture } from "react-native-gesture-handler";
 import { getContextMenu } from "./ContextMenu";
@@ -102,6 +102,8 @@ export function useMessageListState(props: MessageListProps) {
 		swipePosition,
 		threshold: swipeTreshold,
 	});
+	const swipeGestureRef = useRef(swipeGesture);
+	swipeGesture.withRef(swipeGestureRef);
 
 	useLayoutEffect(() => {
 		runOnUI(() => {
@@ -148,7 +150,11 @@ export function useMessageListState(props: MessageListProps) {
 	}, []);
 
 	const contextMenu = getContextMenu(list);
-	list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, contextMenu.gesture, list.scrollGesture);
+	const contextMenuRef = useRef(contextMenu.gesture);
+
+	// list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, contextMenu.gesture, list.scrollGesture);
+	list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture);
+	list.simultaneousHandlers.push(swipeGestureRef, contextMenuRef);
 
 	return list;
 }

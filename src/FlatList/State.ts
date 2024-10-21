@@ -96,8 +96,9 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 
 		const { maxHeight, scrollY, startY, redraw, pressing, layout, safeArea, content, invertedFactor } = scrollView;
 
-		const state = {
-			...scrollView,
+		const shareableState = {
+			layout,
+			scrollY,
 			elements,
 			presses,
 			heights,
@@ -109,6 +110,21 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			renderItem,
 			data,
 			renderTime,
+			maxHeight,
+			safeArea,
+			content,
+			invertedFactor,
+			scrollToIndex,
+			startY,
+			redraw,
+			pressing, // @ts-ignore
+			avatars: props.avatars,
+		};
+
+		const state = {
+			...props,
+			...scrollView,
+			...shareableState,
 		};
 
 		function getItemFromTouch(e: PointProp): TapResult<T> | undefined {
@@ -175,7 +191,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				let itemHeight = heightsValue[id] || 0;
 
 				if (itemHeight === undefined) {
-					itemHeight = renderItem(undefined, item, i, state);
+					itemHeight = renderItem(undefined, item, i, shareableState);
 					heightsValue[id] = itemHeight;
 				}
 
@@ -206,7 +222,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				const id = keyExtractor(item, index);
 				let height = heights.value[id];
 
-				let itemHeight = renderItem(undefined, item, index, state);
+				let itemHeight = renderItem(undefined, item, index, shareableState);
 
 				if (itemHeight !== height && height) {
 					const diff = itemHeight - height;
@@ -260,7 +276,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				matrix: translation,
 			});
 			const id = keyExtractor(item, index);
-			const itemHeight = renderItem(element, item, index, state);
+			const itemHeight = renderItem(element, item, index, shareableState);
 
 			if (invertedFactor === -1) {
 				offset = rowY * invertedFactor - itemHeight;
@@ -308,7 +324,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				let id = keyExtractor(item, index);
 				let itemHeight = heightsValue[id];
 				if (itemHeight === undefined) {
-					itemHeight = renderItem(undefined, item, index, state);
+					itemHeight = renderItem(undefined, item, index, shareableState);
 					heightsValue[id] = itemHeight;
 
 					const diff = itemHeight - estimatedItemHeight;
@@ -360,7 +376,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 						unmountElement(index, item);
 					}
 					if (!itemHeight) {
-						itemHeight = renderItem(undefined, item, index, state);
+						itemHeight = renderItem(undefined, item, index, shareableState);
 					}
 
 					rowY += itemHeight;

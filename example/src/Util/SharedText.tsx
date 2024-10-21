@@ -4,7 +4,7 @@ import { type SharedValue, runOnUI, runOnJS } from "react-native-reanimated";
 
 export function SharedText(props: { shared: SharedValue<string | number> } & TextProps) {
 	const { shared } = props;
-	const [text, setText] = useState(shared.value);
+	const [text, setText] = useState<any>("");
 
 	useLayoutEffect(() => {
 		runOnUI(() => {

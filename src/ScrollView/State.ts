@@ -1,15 +1,16 @@
 // import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
 import { Skia, type GroupProps, type RenderNode } from "@shopify/react-native-skia";
 import { SkiaViewNativeId } from "@shopify/react-native-skia/lib/module/views/SkiaViewNativeId";
-import { makeMutable, useSharedValue } from "react-native-reanimated";
+import { makeMutable, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import { getScrollGesture, type ScrollGestureProps, type ScrollGestureState } from "./ScrollGesture";
-import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
+import { useKeyboardHandler, useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
 import { runOnUI, type SharedValue } from "react-native-reanimated";
 import { useLayoutEffect, useMemo } from "react";
 import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
 import type { ComposedGesture, GestureType } from "react-native-gesture-handler";
+import { Keyboard } from "react-native";
 
 interface EdgeInsets {
 	top: number;
@@ -35,6 +36,7 @@ export type InitialScrollViewState = {
 /**
  */
 export type SkiaScrollViewProps<A = {}> = A &
+	Partial<Omit<SkiaScrollViewState, "safeArea">> &
 	ScrollGestureProps & {
 		/**
 		 * Specify a custom scroll gesture.
@@ -71,29 +73,58 @@ export type SkiaScrollViewProps<A = {}> = A &
 	};
 
 export type SkiaScrollViewState = InitialScrollViewState &
-	ScrollGestureState & {
+	Omit<ScrollGestureState, "gesture"> & {
 		scrollGesture: GestureType | ComposedGesture;
 		scrollbarGesture: GestureType | ComposedGesture;
 		Scrollbar: () => JSX.Element;
 		gesture: ComposedGesture;
+		simultaneousHandlers: React.RefObject<GestureType>[];
 	};
 
 /**
  *
  */
 export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any): SkiaScrollViewState {
-	const keyboard = useReanimatedKeyboardAnimation();
+	const keyboardHeight = useSharedValue(0);
+	const keyboardWillHide = useSharedValue(false);
+
+	useKeyboardHandler(
+		{
+			onStart: (e) => {
+				"worklet";
+				// console.log("onStart", e);
+			},
+			onMove: (e) => {
+				"worklet";
+				// console.log("onMove", e);
+				keyboardHeight.value = -e.height;
+			},
+			onInteractive: (e) => {
+				"worklet";
+				// console.log("onInteractive", e);
+				// keyboardHeight.value = -e.height;
+			},
+			onEnd: (e) => {
+				"worklet";
+				// console.log("onEnd", e);
+			},
+		},
+		[]
+	);
 	const layout = useSharedValue({ width: 0, height: 0 });
+	const offsetY = props.automaticallyAdjustKeyboardInsets !== false ? keyboardHeight : makeMutable(0);
+
 	const list = useMemo(() => {
 		const _nativeId = SkiaViewNativeId.current++;
 		const invertedFactor = props.inverted ? -1 : 1;
 		let animations = makeMutable(0);
 		const mode = makeMutable("default" as "continuous" | "default");
+		const root = props.root?.value || SkiaDomApi.GroupNode({});
 
 		const state = {
 			_nativeId,
 			mode,
-			root: makeMutable(SkiaDomApi.GroupNode({})),
+			root: props.root || makeMutable(root),
 			content: makeMutable(SkiaDomApi.GroupNode({})),
 			matrix: makeMutable(Skia.Matrix().translate(0, 0).get()),
 			redraw() {
@@ -127,24 +158,31 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			},
 		};
 
+		SkiaViewApi.setJsiProperty(_nativeId, "root", root);
+
 		const scrollState = (props.customScrollGesture || getScrollGesture)({
 			...props,
 			startedAnimation: state.startedAnimation,
 			finishedAnimation: state.finishedAnimation,
 			content: state.content,
 			layout,
-			offsetY: props.automaticallyAdjustKeyboardInsets !== false ? keyboard.height : makeMutable(0),
+			offsetY,
 		});
+		const scrollGestureRef = { current: scrollState.gesture };
+		scrollState.gesture.withRef(scrollGestureRef);
+
 		const { scrollY } = scrollState;
-		const { matrix, content, root, redraw, safeArea } = state;
+		const { matrix, content, redraw, safeArea } = state;
 		const scrollbar = getScrollbar({ ...scrollState, ...state });
+		const scrollbarRef = { current: scrollbar.gesture };
+		scrollbar.gesture.withRef(scrollbarRef);
 
 		const customGesture =
 			props.customGesture || (({ scrollbar, gesture }) => Gesture.Exclusive(scrollbar.gesture, gesture));
 
 		const gesture = customGesture({ scrollbar, ...scrollState, ...state } as any);
 
-		root.value.addChild(content.value);
+		root.addChild(content.value);
 
 		runOnUI(() => {
 			"worklet";
@@ -157,13 +195,14 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 
 			function onScroll(value: number) {
 				const matrixValue = matrix.value;
-				matrixValue[5] = value * -1 * invertedFactor + height;
+				matrixValue[5] = value * -1 * invertedFactor + height + offsetY.value;
 				content.value.setProp("matrix", matrixValue);
 
 				redraw();
 			}
 
 			scrollY.addListener(1, onScroll);
+			offsetY.addListener(1, () => onScroll(scrollY.value));
 		})();
 
 		return {
@@ -173,16 +212,18 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			gesture,
 			scrollGesture: scrollState.gesture,
 			scrollbarGesture: scrollbar.gesture,
+			simultaneousHandlers: [scrollGestureRef, scrollbarRef],
 		};
 	}, []);
 
 	useLayoutEffect(() => {
-		const { scrollY } = list;
+		const { scrollY, offsetY } = list;
 		return runOnUI(() => {
 			"worklet";
 
 			scrollY.removeListener(1);
 			layout.removeListener(1);
+			offsetY.removeListener(1);
 		});
 	}, []);
 

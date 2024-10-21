@@ -1,13 +1,14 @@
 import { loadData, Skia } from "@shopify/react-native-skia";
 import { getRandomMessage, loadImage } from "../src/MessageList/randomMessage";
-import { runOnUI, useSharedValue } from "react-native-reanimated";
+import Animated, { runOnUI, useAnimatedStyle, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import { useMessageListState } from "../src/MessageList/State";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { MessageListProps } from "../src/MessageList/Render";
 import { MessageList } from "../src/MessageList";
 import { SharedText } from "../src/Util/SharedText";
 import { useLayoutEffect } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { InputAccessoryView, LogBox, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useKeyboardHandler, useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
 
 const userAvatarPromise1 = loadData(
 	`https://avatar.iran.liara.run/public`,
@@ -28,8 +29,9 @@ export default function SkiaMessageList() {
 		my_user_id,
 		is_group: true,
 		bubble: true,
-		estimatedItemHeight: 200,
+		estimatedItemHeight: 300,
 		safeArea,
+		automaticallyAdjustKeyboardInsets: true,
 		initialData: () =>
 			new Array(500).fill(0).map((_, i) => {
 				return getRandomMessage({
@@ -41,6 +43,46 @@ export default function SkiaMessageList() {
 	const list = useMessageListState(props);
 	const { unmountElement, data, redrawItems, renderTime, scrollToIndex } = list;
 	const text = useSharedValue<any>("");
+	const keyboardHeight = useSharedValue(0);
+	const keyboardProgress = useSharedValue(0);
+
+	useKeyboardHandler(
+		{
+			onStart: (e) => {
+				"worklet";
+				// console.log("onStart", e);
+			},
+			onMove: (e) => {
+				"worklet";
+				// console.log("onMove", e);
+				keyboardHeight.value = -e.height;
+
+				keyboardProgress.value = e.progress;
+			},
+			onInteractive: (e) => {
+				"worklet";
+				// console.log("onInteractive", e);
+				keyboardHeight.value = -e.height;
+				keyboardProgress.value = e.progress;
+			},
+			onEnd: (e) => {
+				"worklet";
+				console.log("onEnd", e);
+			},
+		},
+		[]
+	);
+	const inputStyle = useAnimatedStyle(() => {
+		const paddingBottom = (1 - keyboardProgress.value) * safeArea.bottom;
+		return {
+			paddingBottom,
+			transform: [
+				{
+					translateY: keyboardHeight.value,
+				},
+			],
+		};
+	});
 
 	userAvatarPromise2.then((img) => {
 		runOnUI(() => {
@@ -99,8 +141,9 @@ export default function SkiaMessageList() {
 	}, []);
 
 	return (
-		<>
+		<View style={{ flex: 1 }}>
 			<MessageList {...props} list={list} inverted style={{ flex: 1 }} />
+
 			<View
 				style={{
 					position: "absolute",
@@ -144,6 +187,23 @@ export default function SkiaMessageList() {
 					<SharedText shared={text} />
 				</View>
 			</View>
-		</>
+
+			<Animated.View style={[{ zIndex: 10, backgroundColor: "white" }, inputStyle]}>
+				<TextInput
+					multiline
+					placeholder="Message"
+					style={[
+						{
+							paddingLeft: 62,
+							padding: 10,
+							fontSize: 20,
+						},
+					]}
+					inputAccessoryViewID="1"
+				/>
+			</Animated.View>
+		</View>
 	);
 }
+
+LogBox.ignoreAllLogs(true);

@@ -2,7 +2,7 @@ import { Skia, RoundedRect } from "@shopify/react-native-skia";
 import type { ScrollGestureState } from "./ScrollGesture";
 import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable } from "react-native-reanimated";
 import { interpolateClamp } from "../Util/Interpolate";
-import { Gesture, type ComposedGesture, type GestureType } from "react-native-gesture-handler";
+import { Gesture, type GestureType } from "react-native-gesture-handler";
 import { trigger as vibrate } from "react-native-haptic-feedback";
 import { clearAnimatedTimeout, setAnimatedTimeout } from "../Util/timeout";
 
@@ -21,7 +21,7 @@ export type ScrollbarProps = ScrollGestureState & {
 
 /** */
 export type ScrollbarState = {
-	gesture: GestureType | ComposedGesture;
+	gesture: GestureType;
 	Scrollbar: () => JSX.Element;
 };
 

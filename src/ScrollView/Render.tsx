@@ -1,15 +1,16 @@
 // import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import { GestureDetector } from "react-native-gesture-handler";
+import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "./State";
 import { Skia } from "@shopify/react-native-skia";
 import SkiaDomViewNativeComponent, {
 	type NativeProps,
 } from "@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent";
 import { runOnUI, runOnJS } from "react-native-reanimated";
-import type { LayoutRectangle, NativeMethods, ViewStyle } from "react-native";
-import { useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
+import type { LayoutRectangle, NativeMethods, ScrollViewProps, ViewStyle } from "react-native";
+import { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
+import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 
 /** */
 export type SkiaScrollViewElementProps = {
@@ -84,6 +85,25 @@ export type SkiaScrollViewElementProps = {
 	 * Enable debug mode to show the FPS count and render time.
 	 */
 	debug?: boolean;
+	/**
+	 * Determines whether the keyboard gets dismissed in response to a drag.
+	 *   - 'none' (the default) drags do not dismiss the keyboard.
+	 *   - 'onDrag' the keyboard is dismissed when a drag begins.
+	 *   - 'interactive' the keyboard is dismissed interactively with the drag
+	 *     and moves in synchrony with the touch; dragging upwards cancels the
+	 *     dismissal.
+	 */
+	keyboardDismissMode?: "none" | "interactive" | "on-drag" | undefined;
+
+	/**
+	 * Determines when the keyboard should stay visible after a tap.
+	 * - 'never' (the default), tapping outside of the focused text input when the keyboard is up dismisses the keyboard. When this happens, children won't receive the tap.
+	 * - 'always', the keyboard will not dismiss automatically, and the scroll view will not catch taps, but children of the scroll view can catch taps.
+	 * - 'handled', the keyboard will not dismiss automatically when the tap was handled by a children, (or captured by an ancestor).
+	 * - false, deprecated, use 'never' instead
+	 * - true, deprecated, use 'always' instead
+	 */
+	keyboardShouldPersistTaps?: boolean | "always" | "never" | "handled" | undefined;
 } & SkiaScrollViewProps;
 
 /**
@@ -125,8 +145,9 @@ export type SkiaScrollViewElementProps = {
  * ```
  */
 export function SkiaScrollView(props: SkiaScrollViewElementProps) {
-	var { list, style, children, debug, fixedChildren, ...p } = props;
+	var { list, style, children, debug, fixedChildren, keyboardDismissMode, keyboardShouldPersistTaps, ...p } = props;
 	const ref = useRef<(React.Component<NativeProps, {}, any> & Readonly<NativeMethods>) | null>(null);
+	const scrollViewRef = useRef<InteractiveScrollViewRef>(null);
 	const state = list || useSkiaScrollView(p);
 	const { _nativeId, gesture, layout, root, safeArea, maxHeight, content, Scrollbar, mode } = state;
 
@@ -169,19 +190,12 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 		</>
 	);
 
-	useLayoutEffect(() => {
-		SkiaViewApi.setJsiProperty(_nativeId, "root", root.value);
-
-		return () => {
-			contentReconciler.unmount();
-		};
-	}, []);
-
 	return (
-		<GestureDetector gesture={gesture}>
+		<>
 			<SkiaDomViewNativeComponent
 				ref={(x) => (ref.current = x)}
 				onLayout={(e) => {
+					scrollViewRef.current?.setLayout(e.nativeEvent.layout);
 					runOnUI((rect: LayoutRectangle) => {
 						"worklet";
 
@@ -203,6 +217,50 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 				debug={debug}
 				style={style || { flex: 1 }}
 			/>
-		</GestureDetector>
+			<GestureDetector gesture={gesture}>
+				<InteractiveScrollView
+					keyboardDismissMode={keyboardDismissMode || "interactive"}
+					keyboardShouldPersistTaps={keyboardShouldPersistTaps || "handled"}
+					ref={scrollViewRef}
+					simultaneousHandlers={state.simultaneousHandlers}
+				/>
+			</GestureDetector>
+		</>
 	);
 }
+
+type InteractiveScrollViewProps = {
+	simultaneousHandlers: BaseGestureHandlerProps["simultaneousHandlers"];
+	keyboardDismissMode?: ScrollViewProps["keyboardDismissMode"];
+	keyboardShouldPersistTaps?: ScrollViewProps["keyboardShouldPersistTaps"];
+};
+
+type InteractiveScrollViewRef = {
+	setLayout: (layout: LayoutRectangle) => void;
+};
+
+const InteractiveScrollView = forwardRef<InteractiveScrollViewRef, InteractiveScrollViewProps>(
+	function InteractiveScrollView(props, ref) {
+		const [layout, setLayout] = useState<LayoutRectangle>({ x: 0, y: 0, width: 0, height: 0 });
+
+		useImperativeHandle(ref, () => {
+			return {
+				setLayout,
+			};
+		});
+
+		return (
+			<ScrollView
+				{...props}
+				style={{
+					zIndex: 1,
+					position: "absolute",
+					width: layout.width,
+					height: layout.height,
+					top: layout.y,
+					left: layout.x,
+				}}
+			/>
+		);
+	}
+);

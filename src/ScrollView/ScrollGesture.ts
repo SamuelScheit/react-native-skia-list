@@ -149,7 +149,7 @@ export function getScrollGestureState(props: ScrollGestureProps) {
  *
  */
 export type ScrollGestureState = {
-	gesture: GestureType | ComposedGesture;
+	gesture: GestureType;
 	/**
 	 * Scroll to a certain Y position.
 	 */
@@ -289,9 +289,9 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 			let newY = startY.value + e.translationY * -1 * inverted;
 
 			if (bounces) {
-				newY = interpolateOutside(newY, 0, maxHeight.value - offsetY.value, 0.82);
+				newY = interpolateOutside(newY, 0, maxHeight.value, 0.82);
 			} else {
-				newY = clamp(newY, 0, maxHeight.value - offsetY.value);
+				newY = clamp(newY, 0, maxHeight.value);
 			}
 
 			y.value = newY;

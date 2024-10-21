@@ -29,6 +29,7 @@ export default function App() {
 			<Button href="/SkiaMessageList">SkiaMessageList</Button>
 			<Button href="/FlashList">FlashList</Button>
 			<Button href="/FlatList">FlatList</Button>
+			<Button href="/Test">Test</Button>
 		</ScrollView>
 	);
 }
