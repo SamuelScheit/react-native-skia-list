@@ -16,8 +16,7 @@ npm install react-native-skia-list
 ## [Documentation](https://samuelscheit.github.io/react-native-skia-list/)
 
 <video width="230" controls loop muted autoPlay playsinline >
-  <source src="./docs/static/demo.mov" type="video/mp4" />
-  <source src="/demo.mov" type="video/mp4" />
+  <source src="https://samuelscheit.github.io/react-native-skia-list/demo.mov" type="video/mp4" />
 </video>
 
 ## Usage
