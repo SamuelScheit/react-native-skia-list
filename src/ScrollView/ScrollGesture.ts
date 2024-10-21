@@ -46,6 +46,10 @@ export type ScrollGestureInitalState = {
 	 */
 	pressing: SharedValue<boolean>;
 	/**
+	 * Shared value to disable scrolling.
+	 */
+	scrollingDisabled: SharedValue<boolean>;
+	/**
 	 * If the scroll view should bounce when reaching the top or bottom.
 	 */
 	bounces: boolean;
@@ -63,6 +67,7 @@ const getDefaultState = (): ScrollGestureInitalState => ({
 	maxHeight: makeMutable(1) as SharedValue<number>,
 	scrolling: makeMutable(false) as SharedValue<boolean>,
 	pressing: makeMutable(false) as SharedValue<boolean>,
+	scrollingDisabled: makeMutable(false) as SharedValue<boolean>,
 	bounces: true,
 	decelerationRate: 0.998,
 });
@@ -188,6 +193,8 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 		offsetY,
 		maxHeight,
 		pressing,
+		scrollingDisabled,
+		layout,
 	} = state;
 	const inverted = props.inverted ? -1 : 1;
 
@@ -280,18 +287,27 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 			cancelAnimation(y); // hold down finger to stop scrolling
 		})
 		.onStart(() => {
+			if (scrollingDisabled.value) return;
+
 			// begin scroll
 			startY.value = y.value;
 			scrolling.value = true;
 			onScrollBeginDrag?.();
 		})
 		.onChange((e) => {
+			// if (scrollingDisabled.value) return;
+
 			let newY = startY.value + e.translationY * -1 * inverted;
 
 			if (bounces) {
 				newY = interpolateOutside(newY, 0, maxHeight.value, 0.82);
 			} else {
 				newY = clamp(newY, 0, maxHeight.value);
+			}
+
+			const isOverEdge = e.y - offsetY.value > layout.value.height;
+			if (isOverEdge) {
+				return;
 			}
 
 			y.value = newY;
@@ -304,6 +320,8 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 			}
 		})
 		.onEnd((e) => {
+			if (scrollingDisabled.value) return;
+
 			// end scroll
 			onEnd(e.velocityY * -1 * inverted);
 			onScrollEndDrag?.();

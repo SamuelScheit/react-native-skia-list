@@ -73,12 +73,12 @@ export default function SkiaMessageList() {
 		[]
 	);
 	const inputStyle = useAnimatedStyle(() => {
-		const paddingBottom = (1 - keyboardProgress.value) * safeArea.bottom;
+		const paddingBottom = keyboardProgress.value * safeArea.bottom;
 		return {
-			paddingBottom,
+			// paddingBottom,
 			transform: [
 				{
-					translateY: keyboardHeight.value,
+					translateY: keyboardHeight.value + paddingBottom,
 				},
 			],
 		};
@@ -188,7 +188,9 @@ export default function SkiaMessageList() {
 				</View>
 			</View>
 
-			<Animated.View style={[{ zIndex: 10, backgroundColor: "white" }, inputStyle]}>
+			<Animated.View
+				style={[{ zIndex: 10, backgroundColor: "white", paddingBottom: safeArea.bottom }, inputStyle]}
+			>
 				<TextInput
 					multiline
 					placeholder="Message"

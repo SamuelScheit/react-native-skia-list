@@ -628,13 +628,13 @@ export function getContextMenu(state: ContextMenuProps) {
 			contextMenuStartY.value = touch.y;
 			contextMenuX.value = touch.x;
 			contextMenuY.value = touch.y;
-			manager.begin();
 
 			let start = performance.now();
 			function onWait() {
 				if (contextMenuFailed.value) return;
 
 				if (performance.now() - start > 300) {
+					manager.begin();
 					manager.activate();
 					contextMenuActivated.value = true;
 					onLongPressIn(touch!);
@@ -679,6 +679,7 @@ export function getContextMenu(state: ContextMenuProps) {
 			contextMenuStartY.value = touch.y;
 		})
 		.onTouchesCancelled((_, manager) => {
+			contextMenuFailed.value = true;
 			manager.fail();
 		})
 		.onEnd(() => {
@@ -688,6 +689,7 @@ export function getContextMenu(state: ContextMenuProps) {
 			});
 		})
 		.onFinalize(() => {
+			contextMenuFailed.value = true;
 			onLongPressOut({
 				x: contextMenuStartX.value,
 				y: contextMenuStartY.value,

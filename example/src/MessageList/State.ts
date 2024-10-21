@@ -152,8 +152,10 @@ export function useMessageListState(props: MessageListProps) {
 	const contextMenu = getContextMenu(list);
 	const contextMenuRef = useRef(contextMenu.gesture);
 
-	// list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, contextMenu.gesture, list.scrollGesture);
-	list.gesture = Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture);
+	list.gesture = Gesture.Race(
+		contextMenu.gesture,
+		Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture)
+	);
 	list.simultaneousHandlers.push(swipeGestureRef, contextMenuRef);
 
 	return list;

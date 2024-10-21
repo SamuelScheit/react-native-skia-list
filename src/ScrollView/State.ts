@@ -1,16 +1,15 @@
 // import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
 import { Skia, type GroupProps, type RenderNode } from "@shopify/react-native-skia";
 import { SkiaViewNativeId } from "@shopify/react-native-skia/lib/module/views/SkiaViewNativeId";
-import { makeMutable, useDerivedValue, useSharedValue } from "react-native-reanimated";
+import { cancelAnimation, makeMutable, useSharedValue, withSpring } from "react-native-reanimated";
 import { getScrollGesture, type ScrollGestureProps, type ScrollGestureState } from "./ScrollGesture";
-import { useKeyboardHandler, useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
+import { useKeyboardHandler } from "react-native-keyboard-controller";
 import { runOnUI, type SharedValue } from "react-native-reanimated";
 import { useLayoutEffect, useMemo } from "react";
 import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
 import type { ComposedGesture, GestureType } from "react-native-gesture-handler";
-import { Keyboard } from "react-native";
 
 interface EdgeInsets {
 	top: number;
@@ -86,27 +85,50 @@ export type SkiaScrollViewState = InitialScrollViewState &
  */
 export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any): SkiaScrollViewState {
 	const keyboardHeight = useSharedValue(0);
-	const keyboardWillHide = useSharedValue(false);
+	const scrollingInteractive = useSharedValue(false);
+	const scrollingDisabled = useSharedValue(false);
+	const scrollY = useSharedValue(0);
+	const startY = useSharedValue(0);
+	const safeAreaBottom = props.safeArea?.bottom || 0;
 
 	useKeyboardHandler(
 		{
 			onStart: (e) => {
 				"worklet";
-				// console.log("onStart", e);
+				// will show
+				if (e.progress === 1) {
+					scrollingInteractive.value = false;
+					scrollingDisabled.value = false;
+				}
+				// will hide
+				if (e.duration !== 0 && e.progress === 0 && scrollingInteractive.value) {
+					scrollingDisabled.value = false;
+					cancelAnimation(scrollY);
+					scrollY.value = withSpring(startY.value, {
+						damping: 500,
+						stiffness: 1000,
+						mass: 3,
+					});
+					// on Interactive closed keyboard
+				}
 			},
 			onMove: (e) => {
 				"worklet";
+				keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
 				// console.log("onMove", e);
-				keyboardHeight.value = -e.height;
 			},
 			onInteractive: (e) => {
 				"worklet";
-				// console.log("onInteractive", e);
-				// keyboardHeight.value = -e.height;
+				keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
+				if (e.progress !== 1) {
+					scrollingInteractive.value = true;
+					if (!scrollingDisabled.value) {
+						scrollingDisabled.value = true;
+					}
+				}
 			},
 			onEnd: (e) => {
 				"worklet";
-				// console.log("onEnd", e);
 			},
 		},
 		[]
@@ -167,11 +189,13 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			content: state.content,
 			layout,
 			offsetY,
+			scrollY,
+			startY,
+			scrollingDisabled,
 		});
 		const scrollGestureRef = { current: scrollState.gesture };
 		scrollState.gesture.withRef(scrollGestureRef);
 
-		const { scrollY } = scrollState;
 		const { matrix, content, redraw, safeArea } = state;
 		const scrollbar = getScrollbar({ ...scrollState, ...state });
 		const scrollbarRef = { current: scrollbar.gesture };

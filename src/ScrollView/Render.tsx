@@ -6,10 +6,9 @@ import SkiaDomViewNativeComponent, {
 	type NativeProps,
 } from "@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent";
 import { runOnUI, runOnJS } from "react-native-reanimated";
-import type { LayoutRectangle, NativeMethods, ScrollViewProps, ViewStyle } from "react-native";
+import { type LayoutRectangle, type NativeMethods, type ScrollViewProps, type ViewStyle } from "react-native";
 import { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
-import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 
 /** */
@@ -54,7 +53,7 @@ export type SkiaScrollViewElementProps = {
 	 *
 	 * ```tsx
 	 * const state = useSkiaScrollView({ height: 1000 });
-	 * const content = state.content.value;
+	 * const content = content.value;
 	 *
 	 * let previous = null;
 	 * // do something with the list content, e.g. add a new rect every 10ms
@@ -137,7 +136,7 @@ export type SkiaScrollViewElementProps = {
  * #### Example with `useSkiaScrollView`
  * ```tsx
  * const state = useSkiaScrollView({ height: 1000 });
- * const content = state.content.value;
+ * const content = content.value;
  *
  * content.addChild(SkiaDomApi.RectNode({ width: 100, height: 100, x: 0, y: 0 }));
  *
@@ -149,7 +148,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	const ref = useRef<(React.Component<NativeProps, {}, any> & Readonly<NativeMethods>) | null>(null);
 	const scrollViewRef = useRef<InteractiveScrollViewRef>(null);
 	const state = list || useSkiaScrollView(p);
-	const { _nativeId, gesture, layout, root, safeArea, maxHeight, content, Scrollbar, mode } = state;
+	const { _nativeId, gesture, layout, safeArea, maxHeight, content, root, Scrollbar, mode } = state;
 
 	useLayoutEffect(() => {
 		function setMode(value: string) {
@@ -170,14 +169,14 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	const fixedReconciler = useMemo(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
 
-		state.root.value.insertChildBefore(reconciler.dom, content.value);
+		root.value.insertChildBefore(reconciler.dom, content.value);
 
 		return reconciler;
 	}, []);
 	const contentReconciler = useMemo(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
 
-		state.content.value.addChild(reconciler.dom);
+		content.value.addChild(reconciler.dom);
 
 		return reconciler;
 	}, []);
