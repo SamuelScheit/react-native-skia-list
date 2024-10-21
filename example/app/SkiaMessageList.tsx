@@ -7,7 +7,16 @@ import type { MessageListProps } from "../src/MessageList/Render";
 import { MessageList } from "../src/MessageList";
 import { SharedText } from "../src/Util/SharedText";
 import { useLayoutEffect } from "react";
-import { InputAccessoryView, LogBox, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+	InputAccessoryView,
+	LogBox,
+	ScrollView,
+	StatusBar,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View,
+} from "react-native";
 import { useKeyboardHandler, useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
 
 const userAvatarPromise1 = loadData(
@@ -142,6 +151,7 @@ export default function SkiaMessageList() {
 
 	return (
 		<View style={{ flex: 1 }}>
+			<StatusBar hidden={true} />
 			<MessageList {...props} list={list} inverted style={{ flex: 1 }} />
 
 			<View

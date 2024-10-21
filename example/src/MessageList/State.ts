@@ -63,7 +63,43 @@ export function useMessageListState(props: MessageListProps) {
 		},
 	});
 
+	const swipeTreshold = 30;
+
 	const [replyIconElement] = useState(() => {
+		const swipeGesture = getSwipeGesture({
+			onEndSwipe() {
+				"worklet";
+				// console.log("onEndSwipe");
+			},
+			onOverSwipe() {
+				"worklet";
+				runOnJS(trigger)("impactMedium");
+			},
+			onStartSwipe(e) {
+				"worklet";
+				const item = getItemFromTouch(e);
+				console.log("onStartSwipe", item?.id);
+				swipeItem.value = item?.id;
+			},
+			onSwipe() {
+				"worklet";
+				console.log("onSwipe");
+			},
+			swipePosition,
+			threshold: swipeTreshold,
+		});
+		const swipeGestureRef = { current: swipeGesture };
+		swipeGesture.withRef(swipeGestureRef);
+
+		const contextMenu = getContextMenu(list);
+		const contextMenuRef = { current: contextMenu.gesture };
+
+		list.gesture = Gesture.Race(
+			contextMenu.gesture,
+			Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture)
+		);
+		list.simultaneousHandlers.push(swipeGestureRef, contextMenuRef);
+
 		const replyIconElement = SkiaDomApi.ImageSVGNode({
 			svg: replyIcon,
 			width: 30,
@@ -78,32 +114,6 @@ export function useMessageListState(props: MessageListProps) {
 	});
 
 	const { getItemFromTouch, scrollY, _nativeId, elements, rowOffsets, heights, layout, safeArea } = list;
-	const swipeTreshold = 30;
-
-	const swipeGesture = getSwipeGesture({
-		onEndSwipe() {
-			"worklet";
-			// console.log("onEndSwipe");
-		},
-		onOverSwipe() {
-			"worklet";
-			runOnJS(trigger)("impactMedium");
-		},
-		onStartSwipe(e) {
-			"worklet";
-			const item = getItemFromTouch(e);
-			console.log("onStartSwipe", item?.id);
-			swipeItem.value = item?.id;
-		},
-		onSwipe() {
-			"worklet";
-			console.log("onSwipe");
-		},
-		swipePosition,
-		threshold: swipeTreshold,
-	});
-	const swipeGestureRef = useRef(swipeGesture);
-	swipeGesture.withRef(swipeGestureRef);
 
 	useLayoutEffect(() => {
 		runOnUI(() => {
@@ -144,19 +154,11 @@ export function useMessageListState(props: MessageListProps) {
 		return runOnUI(() => {
 			"worklet";
 
+			scrollY.removeListener(4);
 			scrollY.removeListener(_nativeId);
 			swipePosition.removeListener(_nativeId);
 		});
 	}, []);
-
-	const contextMenu = getContextMenu(list);
-	const contextMenuRef = useRef(contextMenu.gesture);
-
-	list.gesture = Gesture.Race(
-		contextMenu.gesture,
-		Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture)
-	);
-	list.simultaneousHandlers.push(swipeGestureRef, contextMenuRef);
 
 	return list;
 }

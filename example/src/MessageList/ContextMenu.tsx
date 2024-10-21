@@ -452,6 +452,32 @@ export function getContextMenu(state: ContextMenuProps) {
 		result.setProp("layer", opacityPaint);
 	}
 
+	const shareableState = {
+		layout: state.layout,
+		scrollY: state.scrollY,
+		elements: state.elements,
+		presses: state.presses,
+		heights: state.heights,
+		rowOffsets: state.rowOffsets,
+		firstRenderIndex: state.firstRenderIndex,
+		firstRenderHeight: state.firstRenderHeight,
+		maintainVisibleContentPosition: state.maintainVisibleContentPosition,
+		keyExtractor: state.keyExtractor,
+		renderItem: state.renderItem,
+		data: state.data,
+		renderTime: state.renderTime,
+		maxHeight: state.maxHeight,
+		safeArea: state.safeArea,
+		content: state.content,
+		invertedFactor: state.invertedFactor,
+		scrollToIndex: state.scrollToIndex,
+		startY: state.startY,
+		redraw: state.redraw,
+		pressing: state.pressing,
+		// @ts-ignore
+		avatars: state.avatars,
+	};
+
 	function createBackdropFilter(result: TapResult<any>) {
 		"worklet";
 
@@ -473,7 +499,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		list.value.addChild(element);
 
 		unmountElement(result.index, result.item);
-		renderItem!(element, result.item, result.index, state);
+		renderItem!(element, result.item, result.index, shareableState);
 
 		runOnJS(RenderActions)(translation, result);
 
@@ -541,14 +567,6 @@ export function getContextMenu(state: ContextMenuProps) {
 		contextMenuActivated.value = false;
 		console.log("long press", emoji.label);
 	}
-
-	useLayoutEffect(() => {
-		return runOnUI(() => {
-			contextMenuBlur.removeListener(_nativeId);
-			scrollY.removeListener(scrollListenerId);
-			contextMenuOffsetY.removeListener(_nativeId);
-		});
-	}, []);
 
 	function onLongPressIn(e: TouchData) {
 		"worklet";
