@@ -1,6 +1,6 @@
 import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "../ScrollView";
-import { useLayoutEffect, useMemo } from "react";
+import { useLayoutEffect, useState } from "react";
 import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
 import { Skia } from "@shopify/react-native-skia";
 import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/module/";
@@ -65,7 +65,7 @@ export type SkiaFlatListState<T, A> = {
 /** */
 export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any): SkiaFlatListState<T, A> {
 	const scrollView = useSkiaScrollView(props);
-	const list = useMemo(() => {
+	const [list] = useState(() => {
 		const renderTime = makeMutable(0);
 		const renderMutex = makeMutable(false);
 		const elements = makeMutable({} as Record<string, RenderNode<GroupProps> | undefined>);
@@ -496,7 +496,6 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				onScroll();
 			});
 			layout.addListener(2, (value) => {
-				console.log("layout changed");
 				maxHeight.value =
 					estimatedItemHeight * initialData.length -
 					value.height +
@@ -518,7 +517,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			redrawItems: onScroll,
 			scrollToIndex,
 		};
-	}, []);
+	});
 
 	useLayoutEffect(() => {
 		const { scrollY, layout } = list;

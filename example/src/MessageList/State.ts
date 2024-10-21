@@ -1,5 +1,5 @@
 import { runOnJS, runOnUI, useSharedValue } from "react-native-reanimated";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { interpolateClamp, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { Gesture } from "react-native-gesture-handler";
 import { getContextMenu } from "./ContextMenu";
@@ -42,13 +42,13 @@ export function useMessageListState(props: MessageListProps) {
 	const swipePosition = useSharedValue(0);
 	const swipeItem = useSharedValue(undefined as string | undefined | number);
 
-	useMemo(() => {
+	useState(() => {
 		root.value.addChild(
 			SkiaDomApi.FillNode({
 				color: "white",
 			})
 		);
-	}, []);
+	});
 
 	const list = useSkiaFlatList({
 		root,
@@ -63,7 +63,7 @@ export function useMessageListState(props: MessageListProps) {
 		},
 	});
 
-	const replyIconElement = useMemo(() => {
+	const [replyIconElement] = useState(() => {
 		const replyIconElement = SkiaDomApi.ImageSVGNode({
 			svg: replyIcon,
 			width: 30,
@@ -75,7 +75,7 @@ export function useMessageListState(props: MessageListProps) {
 		list.content.value.addChild(replyIconElement);
 
 		return replyIconElement;
-	}, []);
+	});
 
 	const { getItemFromTouch, scrollY, _nativeId, elements, rowOffsets, heights, layout, safeArea } = list;
 	const swipeTreshold = 30;

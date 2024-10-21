@@ -5,7 +5,7 @@ import { cancelAnimation, makeMutable, useSharedValue, withSpring } from "react-
 import { getScrollGesture, type ScrollGestureProps, type ScrollGestureState } from "./ScrollGesture";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
 import { runOnUI, type SharedValue } from "react-native-reanimated";
-import { useLayoutEffect, useMemo } from "react";
+import { useLayoutEffect, useState } from "react";
 import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
@@ -136,7 +136,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 	const layout = useSharedValue({ width: 0, height: 0 });
 	const offsetY = props.automaticallyAdjustKeyboardInsets !== false ? keyboardHeight : makeMutable(0);
 
-	const list = useMemo(() => {
+	const [list] = useState(() => {
 		const _nativeId = SkiaViewNativeId.current++;
 		const invertedFactor = props.inverted ? -1 : 1;
 		let animations = makeMutable(0);
@@ -238,7 +238,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			scrollbarGesture: scrollbar.gesture,
 			simultaneousHandlers: [scrollGestureRef, scrollbarRef],
 		};
-	}, []);
+	});
 
 	useLayoutEffect(() => {
 		const { scrollY, offsetY } = list;

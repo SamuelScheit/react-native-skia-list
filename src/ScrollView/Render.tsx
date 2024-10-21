@@ -166,20 +166,20 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 		});
 	}, []);
 
-	const fixedReconciler = useMemo(() => {
+	const [fixedReconciler] = useState(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
 
 		root.value.insertChildBefore(reconciler.dom, content.value);
 
 		return reconciler;
-	}, []);
-	const contentReconciler = useMemo(() => {
+	});
+	const [contentReconciler] = useState(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
 
 		content.value.addChild(reconciler.dom);
 
 		return reconciler;
-	}, []);
+	});
 
 	contentReconciler.render(children);
 	fixedReconciler.render(
@@ -206,8 +206,6 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 								1
 							);
 						}
-
-						console.log("onLayout", rect);
 					})(e.nativeEvent.layout);
 				}}
 				nativeID={`${_nativeId}`}
