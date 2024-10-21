@@ -1,4 +1,4 @@
-// import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
+import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
 import { Skia, type GroupProps, type RenderNode } from "@shopify/react-native-skia";
 import { SkiaViewNativeId } from "@shopify/react-native-skia/lib/module/views/SkiaViewNativeId";
 import { cancelAnimation, makeMutable, useSharedValue, withSpring } from "react-native-reanimated";
@@ -10,6 +10,7 @@ import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
 import type { ComposedGesture, GestureType } from "react-native-gesture-handler";
+import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 
 interface EdgeInsets {
 	top: number;
