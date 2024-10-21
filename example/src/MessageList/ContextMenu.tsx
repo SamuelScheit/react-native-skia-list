@@ -29,6 +29,7 @@ import { SkiaRoot } from "@shopify/react-native-skia/lib/commonjs/renderer/Recon
 import { NATIVE_DOM } from "@shopify/react-native-skia/lib/commonjs/renderer/HostComponents";
 import { isInBound, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { trigger } from "react-native-haptic-feedback";
+import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 
 export const dpi = 1;
 export const scale = PixelRatio.getFontScale() * 1 * dpi;
