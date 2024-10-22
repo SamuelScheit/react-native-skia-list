@@ -58,7 +58,7 @@
 	"bugs": {
 		"url": "https://github.com/samuelscheit/react-native-skia-list/issues"
 	},
-	"homepage": "https://github.com/samuelscheit/react-native-skia-list#readme",
+	"homepage": "https://samuelscheit.github.io/react-native-skia-list/",
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org/"
 	},
