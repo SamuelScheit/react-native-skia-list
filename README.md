@@ -15,8 +15,6 @@ npm install react-native-skia-list
 
 ## [Documentation](https://samuelscheit.github.io/react-native-skia-list/)
 
-![](./docs/static/img/demo.gif)
-
 <a href="https://samuelscheit.github.io/react-native-skia-list/#demo">
 	<img width="230" src="./docs/static/demo.gif" />
 </a>
