@@ -183,7 +183,9 @@ export default function Home(): JSX.Element {
 					</div>
 				</div>
 				<section className="flex flex-col container items-center text-center pt-0 pb-40">
-					<h2 className="text-5xl mb-8">Demo</h2>
+					<h2 className="text-5xl mb-8" id="demo">
+						Demo
+					</h2>
 
 					<video className="max-w-72 w-[100vw] rounded-sm" controls loop muted autoPlay playsinline>
 						<source src="./demo.mov" type="video/mp4" />
