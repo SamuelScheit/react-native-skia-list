@@ -11,6 +11,8 @@ import {
 import { lipsum } from "./lipsum";
 import { black, emojiBuilder, scale, white } from "./ContextMenu";
 import type { MessageItem } from "./State";
+import type { SkParagraph } from "@shopify/react-native-skia";
+import type { SkImage } from "@shopify/react-native-skia";
 
 const paragraphStyle: SkTextStyle = {
 	fontSize: 18,
@@ -71,7 +73,7 @@ export const authorBuilder = Skia.ParagraphBuilder.Make(
 );
 
 export function loadImage(x = 400, y = 400) {
-	return loadData(`https://picsum.photos/${x}/${y}`, Skia.Image.MakeImageFromEncoded.bind(Skia.Image), console.log);
+	return loadData(`https://picsum.photos/${x}/${y}`, (data) => Skia.Image.MakeImageFromEncoded(data), console.log);
 }
 
 export function biasedRandomNumber() {
@@ -100,7 +102,7 @@ export function biasedRandomNumber() {
 
 let acc = 0;
 
-export function getRandomMessageRaw(i: number) {
+export function getRandomMessageData(i: number) {
 	authorBuilder.reset();
 
 	const date = new Date(Date.now() * Math.random());
@@ -123,7 +125,10 @@ export function getRandomMessageRaw(i: number) {
 	acc += len;
 
 	function getReactions() {
-		const reactions = [] as any;
+		const reactions = [] as {
+			emoji: string;
+			count: string;
+		}[];
 		const list = ["👍", "❤️", "😂", "😮", "😢", "😡", "🙏", "💯"];
 
 		while (Math.random() > 0.8) {
@@ -154,75 +159,81 @@ export function getRandomMessageRaw(i: number) {
 	};
 }
 
-export function getRandomMessage({ my_user_id, i }: { my_user_id: string; i: number }) {
+export function getRandomMessage({
+	my_user_id,
+	i,
+	msg,
+	attachment,
+	avatar1,
+	avatar2,
+}: {
+	my_user_id: string;
+	i: number;
+	msg?: ReturnType<typeof getRandomMessageData>;
+	attachment?: SkImage;
+	avatar1?: SkImage;
+	avatar2?: SkImage;
+}) {
 	authorBuilder.reset();
 
-	const date = new Date(Date.now() * Math.random());
-	const hours = date.getHours().toString().padStart(2, "0");
-	const minutes = date.getMinutes().toString().padStart(2, "0");
-	const dateString = `${hours}:${minutes}`;
+	if (!msg) msg = getRandomMessageData(i);
 
-	const random = Math.random();
-	// const user_id: string = "1";
-	const user_id = random < 0.33 ? "1" : random < 0.66 ? "2" : "3";
-	// const user_id: any = random < 0.5 ? "2" : "3";
-
-	const authorName = user_id === "1" ? "Me" : user_id === "2" ? "John" : "Jane";
+	const user_id = msg.user_id;
 
 	let len = biasedRandomNumber();
 	// let len = 20;
-	let text: string | undefined = `${i}${lipsum.slice(acc % lipsum.length, (acc % lipsum.length) + len).trim()} `;
+	let text = msg.text;
 	// let text: string | undefined = `${i}${lipsum.slice(0, len).trim()}`;
 	// lipsum = lipsum.slice(i * 3);
 	acc += len;
 	const author = authorBuilder
-		.addText(authorName)
+		.addText(msg.author)
 		.pushStyle(dateStyle)
-		.addText(" " + dateString)
+		.addText(" " + msg.dateString)
 		.build();
 
 	const textBuilder = user_id === my_user_id ? textMeBuilder : textRecipientBuilder;
 	textBuilder.reset();
 
-	function getReactions() {
-		const reactions = [] as any;
-		const list = ["👍", "❤️", "😂", "😮", "😢", "😡", "🙏", "💯"];
+	const reactions = [] as {
+		emoji: string;
+		count: string;
+		width: number;
+		paragraph: SkParagraph;
+	}[];
 
-		while (Math.random() > 0.8) {
-			const emoji = list[Math.floor(Math.random() * list.length)]!;
-			const count = Math.floor(Math.random() * 11 + 1).toString();
+	for (const reaction of msg.reactions) {
+		emojiBuilder.reset();
+		const paragraph = emojiBuilder
+			.pushStyle({ fontSize: 15, color: black })
+			.addText(reaction.emoji)
+			.pushStyle({ fontSize: 14, color: black })
+			.addText(" " + reaction.count)
+			.build();
+		paragraph.layout(40);
 
-			emojiBuilder.reset();
-			const paragraph = emojiBuilder
-				.pushStyle({ fontSize: 15, color: black })
-				.addText(emoji)
-				.pushStyle({ fontSize: 14, color: black })
-				.addText(" " + count)
-				.build();
-			paragraph.layout(40);
-
-			reactions.push({
-				emoji,
-				width: paragraph.getMaxIntrinsicWidth(),
-				paragraph,
-				count,
-			});
-		}
-		return reactions;
+		reactions.push({
+			...reaction,
+			width: paragraph.getMaxIntrinsicWidth(),
+			paragraph,
+		});
 	}
 
-	const attachments = Math.random() < 0.1 ? [null] : [];
-	if (attachments.length && Math.random() < 0.5) text = undefined;
-	// const attachments = [] as any[];
+	if (attachment === undefined) attachment = null;
 
-	let avatar = user_id === "1" ? null : user_id === "2" ? null : null;
+	const attachments = Math.random() < 0.1 ? [attachment] : [];
+	if (attachments.length && Math.random() < 0.5) text = undefined;
+	if (avatar1 === undefined) avatar1 = null;
+	if (avatar2 === undefined) avatar2 = null;
+
+	let avatar = user_id === "1" ? null : user_id === "2" ? avatar2 : avatar1;
 
 	return {
 		text: text ? textBuilder.addText(text).build() : undefined,
 		test: text,
 		author,
 		user_id,
-		reactions: getReactions(),
+		reactions,
 		attachments,
 		avatar,
 		// id: Math.random().toString(),

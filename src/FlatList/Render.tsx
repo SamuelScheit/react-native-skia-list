@@ -13,8 +13,10 @@ export type SkiaFlatListElementProps<T, A> = {
 
 /** */
 export function SkiaFlatList<T, A>(props: SkiaFlatListElementProps<T, A>) {
-	const { list, ...p } = props;
-	const state = list || useSkiaFlatList(p);
+	var { list, ...p } = props;
+	if (!list) {
+		list = useSkiaFlatList(p) as any;
+	}
 
-	return <SkiaScrollView {...p} list={state} />;
+	return <SkiaScrollView {...p} list={list} />;
 }

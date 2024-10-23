@@ -6,21 +6,28 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { MessageListProps } from "../src/MessageList/Render";
 import { MessageList } from "../src/MessageList";
 import { SharedText } from "../src/Util/SharedText";
-import { useLayoutEffect } from "react";
-import { LogBox, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useLayoutEffect, useRef } from "react";
+import { Button, LogBox, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
+import Svg, { Circle, Rect } from "react-native-svg";
+import { FluentArrowUp24Filled } from "../assets/ArrowUp";
+import type { SkImage } from "@shopify/react-native-skia";
 
 const userAvatarPromise1 = loadData(
 	`https://avatar.iran.liara.run/public`,
-	Skia.Image.MakeImageFromEncoded.bind(Skia.Image),
+	(data) => Skia.Image.MakeImageFromEncoded(data),
 	console.log
 );
 const userAvatarPromise2 = loadData(
 	`https://avatar.iran.liara.run/public`,
-	Skia.Image.MakeImageFromEncoded.bind(Skia.Image),
+	(data) => Skia.Image.MakeImageFromEncoded(data),
 	console.log
 );
 const attachmentImagePromise = loadImage(400, 400);
+
+let attachment: SkImage | undefined = undefined;
+let avatar1: SkImage | undefined = undefined;
+let avatar2: SkImage | undefined = undefined;
 
 export default function SkiaMessageList() {
 	const my_user_id = "1";
@@ -41,8 +48,10 @@ export default function SkiaMessageList() {
 			}),
 	};
 	const list = useMessageListState(props);
-	const { unmountElement, data, redrawItems, renderTime, scrollToIndex } = list;
-	const text = useSharedValue<any>("");
+	const { unmountElement, data, redrawItems, renderTime, scrollToIndex, insertAt } = list;
+	const lastText = useRef("");
+	const inputRef = useRef<TextInput>(null);
+	const renderText = useSharedValue<any>("");
 	const keyboardHeight = useSharedValue(0);
 	const keyboardProgress = useSharedValue(0);
 
@@ -50,18 +59,15 @@ export default function SkiaMessageList() {
 		{
 			onStart: () => {
 				"worklet";
-				// console.log("onStart", e);
 			},
 			onMove: (e) => {
 				"worklet";
-				// console.log("onMove", e);
 				keyboardHeight.value = -e.height;
 
 				keyboardProgress.value = e.progress;
 			},
 			onInteractive: (e) => {
 				"worklet";
-				// console.log("onInteractive", e);
 				keyboardHeight.value = -e.height;
 				keyboardProgress.value = e.progress;
 			},
@@ -72,6 +78,7 @@ export default function SkiaMessageList() {
 		},
 		[]
 	);
+
 	const inputStyle = useAnimatedStyle(() => {
 		const paddingBottom = keyboardProgress.value * safeArea.bottom;
 		return {
@@ -85,6 +92,7 @@ export default function SkiaMessageList() {
 	});
 
 	userAvatarPromise2.then((img) => {
+		avatar2 = img;
 		runOnUI(() => {
 			data.value.forEach((item) => {
 				if (item.user_id === "2") {
@@ -97,6 +105,7 @@ export default function SkiaMessageList() {
 	});
 
 	attachmentImagePromise.then((img) => {
+		attachment = img;
 		runOnUI(() => {
 			data.value.forEach((item) => {
 				item.attachments = item.attachments.map(() => img);
@@ -107,6 +116,7 @@ export default function SkiaMessageList() {
 	});
 
 	userAvatarPromise1.then((img) => {
+		avatar1 = img;
 		runOnUI(() => {
 			data.value.forEach((item) => {
 				if (item.user_id === "3") {
@@ -131,7 +141,7 @@ export default function SkiaMessageList() {
 	useLayoutEffect(() => {
 		runOnUI(() => {
 			renderTime.addListener(1, (value) => {
-				text.value = `Render time: ${value.toFixed(2)}ms`;
+				renderText.value = `Render time: ${value.toFixed(2)}ms`;
 			});
 		})();
 
@@ -143,7 +153,7 @@ export default function SkiaMessageList() {
 	return (
 		<View style={{ flex: 1 }}>
 			<StatusBar hidden={true} />
-			<MessageList {...props} list={list} inverted style={{ flex: 1 }} />
+			<MessageList keyboardDismissMode="interactive" {...props} list={list} inverted style={{ flex: 1 }} />
 
 			<View
 				style={{
@@ -185,14 +195,24 @@ export default function SkiaMessageList() {
 						borderRadius: 10,
 					}}
 				>
-					<SharedText shared={text} />
+					<SharedText shared={renderText} />
 				</View>
 			</View>
 
 			<Animated.View
-				style={[{ zIndex: 10, backgroundColor: "white", paddingBottom: safeArea.bottom }, inputStyle]}
+				style={[
+					{
+						zIndex: 10,
+						backgroundColor: "white",
+						paddingBottom: Math.max(safeArea.bottom, 5),
+						flexDirection: "row",
+						paddingRight: 10,
+					},
+					inputStyle,
+				]}
 			>
 				<TextInput
+					ref={inputRef}
 					multiline
 					placeholder="Message"
 					style={[
@@ -200,13 +220,55 @@ export default function SkiaMessageList() {
 							paddingLeft: 62,
 							padding: 10,
 							fontSize: 20,
+							flex: 1,
 						},
 					]}
 					inputAccessoryViewID="1"
+					onChangeText={(text) => {
+						lastText.current = text;
+					}}
 				/>
+
+				<TouchableOpacity
+					style={{
+						backgroundColor: "#f7f7f7",
+						borderRadius: 20,
+						padding: 8,
+						aspectRatio: 1,
+						justifyContent: "center",
+						alignItems: "center",
+						flex: 0,
+					}}
+					onPress={() => {
+						inputRef.current?.clear();
+						const id = data.value.length;
+
+						runOnUI(insertAt)(
+							getRandomMessage({
+								my_user_id,
+								i: id,
+								attachment,
+								avatar1,
+								avatar2,
+								msg: lastText.current
+									? {
+											user_id: my_user_id,
+											attachments: [],
+											author: "Me",
+											dateString: new Date().toISOString(),
+											id: id.toString(),
+											reactions: [],
+											text: lastText.current,
+										}
+									: undefined,
+							}),
+							0
+						);
+					}}
+				>
+					<FluentArrowUp24Filled width={24} height={24} />
+				</TouchableOpacity>
 			</Animated.View>
 		</View>
 	);
 }
-
-LogBox.ignoreAllLogs(true);

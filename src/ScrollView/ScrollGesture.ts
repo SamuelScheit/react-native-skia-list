@@ -1,4 +1,11 @@
-import { cancelAnimation, clamp, makeMutable, withSpring, type SharedValue } from "react-native-reanimated";
+import {
+	cancelAnimation,
+	clamp,
+	makeMutable,
+	useSharedValue,
+	withSpring,
+	type SharedValue,
+} from "react-native-reanimated";
 import { withDecay } from "../Util/Decay";
 import { Gesture } from "react-native-gesture-handler";
 import type {
@@ -41,10 +48,6 @@ export type ScrollGestureInitalState = {
 	 */
 	scrolling: SharedValue<boolean>;
 	/**
-	 * Shared value that indicates if the view is currently being pressed.
-	 */
-	pressing: SharedValue<boolean>;
-	/**
 	 * Shared value to disable scrolling.
 	 */
 	scrollingDisabled: SharedValue<boolean>;
@@ -65,7 +68,6 @@ const getDefaultState = (): ScrollGestureInitalState => ({
 	offsetY: makeMutable(0) as SharedValue<number>,
 	maxHeight: makeMutable(1) as SharedValue<number>,
 	scrolling: makeMutable(false) as SharedValue<boolean>,
-	pressing: makeMutable(false) as SharedValue<boolean>,
 	scrollingDisabled: makeMutable(false) as SharedValue<boolean>,
 	bounces: true,
 	decelerationRate: 0.998,
@@ -191,7 +193,6 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 		startY,
 		offsetY,
 		maxHeight,
-		pressing,
 		scrollingDisabled,
 		layout,
 	} = state;
@@ -275,11 +276,8 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 			startedAnimation?.();
 			const [touch] = e.allTouches;
 			if (!touch) return manager.fail();
-			pressing.value = true;
+
 			if (touch.x <= 20) return manager.fail();
-		})
-		.onTouchesUp(() => {
-			pressing.value = false;
 		})
 		.onBegin(() => {
 			// begin touch down

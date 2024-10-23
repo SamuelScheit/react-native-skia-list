@@ -9037,6 +9037,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"css-tree@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "css-tree@npm:1.1.3"
+  dependencies:
+    mdn-data: "npm:2.0.14"
+    source-map: "npm:^0.6.1"
+  checksum: 10c0/499a507bfa39b8b2128f49736882c0dd636b0cd3370f2c69f4558ec86d269113286b7df469afc955de6a68b0dba00bc533e40022a73698081d600072d5d83c1c
+  languageName: node
+  linkType: hard
+
 "css-tree@npm:^2.3.1":
   version: 2.3.1
   resolution: "css-tree@npm:2.3.1"
@@ -15613,6 +15623,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mdn-data@npm:2.0.14":
+  version: 2.0.14
+  resolution: "mdn-data@npm:2.0.14"
+  checksum: 10c0/67241f8708c1e665a061d2b042d2d243366e93e5bf1f917693007f6d55111588b952dcbfd3ea9c2d0969fb754aad81b30fdcfdcc24546495fc3b24336b28d4bd
+  languageName: node
+  linkType: hard
+
 "mdn-data@npm:2.0.28":
   version: 2.0.28
   resolution: "mdn-data@npm:2.0.28"
@@ -19326,8 +19343,10 @@ __metadata:
     react-native-reanimated: "npm:^3.15.5"
     react-native-safe-area-context: "npm:^4.11.0"
     react-native-screens: "npm:3.31.1"
+    react-native-svg: "npm:15.2.0"
     react-native-url-polyfill: "npm:^2.0.0"
     react-native-web: "npm:~0.19.10"
+    react-native-wgpu: "npm:^0.1.13"
     zeego: "npm:^2.0.1"
   languageName: unknown
   linkType: soft
@@ -19371,6 +19390,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"react-native-svg@npm:15.2.0":
+  version: 15.2.0
+  resolution: "react-native-svg@npm:15.2.0"
+  dependencies:
+    css-select: "npm:^5.1.0"
+    css-tree: "npm:^1.1.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/9b979dbf101ee3131c606c7960f1bc8c49b3f0acb42b394e9b89f33b853e20765d93844178ad545747e73b2ffd5654d6e486daf86987865983913c46d31bb2c8
+  languageName: node
+  linkType: hard
+
 "react-native-url-polyfill@npm:^2.0.0":
   version: 2.0.0
   resolution: "react-native-url-polyfill@npm:2.0.0"
@@ -19398,6 +19430,16 @@ __metadata:
     react: ^18.0.0
     react-dom: ^18.0.0
   checksum: 10c0/55e82a6f656843b2b4f6e4c4006a82ae8feed548e880e9fa3c2623da415d3abd9399c91c5360b71d5f24f47c5cbe30872a3ad785fa1a32cf152383d595f8ebd5
+  languageName: node
+  linkType: hard
+
+"react-native-wgpu@npm:^0.1.13":
+  version: 0.1.13
+  resolution: "react-native-wgpu@npm:0.1.13"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/28d0ca7314a72b52707e2ad11bb6409fcd7c00d3c3bbf27f0e84d5a5eb48c4dbd88bcf24b29cef2e178b7feb4afb857e139dab5dbeddbbf4f951893b4da726be
   languageName: node
   linkType: hard
 

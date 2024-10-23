@@ -31,6 +31,10 @@ export type InitialScrollViewState = {
 	invertedFactor: number;
 	startedAnimation: () => void;
 	finishedAnimation: () => void;
+	/**
+	 * Shared value that indicates if the view is currently being pressed.
+	 */
+	pressing: SharedValue<boolean>;
 };
 
 /**
@@ -74,6 +78,7 @@ export type SkiaScrollViewProps<A = {}> = A &
 
 export type SkiaScrollViewState = InitialScrollViewState &
 	Omit<ScrollGestureState, "gesture"> & {
+		tapGesture: GestureType;
 		scrollGesture: GestureType | ComposedGesture;
 		scrollbarGesture: GestureType | ComposedGesture;
 		Scrollbar: () => JSX.Element;
@@ -116,7 +121,6 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			onMove: (e) => {
 				"worklet";
 				keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
-				// console.log("onMove", e);
 			},
 			onInteractive: (e) => {
 				"worklet";
@@ -134,7 +138,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 		},
 		[]
 	);
-	const layout = useSharedValue({ width: 0, height: 0 });
+
 	const offsetY = props.automaticallyAdjustKeyboardInsets !== false ? keyboardHeight : makeMutable(0);
 
 	const [list] = useState(() => {
@@ -143,10 +147,13 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 		let animations = makeMutable(0);
 		const mode = makeMutable("default" as "continuous" | "default");
 		const root = props.root?.value || SkiaDomApi.GroupNode({});
+		const pressing = makeMutable(false);
+		const layout = makeMutable({ width: 0, height: 0 });
 
 		const state = {
 			_nativeId,
 			mode,
+			pressing,
 			root: props.root || makeMutable(root),
 			content: makeMutable(SkiaDomApi.GroupNode({})),
 			matrix: makeMutable(Skia.Matrix().translate(0, 0).get()),
@@ -155,8 +162,8 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 
 				SkiaViewApi.requestRedraw(_nativeId);
 			},
-			...props,
 			layout,
+			...props,
 			safeArea: makeMutable({
 				top: props.safeArea?.top || 0,
 				bottom: props.safeArea?.bottom || 0,
@@ -202,8 +209,23 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 		const scrollbarRef = { current: scrollbar.gesture };
 		scrollbar.gesture.withRef(scrollbarRef);
 
+		const tapGestureRef = { current: null };
+		const tapGesture = Gesture.Manual()
+			.onTouchesDown(() => {
+				pressing.value = true;
+			})
+			.onTouchesUp(() => {
+				pressing.value = false;
+			})
+			.onTouchesCancelled(() => {
+				pressing.value = false;
+			})
+			.withRef(tapGestureRef);
+
 		const customGesture =
-			props.customGesture || (({ scrollbar, gesture }) => Gesture.Exclusive(scrollbar.gesture, gesture));
+			props.customGesture ||
+			(({ scrollbar, gesture }) =>
+				Gesture.Simultaneous(tapGesture, Gesture.Exclusive(scrollbar.gesture, gesture)));
 
 		const gesture = customGesture({ scrollbar, ...scrollState, ...state } as any);
 
@@ -237,20 +259,21 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			gesture,
 			scrollGesture: scrollState.gesture,
 			scrollbarGesture: scrollbar.gesture,
-			simultaneousHandlers: [scrollGestureRef, scrollbarRef],
+			tapGesture,
+			simultaneousHandlers: [tapGestureRef, scrollGestureRef, scrollbarRef],
 		};
 	});
 
-	useLayoutEffect(() => {
-		const { scrollY, offsetY } = list;
-		return runOnUI(() => {
-			"worklet";
+	// useLayoutEffect(() => {
+	// 	const { scrollY, offsetY } = list;
+	// 	return runOnUI(() => {
+	// 		"worklet";
 
-			scrollY.removeListener(1);
-			layout.removeListener(1);
-			offsetY.removeListener(1);
-		});
-	}, []);
+	// 		scrollY.removeListener(1);
+	// 		layout.removeListener(1);
+	// 		offsetY.removeListener(1);
+	// 	});
+	// }, []);
 
 	if (props.height) {
 		const { safeArea, maxHeight, layout } = list;

@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import { Text, TouchableOpacity, View } from "react-native";
-import { getRandomMessageRaw } from "../src/MessageList/randomMessage";
+import { getRandomMessageData } from "../src/MessageList/randomMessage";
 import { Profiler, useRef } from "react";
 import { SharedText } from "../src/Util/SharedText";
 import { useSharedValue } from "react-native-reanimated";
@@ -10,7 +10,7 @@ export default function FlashListTest() {
 	const ref = useRef<FlashList<any>>();
 	const time = useRef(0);
 	const text = useSharedValue<any>("");
-	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageRaw(i));
+	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageData(i));
 
 	async function scrollToEnd(index = 0) {
 		"worklet";

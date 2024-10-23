@@ -188,8 +188,8 @@ export function getContextMenu(state: ContextMenuProps) {
 	let startScrollY = makeMutable(0);
 	let contextMenuOpen = makeMutable(false);
 
-	let actionLastSelected = useSharedValue(null as number | null);
-	let emojiLastSelected = useSharedValue(null as number | null);
+	let actionLastSelected = makeMutable(null as number | null);
+	let emojiLastSelected = makeMutable(null as number | null);
 
 	var backdropFilter = makeMutable(null as RenderNode<ChildrenProps> | null);
 	var item = makeMutable(null as RenderNode<GroupProps> | null);

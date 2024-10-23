@@ -1,5 +1,10 @@
 import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "../ScrollView";
+import {
+	useSkiaScrollView,
+	type SkiaScrollViewElementProps,
+	type SkiaScrollViewProps,
+	type SkiaScrollViewState,
+} from "../ScrollView";
 import { useEffect, useState } from "react";
 import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
 import { Skia } from "@shopify/react-native-skia";
@@ -13,14 +18,15 @@ export interface Dimensions {
 
 /** */
 export type SkiaFlatListProps<T = any, A = {}> = A &
-	SkiaScrollViewProps & {
+	SkiaScrollViewElementProps & {
 		initialData?: () => T[];
+		maintainVisibleContentPosition?: boolean;
 		/**
 		 * Rough estimate of the height of each item in the list.
 		 * Used to calculate the maximum scroll height.
-		 * Not required because max height will be calculated if user reaches the end of the list.
+		 * Set a higher value than average to ensure the user can easily scroll to the end of the list.
+		 * Default is 100.
 		 *  */
-		maintainVisibleContentPosition?: boolean;
 		estimatedItemHeight?: number;
 		keyExtractor?: (item: T, index: number) => string;
 		renderItem?: (element: RenderNode<GroupProps> | undefined, item: T, index: number, state: any) => number;
@@ -253,7 +259,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			return rowY - addThreshold > scrollY.value + layout.value.height;
 		}
 
-		function unmountElement(index: number | undefined, item: T | undefined) {
+		function unmountElement(index: number | undefined, item?: T | undefined) {
 			"worklet";
 			if (item === undefined && index !== undefined) item = data.value[index];
 			if (!item) return;
@@ -306,6 +312,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			const dataValue = data.value;
 			const elementsValue = elements.value;
 			const heightsValue = heights.value;
+			const rowOffsetsValue = rowOffsets.value;
 
 			// const removeThreshold = 1000; // only remove elements that are 2 screens away
 
@@ -399,15 +406,33 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 					firstWasSet = true;
 				}
 
-				if (!element || itemHeight === undefined) {
-					const previousHeight = itemHeight;
-					itemHeight = mountElement(rowY, item, index);
+				const previousHeight = itemHeight;
 
-					if (previousHeight === undefined) {
-						const diff = itemHeight - estimatedItemHeight;
-						maxHeight.value += diff;
-					}
+				if (!element || itemHeight === undefined) {
+					itemHeight = mountElement(rowY, item, index);
+					element = elementsValue[id];
 					// console.log("adding", id, rowY);
+				}
+
+				let actualY = rowY;
+				if (invertedFactor === -1) actualY = rowY * invertedFactor - itemHeight;
+
+				if (previousHeight === undefined) {
+					// element mounted first time
+					const diff = itemHeight - estimatedItemHeight;
+					maxHeight.value += diff;
+				} else if (previousHeight !== itemHeight) {
+					// heights changed
+				}
+
+				const previousRowY = rowOffsetsValue[id];
+
+				if (previousRowY !== actualY && previousRowY !== undefined) {
+					// element position changed
+					const translation = Skia.Matrix().translate(0, actualY).get();
+					element.setProp("matrix", translation);
+					rowOffsetsValue[id] = actualY;
+					console.log("position changed", id, actualY, previousRowY);
 				}
 
 				rowY += itemHeight;
@@ -458,28 +483,29 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 
 			// will recalculate the height of the previous and next elements and adjust the y position accordingly
 			if (index > 0) {
-				getItemsHeight([data.value[index - 1]!], index - 1);
+				unmountElement(index - 1);
+				// getItemsHeight([data.value[index - 1]!], index - 1);
 			}
 			if (index + newData.length < data.value.length) {
-				getItemsHeight([data.value[index + newData.length]!], index + newData.length);
+				unmountElement(index + newData.length);
+				// getItemsHeight([data.value[index + newData.length]!], index + newData.length);
 			}
 
 			let oldY = scrollY.value;
 
 			const height = getItemsHeight(newData, index);
-
 			if (!height) return;
+
+			console.log("insertAt", height);
 
 			if (firstRenderIndex.value >= index && maintainVisibleContentPosition) {
 				firstRenderIndex.value += newData.length;
 				firstRenderHeight.value += height;
 				const newY = oldY + height;
 				scrollY.value = newY;
-				scrollY.value = newY;
-				startY.value += height;
-
+				// startY.value += height;
 				// do not scroll to new item, if finger is down
-				console.log("scroll to item", pressing.value);
+				// console.log("scroll to item", pressing.value, newY, oldY);
 				if (animated && !pressing.value) {
 					scrollY.value = withTiming(oldY, { duration: 350 });
 				}

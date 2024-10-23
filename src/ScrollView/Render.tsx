@@ -86,9 +86,9 @@ export type SkiaScrollViewElementProps = {
 	debug?: boolean;
 	/**
 	 * Determines whether the keyboard gets dismissed in response to a drag.
-	 *   - 'none' (the default) drags do not dismiss the keyboard.
-	 *   - 'onDrag' the keyboard is dismissed when a drag begins.
-	 *   - 'interactive' the keyboard is dismissed interactively with the drag
+	 *   - `none` (the default) drags do not dismiss the keyboard.
+	 *   - `onDrag` the keyboard is dismissed when a drag begins.
+	 *   - `interactive` the keyboard is dismissed interactively with the drag
 	 *     and moves in synchrony with the touch; dragging upwards cancels the
 	 *     dismissal.
 	 */
@@ -96,13 +96,12 @@ export type SkiaScrollViewElementProps = {
 
 	/**
 	 * Determines when the keyboard should stay visible after a tap.
-	 * - 'never' (the default), tapping outside of the focused text input when the keyboard is up dismisses the keyboard. When this happens, children won't receive the tap.
-	 * - 'always', the keyboard will not dismiss automatically, and the scroll view will not catch taps, but children of the scroll view can catch taps.
-	 * - 'handled', the keyboard will not dismiss automatically when the tap was handled by a children, (or captured by an ancestor).
-	 * - false, deprecated, use 'never' instead
-	 * - true, deprecated, use 'always' instead
+	 * - `never` (the default), tapping outside of the focused text input when the keyboard is up dismisses the keyboard. When this happens, children won`t receive the tap.
+	 * - `always`, the keyboard will not dismiss automatically, and the scroll view will not catch taps, but children of the scroll view can catch taps.
+	 * - false, deprecated, use `never` instead
+	 * - true, deprecated, use `always` instead
 	 */
-	keyboardShouldPersistTaps?: boolean | "always" | "never" | "handled" | undefined;
+	keyboardShouldPersistTaps?: boolean | "always" | "never" | undefined;
 } & SkiaScrollViewProps;
 
 /**
@@ -147,7 +146,10 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	var { list, style, children, debug, fixedChildren, keyboardDismissMode, keyboardShouldPersistTaps, ...p } = props;
 	const ref = useRef<(React.Component<NativeProps, {}, any> & Readonly<NativeMethods>) | null>(null);
 	const scrollViewRef = useRef<InteractiveScrollViewRef>(null);
-	const state = list || useSkiaScrollView(p);
+	var state = list;
+	if (!state) {
+		state = useSkiaScrollView(p) as any;
+	}
 	const { _nativeId, gesture, layout, safeArea, maxHeight, content, root, Scrollbar, mode } = state;
 
 	useLayoutEffect(() => {

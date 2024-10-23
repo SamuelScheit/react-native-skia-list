@@ -12,11 +12,14 @@ const RenderMessageList = function RenderMessageList({
 	style?: ViewStyle;
 	list?: ReturnType<typeof useMessageListState>;
 }) {
-	list ||= useMessageListState(props);
+	if (!list) {
+		list = useMessageListState(props);
+	}
 
-	return <SkiaFlatList debug style={style || { flex: 1 }} list={list} />;
+	return <SkiaFlatList {...props} debug style={style || { flex: 1 }} list={list} />;
 };
 
-export const MessageList = memo(RenderMessageList, () => true);
+export const MessageList = RenderMessageList;
+// export const MessageList = memo(RenderMessageList, () => true);
 
 export type MessageListState = ReturnType<typeof useMessageListState>;

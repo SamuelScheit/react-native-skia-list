@@ -1,4 +1,4 @@
-import { runOnJS, runOnUI, useSharedValue } from "react-native-reanimated";
+import { makeMutable, runOnJS, runOnUI, useSharedValue } from "react-native-reanimated";
 import { useLayoutEffect, useState } from "react";
 import { interpolateClamp, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { Gesture } from "react-native-gesture-handler";
@@ -38,17 +38,17 @@ export function useMessageListState(props: MessageListProps) {
 	const avatars = useSharedValue({} as Record<string, RenderNode<ImageProps> | undefined>);
 	const contextMenuMessage = useSharedValue<TapResult<MessageItem> | undefined>(undefined);
 	const renderItem: any = getRenderMessageItem(props);
-	const root = useSharedValue(SkiaDomApi.GroupNode({}));
-	const swipePosition = useSharedValue(0);
-	const swipeItem = useSharedValue(undefined as string | undefined | number);
-
-	useState(() => {
-		root.value.addChild(
+	const [root] = useState(() => {
+		const el = SkiaDomApi.GroupNode({});
+		el.addChild(
 			SkiaDomApi.FillNode({
 				color: "white",
 			})
 		);
+		return makeMutable(el);
 	});
+	const swipePosition = useSharedValue(0);
+	const swipeItem = useSharedValue(undefined as string | undefined | number);
 
 	const list = useSkiaFlatList({
 		root,
@@ -95,9 +95,12 @@ export function useMessageListState(props: MessageListProps) {
 		const contextMenu = getContextMenu(list);
 		const contextMenuRef = { current: contextMenu.gesture };
 
-		list.gesture = Gesture.Race(
-			contextMenu.gesture,
-			Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture)
+		list.gesture = Gesture.Simultaneous(
+			list.tapGesture,
+			Gesture.Race(
+				contextMenu.gesture,
+				Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture)
+			)
 		);
 		list.simultaneousHandlers.push(swipeGestureRef, contextMenuRef);
 
@@ -113,6 +116,8 @@ export function useMessageListState(props: MessageListProps) {
 
 		return replyIconElement;
 	});
+
+	console.log("useMessageListState() useLayoutEffect()");
 
 	useLayoutEffect(() => {
 		runOnUI(() => {
