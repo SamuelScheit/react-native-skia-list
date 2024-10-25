@@ -133,56 +133,54 @@ export type SkiaScrollViewState = InitialScrollViewState &
  * ```
  */
 export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any): SkiaScrollViewState {
-	// const keyboardHeight = useSharedValue(0);
-	// const scrollingInteractive = useSharedValue(false);
-	// const scrollingDisabled = useSharedValue(false);
-	// const scrollY = useSharedValue(0);
-	// const startY = useSharedValue(0);
-	// const safeAreaBottom = props.safeArea?.bottom || 0;
+	const keyboardHeight = useSharedValue(0);
+	const scrollingInteractive = useSharedValue(false);
+	const scrollingDisabled = useSharedValue(false);
+	const scrollY = useSharedValue(0);
+	const startY = useSharedValue(0);
+	const safeAreaBottom = props.safeArea?.bottom || 0;
 
-	// console.log("useSkiaScrollView", scrollY.value);
-
-	// useKeyboardHandler(
-	// 	{
-	// 		onStart: (e) => {
-	// 			"worklet";
-	// 			// will show
-	// 			if (e.progress === 1) {
-	// 				scrollingInteractive.value = false;
-	// 				scrollingDisabled.value = false;
-	// 			}
-	// 			// will hide
-	// 			if (e.duration !== 0 && e.progress === 0 && scrollingInteractive.value) {
-	// 				scrollingDisabled.value = false;
-	// 				cancelAnimation(scrollY);
-	// 				scrollY.value = withSpring(startY.value, {
-	// 					damping: 500,
-	// 					stiffness: 1000,
-	// 					mass: 3,
-	// 				});
-	// 				// on Interactive closed keyboard
-	// 			}
-	// 		},
-	// 		onMove: (e) => {
-	// 			"worklet";
-	// 			keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
-	// 		},
-	// 		onInteractive: (e) => {
-	// 			"worklet";
-	// 			keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
-	// 			if (e.progress !== 1) {
-	// 				scrollingInteractive.value = true;
-	// 				if (!scrollingDisabled.value) {
-	// 					scrollingDisabled.value = true;
-	// 				}
-	// 			}
-	// 		},
-	// 		onEnd: () => {
-	// 			"worklet";
-	// 		},
-	// 	},
-	// 	[]
-	// );
+	useKeyboardHandler(
+		{
+			onStart: (e) => {
+				"worklet";
+				// will show
+				if (e.progress === 1) {
+					scrollingInteractive.value = false;
+					scrollingDisabled.value = false;
+				}
+				// will hide
+				if (e.duration !== 0 && e.progress === 0 && scrollingInteractive.value) {
+					scrollingDisabled.value = false;
+					cancelAnimation(scrollY);
+					scrollY.value = withSpring(startY.value, {
+						damping: 500,
+						stiffness: 1000,
+						mass: 3,
+					});
+					// on Interactive closed keyboard
+				}
+			},
+			onMove: (e) => {
+				"worklet";
+				keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
+			},
+			onInteractive: (e) => {
+				"worklet";
+				keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
+				if (e.progress !== 1) {
+					scrollingInteractive.value = true;
+					if (!scrollingDisabled.value) {
+						scrollingDisabled.value = true;
+					}
+				}
+			},
+			onEnd: () => {
+				"worklet";
+			},
+		},
+		[]
+	);
 
 	const offsetY = makeMutable(0);
 

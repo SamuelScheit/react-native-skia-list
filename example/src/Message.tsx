@@ -1,13 +1,48 @@
-import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, { clamp, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { Gesture, GestureDetector, State } from "react-native-gesture-handler";
 import { Image } from "expo-image";
 import * as ContextMenu from "zeego/context-menu";
 import { Text, TouchableOpacity, View } from "react-native";
 import { memo } from "react";
 
 function RenderMessage({ item }: { item: any }) {
-	const gesture = Gesture.LongPress();
 	const swipePosition = useSharedValue(0);
+	const startY = useSharedValue(0);
+	const startX = useSharedValue(0);
+	const gesture = Gesture.Pan()
+		.manualActivation(true)
+		.onTouchesDown((event, state) => {
+			const [touch] = event.changedTouches;
+			if (!touch) return;
+
+			startX.value = touch.x;
+			startY.value = touch.y;
+		})
+		.onTouchesMove((event, state) => {
+			if (event.state === State.FAILED) return;
+			if (event.state === State.ACTIVE) return;
+
+			const [touch] = event.changedTouches;
+			if (!touch) return console.error("No touch");
+
+			const diffX = Math.abs(touch.x - startX.value);
+			const diffY = Math.abs(touch.y - startY.value);
+
+			console.log({ diffX, diffY });
+
+			if (diffY > 10) {
+				state.fail();
+			} else if (diffX > 10) {
+				state.activate();
+			}
+		})
+		.onChange((event) => {
+			swipePosition.value = clamp(event.translationX, -100, 0);
+		})
+		.onEnd(() => {
+			swipePosition.value = withTiming(0);
+		});
+
 	const style = useAnimatedStyle(() => {
 		return {
 			transform: [

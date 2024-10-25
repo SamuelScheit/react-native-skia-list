@@ -8,7 +8,7 @@ export default function FlatList() {
 	const safeArea = useSafeAreaInsets();
 
 	const blue = Skia.Paint();
-	blue.setColor(Skia.Color("rgb(0, 96, 162)"));
+	blue.setColor(Skia.Color("rgb(124, 165, 230)"));
 
 	const white = Skia.Color("#fff");
 
@@ -23,7 +23,7 @@ export default function FlatList() {
 	}, []);
 
 	const initialData = useCallback(() => {
-		return Array.from({ length: 100 }, (_, i) => {
+		return Array.from({ length: 10000 }, (_, i) => {
 			paragraphBuilder.reset();
 
 			return {
@@ -44,15 +44,20 @@ export default function FlatList() {
 	const rectMargin = 10;
 
 	const list = useSkiaFlatList({
-		safeArea,
+		safeArea: {
+			bottom: safeArea.bottom,
+			top: safeArea.top,
+			left: 15,
+			right: 15,
+		},
 		keyExtractor,
 		initialData,
-		estimatedItemHeight: 100,
+		estimatedItemHeight: 58,
 		inverted: false,
 		renderItem: (item, _index, state, element) => {
 			"worklet";
 
-			const { width } = state.layout.value;
+			const width = state.layout.value.width - state.safeArea.value.left - state.safeArea.value.right;
 
 			let maxTextWidth = width - rectPadding * 2;
 
@@ -88,11 +93,6 @@ export default function FlatList() {
 			return itemHeight;
 		},
 	});
-
-	useEffect(() => {
-		console.log("resetData");
-		list.resetData(initialData());
-	}, [initialData]);
 
 	return <SkiaFlatList list={list} style={{ flex: 1 }} />;
 }

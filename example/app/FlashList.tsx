@@ -13,7 +13,6 @@ export default function FlashListTest() {
 	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageData(i));
 
 	async function scrollToEnd(index = 0) {
-
 		if (index >= data.length) return;
 
 		ref.current?.scrollToIndex({ index, animated: false });
@@ -26,8 +25,8 @@ export default function FlashListTest() {
 			<Profiler
 				id={"list"}
 				onRender={(_id, _phase, actualDuration) => {
-					time.current += actualDuration;
-					text.value = `Total Render time: ${time.current.toFixed(2)}ms`;
+					// time.current += actualDuration;
+					// text.value = `Total Render time: ${time.current.toFixed(2)}ms`;
 				}}
 			>
 				<FlashList
@@ -41,7 +40,7 @@ export default function FlashListTest() {
 					}}
 				/>
 			</Profiler>
-			<View
+			{/* <View
 				style={{
 					position: "absolute",
 					top: 40,
@@ -83,7 +82,7 @@ export default function FlashListTest() {
 				>
 					<SharedText shared={text} />
 				</View>
-			</View>
+			</View> */}
 		</>
 	);
 }

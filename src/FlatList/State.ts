@@ -398,7 +398,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			"worklet";
 
 			let offset = rowY;
-			const translation = Skia.Matrix().translate(0, rowY).get();
+			const translation = Skia.Matrix().translate(safeArea.value.left, rowY).get();
 			const element = SkiaDomApi.GroupNode({
 				matrix: translation,
 			});
@@ -430,16 +430,6 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			let start = performance.now();
 
 			const { width, height } = layout.value;
-
-			console.log(
-				"redraw",
-				width,
-				height,
-				renderMutex.value,
-				firstRenderHeight.value,
-				firstRenderIndex.value,
-				scrollY.value
-			);
 
 			if (width === 0 || height === 0) return;
 			if (renderMutex.value) return;

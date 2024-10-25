@@ -1,52 +1,80 @@
-import { Canvas as SkiaCanvas } from "@shopify/react-native-skia";
-import { useLayoutEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { Skia } from "@shopify/react-native-skia";
+import { SkiaViewNativeId } from "@shopify/react-native-skia/src/views/SkiaViewNativeId";
+import { useLayoutEffect } from "react";
+import { runOnUIImmediately } from "react-native-reanimated/src/threads";
+import { makeMutable, type SharedValue, useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { makeMutable, runOnUI, useSharedValue } from "react-native-reanimated";
-import type { Mutable } from "react-native-reanimated/lib/typescript/commonTypes";
-import { Canvas } from "react-native-wgpu";
+import SkiaPictureViewNativeComponent from "@shopify/react-native-skia/src/specs/SkiaPictureViewNativeComponent";
 
-declare global {
-	var index: number;
-}
+export default function TestSkiaPicture() {
+	const _nativeId = SkiaViewNativeId.current++;
+	// const recorderShared = useSharedValue<SkPictureRecorder>(Skia.PictureRecorder());
+	// const canvasShared = useSharedValue<SkCanvas>(recorderShared.value.beginRecording());
+	const startY = useSharedValue(0);
+	const startX = useSharedValue(0);
+	const y = useSharedValue(0);
+	const x = useSharedValue(0);
 
-globalThis.index ||= 0;
-
-globalThis.gcUI = () => {
-	console.log("run gcUI");
-	runOnUI(() => {
+	function onDraw(stopped: SharedValue<boolean>) {
 		"worklet";
 
-		console.log("gcUI");
-		// globalThis.gc?.();
-	})();
-};
+		if (stopped.value) return;
 
-export default function Test() {
-	const [state] = useState(() => {
-		const state = [] as Mutable<any>[];
-		for (let i = 0; i < 100_000; i++) {
-			state.push(makeMutable(0));
+		const recorder = Skia.PictureRecorder();
+		const canvas = recorder.beginRecording();
+
+		for (let i = 0; i < 20; i++) {
+			for (let j = 0; j < 20; j++) {
+				const paint = Skia.Paint();
+				paint.setColor(Skia.Color("red"));
+				canvas.drawCircle(x.value + i * 20, y.value + j * 20, 10, paint);
+			}
 		}
 
-		runOnUI(() => {
-			state.forEach((value) => {
-				value.addListener(1, () => {});
-			});
-		})();
+		const picture = recorder.finishRecordingAsPicture();
 
-		return state;
-	});
+		SkiaViewApi.setJsiProperty(_nativeId, "picture", picture);
+		SkiaViewApi.requestRedraw(_nativeId);
+
+		requestAnimationFrame(() => {
+			onDraw(stopped);
+		});
+	}
 
 	useLayoutEffect(() => {
-		return runOnUI(() => {
-			const start = Date.now();
-			state.forEach((value) => {
-				value.removeListener(1);
-			});
-			console.log(Date.now() - start);
-		});
+		const stopped = makeMutable(false);
+
+		runOnUIImmediately(onDraw)(stopped);
+
+		return () => {
+			stopped.value = true;
+		};
 	}, []);
 
-	return <View style={{ flex: 1, paddingLeft: 10 }}></View>;
+	const gesture = Gesture.Pan()
+		.onBegin((e) => {})
+		.onStart(() => {
+			startY.value = y.value;
+			startX.value = x.value;
+		})
+		.onChange((e) => {
+			y.value = startY.value + e.translationY;
+			x.value = startX.value + e.translationX;
+		})
+		.onEnd((e) => {
+			// end scroll
+		})
+		.onFinalize((g, success) => {});
+
+	return (
+		<GestureDetector gesture={gesture}>
+			<SkiaPictureViewNativeComponent
+				style={{ flex: 1 }}
+				collapsable={false}
+				nativeID={`${_nativeId}`}
+				mode={"default"}
+				debug
+			/>
+		</GestureDetector>
+	);
 }
