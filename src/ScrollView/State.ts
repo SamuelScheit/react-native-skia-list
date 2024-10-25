@@ -133,56 +133,58 @@ export type SkiaScrollViewState = InitialScrollViewState &
  * ```
  */
 export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any): SkiaScrollViewState {
-	const keyboardHeight = useSharedValue(0);
-	const scrollingInteractive = useSharedValue(false);
-	const scrollingDisabled = useSharedValue(false);
-	const scrollY = useSharedValue(0);
-	const startY = useSharedValue(0);
-	const safeAreaBottom = props.safeArea?.bottom || 0;
+	// const keyboardHeight = useSharedValue(0);
+	// const scrollingInteractive = useSharedValue(false);
+	// const scrollingDisabled = useSharedValue(false);
+	// const scrollY = useSharedValue(0);
+	// const startY = useSharedValue(0);
+	// const safeAreaBottom = props.safeArea?.bottom || 0;
 
-	useKeyboardHandler(
-		{
-			onStart: (e) => {
-				"worklet";
-				// will show
-				if (e.progress === 1) {
-					scrollingInteractive.value = false;
-					scrollingDisabled.value = false;
-				}
-				// will hide
-				if (e.duration !== 0 && e.progress === 0 && scrollingInteractive.value) {
-					scrollingDisabled.value = false;
-					cancelAnimation(scrollY);
-					scrollY.value = withSpring(startY.value, {
-						damping: 500,
-						stiffness: 1000,
-						mass: 3,
-					});
-					// on Interactive closed keyboard
-				}
-			},
-			onMove: (e) => {
-				"worklet";
-				keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
-			},
-			onInteractive: (e) => {
-				"worklet";
-				keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
-				if (e.progress !== 1) {
-					scrollingInteractive.value = true;
-					if (!scrollingDisabled.value) {
-						scrollingDisabled.value = true;
-					}
-				}
-			},
-			onEnd: () => {
-				"worklet";
-			},
-		},
-		[]
-	);
+	// console.log("useSkiaScrollView", scrollY.value);
 
-	const offsetY = props.automaticallyAdjustKeyboardInsets !== false ? keyboardHeight : makeMutable(0);
+	// useKeyboardHandler(
+	// 	{
+	// 		onStart: (e) => {
+	// 			"worklet";
+	// 			// will show
+	// 			if (e.progress === 1) {
+	// 				scrollingInteractive.value = false;
+	// 				scrollingDisabled.value = false;
+	// 			}
+	// 			// will hide
+	// 			if (e.duration !== 0 && e.progress === 0 && scrollingInteractive.value) {
+	// 				scrollingDisabled.value = false;
+	// 				cancelAnimation(scrollY);
+	// 				scrollY.value = withSpring(startY.value, {
+	// 					damping: 500,
+	// 					stiffness: 1000,
+	// 					mass: 3,
+	// 				});
+	// 				// on Interactive closed keyboard
+	// 			}
+	// 		},
+	// 		onMove: (e) => {
+	// 			"worklet";
+	// 			keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
+	// 		},
+	// 		onInteractive: (e) => {
+	// 			"worklet";
+	// 			keyboardHeight.value = -e.height + safeAreaBottom * e.progress;
+	// 			if (e.progress !== 1) {
+	// 				scrollingInteractive.value = true;
+	// 				if (!scrollingDisabled.value) {
+	// 					scrollingDisabled.value = true;
+	// 				}
+	// 			}
+	// 		},
+	// 		onEnd: () => {
+	// 			"worklet";
+	// 		},
+	// 	},
+	// 	[]
+	// );
+
+	const offsetY = makeMutable(0);
 
 	const [list] = useState(() => {
 		const _nativeId = SkiaViewNativeId.current++;
@@ -197,8 +199,6 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			_nativeId,
 			mode,
 			pressing,
-			root: props.root || makeMutable(root),
-			content: makeMutable(SkiaDomApi.GroupNode({})),
 			matrix: makeMutable(Skia.Matrix().translate(0, 0).get()),
 			redraw() {
 				"worklet";
@@ -207,6 +207,8 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			},
 			layout,
 			...props,
+			root: props.root || makeMutable(root),
+			content: props.content || makeMutable(SkiaDomApi.GroupNode({})),
 			safeArea: makeMutable({
 				top: props.safeArea?.top || 0,
 				bottom: props.safeArea?.bottom || 0,
@@ -240,9 +242,9 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			content: state.content,
 			layout,
 			offsetY,
-			scrollY,
-			startY,
-			scrollingDisabled,
+			// scrollY,
+			// startY,
+			// scrollingDisabled,
 		});
 		const scrollGestureRef = { current: scrollState.gesture };
 		scrollState.gesture.withRef(scrollGestureRef);
@@ -276,6 +278,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 
 		runOnUI(() => {
 			"worklet";
+			const { scrollY } = scrollState;
 			let height = invertedFactor === -1 ? layout.value.height - safeArea.value.bottom : safeArea.value.top;
 
 			layout.addListener(1, (value) => {
@@ -306,17 +309,6 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			simultaneousHandlers: [tapGestureRef, scrollGestureRef, scrollbarRef],
 		};
 	});
-
-	// useLayoutEffect(() => {
-	// 	const { scrollY, offsetY } = list;
-	// 	return runOnUI(() => {
-	// 		"worklet";
-
-	// 		scrollY.removeListener(1);
-	// 		layout.removeListener(1);
-	// 		offsetY.removeListener(1);
-	// 	});
-	// }, []);
 
 	if (props.height) {
 		const { safeArea, maxHeight, layout } = list;

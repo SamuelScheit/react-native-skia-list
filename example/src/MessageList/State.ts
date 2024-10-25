@@ -117,7 +117,7 @@ export function useMessageListState(props: MessageListProps) {
 		return replyIconElement;
 	});
 
-	useLayoutEffect(() => {
+	useState(() => {
 		runOnUI(() => {
 			"worklet";
 
@@ -152,15 +152,7 @@ export function useMessageListState(props: MessageListProps) {
 				);
 			});
 		})();
-
-		return runOnUI(() => {
-			"worklet";
-
-			scrollY.removeListener(4);
-			scrollY.removeListener(_nativeId);
-			swipePosition.removeListener(_nativeId);
-		});
-	}, []);
+	});
 
 	return list;
 }

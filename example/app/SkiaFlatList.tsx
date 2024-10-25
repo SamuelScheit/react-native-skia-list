@@ -46,7 +46,9 @@ export default function FlatList() {
 	const list = useSkiaFlatList({
 		safeArea,
 		keyExtractor,
-		inverted: true,
+		initialData,
+		estimatedItemHeight: 100,
+		inverted: false,
 		renderItem: (item, _index, state, element) => {
 			"worklet";
 

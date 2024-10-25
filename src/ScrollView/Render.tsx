@@ -155,7 +155,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	}
 	const { _nativeId, gesture, layout, safeArea, maxHeight, content, root, Scrollbar, mode } = state;
 
-	useLayoutEffect(() => {
+	useState(() => {
 		function setMode(value: string) {
 			ref.current?.setNativeProps({ mode: value });
 		}
@@ -165,11 +165,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 				runOnJS(setMode)(value);
 			});
 		})();
-
-		return runOnUI(() => {
-			mode.removeListener(1);
-		});
-	}, []);
+	});
 
 	const [fixedReconciler] = useState(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
@@ -215,7 +211,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 				}}
 				nativeID={`${_nativeId}`}
 				// mode={"continuous"}
-				mode={"default"}
+				mode={mode.value}
 				debug={debug}
 				style={style || { flex: 1 }}
 			/>

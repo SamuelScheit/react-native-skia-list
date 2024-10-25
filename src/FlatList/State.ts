@@ -405,7 +405,6 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			const id = keyExtractor(item, index);
 
 			let itemHeight = renderItem(item, index, shareableState, element);
-			if (!itemHeight) itemHeight = renderItem(item, index, shareableState);
 
 			if (invertedFactor === -1) {
 				offset = rowY * invertedFactor - itemHeight;
@@ -431,6 +430,17 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			let start = performance.now();
 
 			const { width, height } = layout.value;
+
+			console.log(
+				"redraw",
+				width,
+				height,
+				renderMutex.value,
+				firstRenderHeight.value,
+				firstRenderIndex.value,
+				scrollY.value
+			);
+
 			if (width === 0 || height === 0) return;
 			if (renderMutex.value) return;
 
@@ -583,7 +593,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 		function resetData(newData: T[] = []) {
 			"worklet";
 			data.value = newData;
-			maxHeight.value = 0;
+			maxHeight.value = estimatedItemHeight * newData.length + 1;
 			heights.value = {};
 			elements.value = {};
 			firstRenderIndex.value = 0;
@@ -591,9 +601,14 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			cancelAnimation(scrollY);
 			scrollY.value = 0;
 			startY.value = 0;
-			root.value.removeChild(content.value);
-			content.value = SkiaDomApi.GroupNode({});
-			root.value.addChild(content.value);
+			const rootNode = root.value;
+			const children = rootNode.children();
+			for (const child of children) {
+				rootNode.removeChild(child);
+			}
+			// root.value.removeChild(content.value);
+			// content.value = SkiaDomApi.GroupNode({});
+			// root.value.addChild(content.value);
 			redrawItems();
 		}
 
@@ -743,16 +758,6 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			scrollToItem: callOnUI(scrollToItem),
 		};
 	});
-
-	useEffect(() => {
-		const { scrollY, layout } = list;
-		return runOnUI(() => {
-			"worklet";
-
-			scrollY.removeListener(2);
-			layout.removeListener(2);
-		});
-	}, []);
 
 	return list as SkiaFlatListState<T, A>;
 }
