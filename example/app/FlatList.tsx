@@ -12,7 +12,6 @@ export default function FlatListTest() {
 	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageData(i));
 
 	async function scrollToEnd(index = 0) {
-		"worklet";
 
 		if (index >= data.length) return;
 

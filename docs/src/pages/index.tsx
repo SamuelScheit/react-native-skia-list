@@ -67,7 +67,7 @@ export default function Home(): JSX.Element {
 								</svg>
 								Bidirectional
 							</div>
-							<div>scrolling and updating</div>
+							<div>data updates</div>
 						</div>
 
 						<div id={styles.keyboard} className={styles.card}>

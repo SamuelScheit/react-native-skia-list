@@ -23,13 +23,6 @@ function Button(props: LinkProps) {
 }
 
 export default function App() {
-	runOnUI(() => {
-		console.log("reanimated", !!globalThis.gc);
-		globalThis.gc?.();
-	})();
-
-	globalThis.gc?.();
-
 	return (
 		<ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }}>
 			<Button href="/SkiaScrollView">SkiaScrollView</Button>

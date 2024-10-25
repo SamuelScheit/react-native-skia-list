@@ -21,27 +21,15 @@ const sidebars: SidebarsConfig = {
 		{
 			type: "doc",
 			id: "ScrollView/index",
-			label: "ScrollView",
+			label: "<SkiaScrollView />",
 		},
 		{
 			type: "doc",
 			id: "FlatList/index",
-			label: "FlatList",
+			label: "<SkiaFlatList />",
 		},
 	],
 
-	// But you can create a sidebar manually
-	/*
-  tutorialSidebar: [
-    'intro',
-    'hello',
-    {
-      type: 'category',
-      label: 'Tutorial',
-      items: ['tutorial-basics/create-a-document'],
-    },
-  ],
-   */
 };
 
 export default sidebars;

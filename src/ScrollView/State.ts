@@ -12,24 +12,59 @@ import { getScrollbar } from "./Scrollbar";
 import type { ComposedGesture, GestureType } from "react-native-gesture-handler";
 import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 
-interface EdgeInsets {
+export interface EdgeInsets {
 	top: number;
 	right: number;
 	bottom: number;
 	left: number;
 }
 
+/** */
 export type InitialScrollViewState = {
+	/** @hidden	 */
 	_nativeId: number;
+	/** @hidden	 */
 	mode: SharedValue<"continuous" | "default">;
+	/**
+	 * The root [group node](https://shopify.github.io/react-native-skia/docs/group) of the skia list view with a fixed position that contains the `content` group node
+	 *
+	 * You can transform the entire list by setting the `matrix` property.
+	 *
+	 * ```tsx
+	 * root.value.setProp("matrix", Skia.Matrix().skew(1, 0.5).get());
+	 * ```
+	 */
 	root: SharedValue<RenderNode<GroupProps>>;
+	/**
+	 * The content [group node](https://shopify.github.io/react-native-skia/docs/group) of the skia list view that contains the list items which are translated based on the scroll position.
+	 */
 	content: SharedValue<RenderNode<GroupProps>>;
+	/** @hidden	 */
 	layout: SharedValue<{ width: number; height: number }>;
+	/**
+	 * The Skia Matrix that translates the content node.
+	 *
+	 * - `matrix.value[0]` is the **X scale**.
+	 * - `matrix.value[4]` is the **Y scale**.
+	 * - `matrix.value[5]` is the **Y translation**. Use `scrollY` instead
+	 * - `matrix.value[2]` is the **X translation**. Use `safeArea.left` instead
+	 * - `matrix.value[1]` is the **X skew**.
+	 * - `matrix.value[3]` is the **Y skew**.
+	 */
 	matrix: SharedValue<number[]>;
+	/**
+	 * Call `redraw()` to request a redraw of the skia canvas, e.g. when adding a fixed element to the root node. \
+	 * When using FlatList use `redrawItems()` instead to redraw the list items. \
+	 * When animating a property use `startedAnimation()` and `finishedAnimation()` to efficiently rerender the list.
+	 */
 	redraw: () => void;
+	/** @hidden	 */
 	safeArea: SharedValue<EdgeInsets>;
+	/** @hidden	 */
 	invertedFactor: number;
+	/** @hidden	 */
 	startedAnimation: () => void;
+	/** @hidden	 */
 	finishedAnimation: () => void;
 	/**
 	 * Shared value that indicates if the view is currently being pressed.
@@ -87,7 +122,15 @@ export type SkiaScrollViewState = InitialScrollViewState &
 	};
 
 /**
+ * Use this hook to manage and access the state of SkiaScrollView.
  *
+ * ```tsx
+ * const state = useSkiaScrollView({ height: 1000 });
+ *
+ * state.content.value.addChild(SkiaDomApi.RectNode({ width: 100, height: 100, x: 0, y: 0 }));
+ *
+ * <SkiaScrollView list={state} style={{ flex: 1 }} />
+ * ```
  */
 export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any): SkiaScrollViewState {
 	const keyboardHeight = useSharedValue(0);

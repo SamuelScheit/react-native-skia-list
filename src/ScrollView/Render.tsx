@@ -11,18 +11,19 @@ import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, typ
 import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 
-/** */
+/**
+ */
 export type SkiaScrollViewElementProps = {
 	/**
-	 * Create your self managed list state using `useSkiaScrollView`:
+	 * Manage the list state yourself using `useSkiaScrollView`:
 	 *
 	 * ```tsx
-	 * const state = useSkiaScrollView({ height: 1000 });
+	 * const list = useSkiaScrollView({ height: 1000 });
 	 *
-	 * // do something with the state, e.g. skew the list content:
-	 * state.matrix.value[1] = 0.1;
+	 * // do something with the list, e.g. skew the list content:
+	 * list.matrix.value[1] = 0.1;
 	 *
-	 * <SkiaScrollView list={state} />
+	 * <SkiaScrollView list={list} />
 	 * ```
 	 */
 	list?: SkiaScrollViewState;
@@ -98,24 +99,25 @@ export type SkiaScrollViewElementProps = {
 	 * Determines when the keyboard should stay visible after a tap.
 	 * - `never` (the default), tapping outside of the focused text input when the keyboard is up dismisses the keyboard. When this happens, children won`t receive the tap.
 	 * - `always`, the keyboard will not dismiss automatically, and the scroll view will not catch taps, but children of the scroll view can catch taps.
-	 * - false, deprecated, use `never` instead
-	 * - true, deprecated, use `always` instead
+	 * - `false`, deprecated, use `never` instead
+	 * - `true`, deprecated, use `always` instead
 	 */
 	keyboardShouldPersistTaps?: boolean | "always" | "never" | undefined;
 } & SkiaScrollViewProps;
 
 /**
- * Use `SkiaScrollView` as a replacement for the React Native `ScrollView` component.
  *
- * :::note
- * It uses the Skia renderer to render the content so you can't use React Native components inside it.
- * :::
+ * Use `<SkiaScrollView />` as a replacement for the React Native `<ScrollView />` component.
  *
  * :::info
+ * It uses the Skia rendering engine to render the content so you can't use React Native components inside it.
+ * :::
+ *
+ * :::note
  * You must specify the `height` prop of [ScrollGestureProps](#scrollgestureprops) to make the list scrollable.
  * :::
  *
- * #### Example
+ * ### Example
  * ```tsx
  * const paint = Skia.Paint();
  * paint.setColor(Skia.Color("rgb(91, 128, 218)"));
@@ -129,10 +131,11 @@ export type SkiaScrollViewElementProps = {
  * </SkiaScrollView>
  * ```
  *
- * You can manage the list state yourself by using `useSkiaScrollView`: \
- * This is useful when you need to build custom behavior on top of the list, e.g. a sticky header, custom gestures/renderer.
+ * ### Example with `useSkiaScrollView`
  *
- * #### Example with `useSkiaScrollView`
+ * You can manage the list state yourself by using `useSkiaScrollView`: \
+ * This is useful when you need to build custom behavior on top of the list, e.g. custom gestures/renderer.
+ *
  * ```tsx
  * const state = useSkiaScrollView({ height: 1000 });
  * const content = content.value;

@@ -37,7 +37,7 @@ const replyIcon = replyIconFactory("#6b6c6f");
 export function useMessageListState(props: MessageListProps) {
 	const avatars = useSharedValue({} as Record<string, RenderNode<ImageProps> | undefined>);
 	const contextMenuMessage = useSharedValue<TapResult<MessageItem> | undefined>(undefined);
-	const renderItem: any = getRenderMessageItem(props);
+	const renderItem = getRenderMessageItem(props);
 	const [root] = useState(() => {
 		const el = SkiaDomApi.GroupNode({});
 		el.addChild(
@@ -116,8 +116,6 @@ export function useMessageListState(props: MessageListProps) {
 
 		return replyIconElement;
 	});
-
-	console.log("useMessageListState() useLayoutEffect()");
 
 	useLayoutEffect(() => {
 		runOnUI(() => {

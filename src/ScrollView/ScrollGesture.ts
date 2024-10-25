@@ -30,7 +30,6 @@ export type ScrollGestureInitalState = {
 	 */
 	scrollY: SharedValue<number>;
 	/**
-	 * @internal
 	 * Used internally to keep track of the start Y position when dragging.
 	 */
 	startY: SharedValue<number>;
@@ -175,8 +174,6 @@ export type ScrollGestureState = {
 } & ScrollGestureInitalState &
 	ScrollGestureProps;
 
-/**
- */
 export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState {
 	const state = getScrollGestureState(props);
 

@@ -1,53 +1,96 @@
 import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
 import { matchFont, Skia } from "@shopify/react-native-skia";
-import { SkiaFlatList } from "react-native-skia-list";
+import { SkiaFlatList, useSkiaFlatList } from "react-native-skia-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const paint = Skia.Paint();
-paint.setColor(Skia.Color("rgb(91, 128, 218)"));
-
-const white = Skia.Paint();
-white.setColor(Skia.Color("#fff"));
-
-const font = matchFont({ fontSize: 20, fontFamily: "Arial" });
+import { useCallback, useEffect, useMemo } from "react";
 
 export default function FlatList() {
 	const safeArea = useSafeAreaInsets();
 
-	return (
-		<SkiaFlatList
-			debug
-			safeArea={safeArea}
-			style={{ backgroundColor: "white", flex: 1 }}
-			initialData={() => Array.from({ length: 1000 }, (_, i) => i)}
-			renderItem={(element, item, _index, _state) => {
-				"worklet";
+	const blue = Skia.Paint();
+	blue.setColor(Skia.Color("rgb(0, 96, 162)"));
 
-				if (!element) return 100;
+	const white = Skia.Color("#fff");
 
-				element?.addChild(
-					SkiaDomApi.RectNode({
-						x: 0,
-						y: 0,
-						width: 130,
-						height: 80,
-						paint,
-					})
-				);
+	const paragraphBuilder = useMemo(() => {
+		return Skia.ParagraphBuilder.Make({
+			textStyle: {
+				fontSize: 24,
+				fontFamilies: ["Arial"],
+				color: Skia.Color("#fff"),
+			},
+		});
+	}, []);
 
-				element.addChild(
-					SkiaDomApi.TextNode({
-						text: `${item}`,
-						font,
-						x: 50,
-						y: 40,
-						paint: white,
-					})
-				);
+	const initialData = useCallback(() => {
+		return Array.from({ length: 100 }, (_, i) => {
+			paragraphBuilder.reset();
 
-				return 100;
-			}}
-			// fixedChildren={<Fill invertClip clip={{ x: 6, y: 5, width: 130, height: 17 }} color="white" />}
-		/>
-	);
+			return {
+				id: `${i}`,
+				text: paragraphBuilder.addText(`Item ${i}`).build(),
+			};
+		});
+	}, []);
+
+	type Entry = ReturnType<typeof initialData>[number];
+
+	const keyExtractor = useCallback((item: Entry) => {
+		"worklet";
+		return item.id;
+	}, []);
+
+	const rectPadding = 10;
+	const rectMargin = 10;
+
+	const list = useSkiaFlatList({
+		safeArea,
+		keyExtractor,
+		inverted: true,
+		renderItem: (item, _index, state, element) => {
+			"worklet";
+
+			const { width } = state.layout.value;
+
+			let maxTextWidth = width - rectPadding * 2;
+
+			item.text.layout(maxTextWidth);
+
+			const textHeight = item.text.getHeight();
+			const rectHeight = textHeight + rectPadding * 2;
+
+			const itemHeight = rectHeight + rectMargin;
+
+			if (!element) return itemHeight;
+
+			element.addChild(
+				SkiaDomApi.RectNode({
+					x: 0,
+					y: 0,
+					width,
+					height: rectHeight,
+					paint: blue,
+				})
+			);
+
+			element.addChild(
+				SkiaDomApi.ParagraphNode({
+					paragraph: item.text,
+					x: rectPadding,
+					y: rectPadding,
+					width: maxTextWidth,
+					color: white,
+				})
+			);
+
+			return itemHeight;
+		},
+	});
+
+	useEffect(() => {
+		console.log("resetData");
+		list.resetData(initialData());
+	}, [initialData]);
+
+	return <SkiaFlatList list={list} style={{ flex: 1 }} />;
 }

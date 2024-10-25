@@ -73,7 +73,6 @@ export default function SkiaMessageList() {
 			},
 			onEnd: (e) => {
 				"worklet";
-				console.log("onEnd", e);
 			},
 		},
 		[]
@@ -243,7 +242,7 @@ export default function SkiaMessageList() {
 						inputRef.current?.clear();
 						const id = data.value.length;
 
-						runOnUI(insertAt)(
+						insertAt(
 							getRandomMessage({
 								my_user_id,
 								i: id,

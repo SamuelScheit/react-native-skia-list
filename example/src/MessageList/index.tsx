@@ -2,7 +2,7 @@ import { useMessageListState } from "./State";
 import { memo } from "react";
 import type { ViewStyle } from "react-native";
 import type { MessageListProps } from "./Render";
-import { SkiaFlatList } from "react-native-skia-list";
+import { SkiaFlatList, type SkiaFlatListElementProps } from "react-native-skia-list";
 
 const RenderMessageList = function RenderMessageList({
 	style,
@@ -16,7 +16,7 @@ const RenderMessageList = function RenderMessageList({
 		list = useMessageListState(props);
 	}
 
-	return <SkiaFlatList {...props} debug style={style || { flex: 1 }} list={list} />;
+	return <SkiaFlatList {...(props as SkiaFlatListElementProps)} debug style={style || { flex: 1 }} list={list} />;
 };
 
 export const MessageList = RenderMessageList;

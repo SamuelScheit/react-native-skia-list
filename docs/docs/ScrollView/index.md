@@ -1,20 +1,18 @@
 # ScrollView
 
-<a id="skiascrollview" name="skiascrollview"></a>
+## \<**SkiaScrollView** \/>
 
-## **SkiaScrollView**([`SkiaScrollViewElementProps`](index.md#skiascrollviewelementprops)): `Element`
-
-Use `SkiaScrollView` as a replacement for the React Native `ScrollView` component.
-
-:::note
-It uses the Skia renderer to render the content so you can't use React Native components inside it.
-:::
+Use `<SkiaScrollView />` as a replacement for the React Native `<ScrollView />` component.
 
 :::info
+It uses the Skia rendering engine to render the content so you can't use React Native components inside it.
+:::
+
+:::note
 You must specify the `height` prop of [ScrollGestureProps](#scrollgestureprops) to make the list scrollable.
 :::
 
-#### Example
+### Example
 ```tsx
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("rgb(91, 128, 218)"));
@@ -28,10 +26,11 @@ const circleCount = 100;
 </SkiaScrollView>
 ```
 
-You can manage the list state yourself by using `useSkiaScrollView`: \
-This is useful when you need to build custom behavior on top of the list, e.g. a sticky header, custom gestures/renderer.
+### Example with `useSkiaScrollView`
 
-#### Example with `useSkiaScrollView`
+You can manage the list state yourself by using `useSkiaScrollView`: \
+This is useful when you need to build custom behavior on top of the list, e.g. custom gestures/renderer.
+
 ```tsx
 const state = useSkiaScrollView({ height: 1000 });
 const content = content.value;
@@ -43,21 +42,19 @@ content.addChild(SkiaDomApi.RectNode({ width: 100, height: 100, x: 0, y: 0 }));
 
 ***
 
-<a id="skiascrollviewelementprops" name="skiascrollviewelementprops"></a>
-
 ## SkiaScrollViewElementProps
 
 ### list?: `SkiaScrollViewState`
 
-Create your self managed list state using `useSkiaScrollView`:
+Manage the list state yourself using `useSkiaScrollView`:
 
 ```tsx
-const state = useSkiaScrollView({ height: 1000 });
+const list = useSkiaScrollView({ height: 1000 });
 
-// do something with the state, e.g. skew the list content:
-state.matrix.value[1] = 0.1;
+// do something with the list, e.g. skew the list content:
+list.matrix.value[1] = 0.1;
 
-<SkiaScrollView list={state} />
+<SkiaScrollView list={list} />
 ```
 
 ### style?: `ViewStyle`
@@ -132,22 +129,12 @@ Determines whether the keyboard gets dismissed in response to a drag.
 Determines when the keyboard should stay visible after a tap.
 - `never` (the default), tapping outside of the focused text input when the keyboard is up dismisses the keyboard. When this happens, children won`t receive the tap.
 - `always`, the keyboard will not dismiss automatically, and the scroll view will not catch taps, but children of the scroll view can catch taps.
-- false, deprecated, use `never` instead
-- true, deprecated, use `always` instead
+- `false`, deprecated, use `never` instead
+- `true`, deprecated, use `always` instead
 
 ***
-
-<a id="getscrollgesture" name="getscrollgesture"></a>
-
-## **getScrollGesture**([`ScrollGestureProps`](index.md#scrollgestureprops)): [`ScrollGestureState`](index.md#scrollgesturestate)
-
-***
-
-<a id="scrollgestureinitalstate" name="scrollgestureinitalstate"></a>
 
 ## ScrollGestureInitalState
-
-<a id="layout" name="layout"></a>
 
 ### layout: `SharedValue<object>`
 
@@ -158,66 +145,40 @@ Will automatically update when the layout changes.
 
 #### height: `number`
 
-<a id="scrolly" name="scrolly"></a>
-
 ### scrollY: `SharedValue<number>`
 
 The current scroll Y position.
 
-<a id="starty" name="starty"></a>
-
 ### startY: `SharedValue<number>`
 
-**`Internal`**
-
 Used internally to keep track of the start Y position when dragging.
-
-<a id="offsety" name="offsety"></a>
 
 ### offsetY: `SharedValue<number>`
 
 Used to indepentently control the scroll position without affecting the scrollY value (which is used by the gesture handler) e.g. used for keyboard handling.
-
-<a id="maxheight" name="maxheight"></a>
 
 ### maxHeight: `SharedValue<number>`
 
 The maximum height the scroll view can scroll to.
 Automatically updated when the layout/data changes.
 
-<a id="scrolling" name="scrolling"></a>
-
 ### scrolling: `SharedValue<boolean>`
 
 Shared value that indicates if the view is currently being scrolled.
-
-<a id="pressing" name="pressing"></a>
-
-### pressing: `SharedValue<boolean>`
-
-Shared value that indicates if the view is currently being pressed.
-
-<a id="scrollingdisabled" name="scrollingdisabled"></a>
 
 ### scrollingDisabled: `SharedValue<boolean>`
 
 Shared value to disable scrolling.
 
-<a id="bounces" name="bounces"></a>
-
 ### bounces: `boolean`
 
 If the scroll view should bounce when reaching the top or bottom.
-
-<a id="decelerationrate" name="decelerationrate"></a>
 
 ### decelerationRate: `number`
 
 The deceleration rate for momentum scrolling. Default is 0.998.
 
 ***
-
-<a id="scrollgestureprops" name="scrollgestureprops"></a>
 
 ## ScrollGestureProps
 
@@ -282,8 +243,6 @@ Ensure that you have the equal amount of `startedAnimation` and `finishedAnimati
 
 ***
 
-<a id="scrollgesturestate" name="scrollgesturestate"></a>
-
 ## ScrollGestureState
 
 ### gesture: `GestureType`
@@ -302,17 +261,62 @@ If you manually handle scrolling, e.g. with a custom ScrollBar, you can call thi
 
 ***
 
-<a id="useskiascrollview" name="useskiascrollview"></a>
+## **useSkiaScrollView**([`SkiaScrollViewProps<A>`](ScrollView/index.md#skiascrollviewprops)): `SkiaScrollViewState`
 
-## **useSkiaScrollView**([`SkiaScrollViewProps<A>`](index.md#skiascrollviewprops)): `SkiaScrollViewState`
+Use this hook to manage and access the state of SkiaScrollView.
+
+```tsx
+const state = useSkiaScrollView({ height: 1000 });
+
+state.content.value.addChild(SkiaDomApi.RectNode({ width: 100, height: 100, x: 0, y: 0 }));
+
+<SkiaScrollView list={state} style={{ flex: 1 }} />
+```
 
 ***
 
-<a id="skiascrollviewprops" name="skiascrollviewprops"></a>
+## InitialScrollViewState
+
+### root: `SharedValue<RenderNode<GroupProps>>`
+
+The root [group node](https://shopify.github.io/react-native-skia/docs/group) of the skia list view with a fixed position that contains the `content` group node
+
+You can transform the entire list by setting the `matrix` property.
+
+```tsx
+root.value.setProp("matrix", Skia.Matrix().skew(1, 0.5).get());
+```
+
+### content: `SharedValue<RenderNode<GroupProps>>`
+
+The content [group node](https://shopify.github.io/react-native-skia/docs/group) of the skia list view that contains the list items which are translated based on the scroll position.
+
+### matrix: `SharedValue<number[]>`
+
+The Skia Matrix that translates the content node.
+
+- `matrix.value[0]` is the **X scale**.
+- `matrix.value[4]` is the **Y scale**.
+- `matrix.value[5]` is the **Y translation**. Use `scrollY` instead
+- `matrix.value[2]` is the **X translation**. Use `safeArea.left` instead
+- `matrix.value[1]` is the **X skew**.
+- `matrix.value[3]` is the **Y skew**.
+
+### redraw: `() => void`
+
+Call `redraw()` to request a redraw of the skia canvas, e.g. when adding a fixed element to the root node. \
+When using FlatList use `redrawItems()` instead to redraw the list items. \
+When animating a property use `startedAnimation()` and `finishedAnimation()` to efficiently rerender the list.
+
+### pressing: `SharedValue<boolean>`
+
+Shared value that indicates if the view is currently being pressed.
+
+***
 
 ## SkiaScrollViewProps
 
-### customScrollGesture?: `typeof `[`getScrollGesture`](index.md#getscrollgesture)
+### customScrollGesture?: `typeof getScrollGesture`
 
 Specify a custom scroll gesture.
 

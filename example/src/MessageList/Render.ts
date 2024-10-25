@@ -1,7 +1,7 @@
 import { type GroupProps, type RenderNode, Skia } from "@shopify/react-native-skia";
 import { type MessageItem } from "./State";
 import { makeMutable } from "react-native-reanimated";
-import { type SkiaFlatListProps } from "react-native-skia-list";
+import { type ShareableState, type SkiaFlatListProps } from "react-native-skia-list";
 import type { MessageListState } from ".";
 
 const rectRadius = 20;
@@ -54,16 +54,13 @@ export function getRenderMessageItem({
 	const reactionPaddingX = 7;
 	const authorSpacing = 3;
 
-	function renderItem(
-		element: RenderNode<GroupProps> | undefined,
-		item: MessageItem,
-		index: number,
-		state: MessageListState
-	) {
+	function renderItem(item: MessageItem, index: number, state: ShareableState, element?: RenderNode<GroupProps>) {
 		"worklet";
 
 		const { text, attachments, user_id, avatar, reactions, author } = item;
-		const { layout, safeArea, data, avatars } = state;
+		const { layout, safeArea, data, avatars } = state as ShareableState & {
+			avatars: Record<string, RenderNode<GroupProps> | undefined>;
+		};
 
 		const { width } = layout.value;
 

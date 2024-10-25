@@ -457,7 +457,6 @@ export function getContextMenu(state: ContextMenuProps) {
 		layout: state.layout,
 		scrollY: state.scrollY,
 		elements: state.elements,
-		presses: state.presses,
 		heights: state.heights,
 		rowOffsets: state.rowOffsets,
 		firstRenderIndex: state.firstRenderIndex,
@@ -500,7 +499,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		list.value.addChild(element);
 
 		unmountElement(result.index, result.item);
-		renderItem!(element, result.item, result.index, shareableState);
+		renderItem!(result.item, result.index, shareableState, element);
 
 		runOnJS(RenderActions)(translation, result);
 
