@@ -7,7 +7,8 @@
 
 ## Installation
 
-Be aware the library is still in development and not done yet.
+> [!CAUTION]
+> This library is in early development and not ready for production use.
 
 ```sh
 npm install react-native-skia-list
