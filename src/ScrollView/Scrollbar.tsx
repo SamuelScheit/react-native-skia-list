@@ -3,8 +3,23 @@ import type { ScrollGestureState } from "./ScrollGesture";
 import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable } from "react-native-reanimated";
 import { interpolateClamp } from "../Util/Interpolate";
 import { Gesture, type GestureType } from "react-native-gesture-handler";
-import { trigger as vibrate } from "react-native-haptic-feedback";
 import { clearAnimatedTimeout, setAnimatedTimeout } from "../Util/timeout";
+
+function getHapticsModule() {
+	try {
+		const Haptics = require("expo-haptics");
+		return () => Haptics.impactAsync("heavy");
+	} catch (error) {}
+	try {
+		const Haptics = require("react-native-haptic-feedback");
+
+		return () => Haptics.trigger("impactHeavy", { ignoreAndroidSystemSettings: true });
+	} catch (error) {}
+	console.warn("[SkiaList] No haptics module found, please install `expo-haptics` or `react-native-haptic-feedback`");
+	return () => {};
+}
+
+const vibrate = getHapticsModule();
 
 const primary = Skia.Paint();
 primary.setColor(Skia.Color("rgb(91, 128, 218)"));
@@ -79,7 +94,7 @@ export function getScrollbar(state: ScrollbarProps): ScrollbarState {
 
 				visible.value = withTiming(1, { duration: 200 });
 				dragging.value = withTiming(1, { duration: 200 });
-				runOnJS(vibrate)("impactHeavy", { ignoreAndroidSystemSettings: true });
+				runOnJS(vibrate)();
 				beginY.value = scrollY.value / maxHeight.value;
 			}
 		})
