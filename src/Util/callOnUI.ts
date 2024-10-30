@@ -1,5 +1,4 @@
-const { runOnUIImmediately } =
-	require("react-native-reanimated/src/threads") as typeof import("react-native-reanimated/lib/typescript/threads");
+import { runOnUI } from "react-native-reanimated";
 
 export function callOnUI<Args extends unknown[], ReturnValue>(
 	worklet: (...args: Args) => ReturnValue
@@ -9,6 +8,6 @@ export function callOnUI<Args extends unknown[], ReturnValue>(
 
 		if (_WORKLET) return worklet(...args);
 
-		return runOnUIImmediately(worklet)(...args);
+		return runOnUI(worklet)(...args) as any;
 	};
 }

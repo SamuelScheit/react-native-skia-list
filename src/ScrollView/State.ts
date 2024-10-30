@@ -8,7 +8,7 @@ const { SkiaViewNativeId } =
 const { SkiaViewApi } =
 	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
 
-import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
+import type { GroupProps, RenderNode, SkMatrix } from "@shopify/react-native-skia/lib/typescript/src/";
 import { cancelAnimation, makeMutable, useSharedValue, withSpring } from "react-native-reanimated";
 import { getScrollGesture, type ScrollGestureProps, type ScrollGestureState } from "./ScrollGesture";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
@@ -58,7 +58,7 @@ export type InitialScrollViewState = {
 	 * - `matrix.value[1]` is the **X skew**.
 	 * - `matrix.value[3]` is the **Y skew**.
 	 */
-	matrix: SharedValue<number[]>;
+	matrix: SharedValue<SkMatrix>;
 	/**
 	 * Call `redraw()` to request a redraw of the skia canvas, e.g. when adding a fixed element to the root node. \
 	 * When using FlatList use `redrawItems()` instead to redraw the list items. \
@@ -203,7 +203,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 			_nativeId,
 			mode,
 			pressing,
-			matrix: makeMutable(Skia.Matrix().translate(0, 0).get()),
+			matrix: makeMutable(Skia.Matrix().translate(0, 0)),
 			redraw() {
 				"worklet";
 
@@ -288,11 +288,18 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 				height = invertedFactor === -1 ? value.height - safeArea.value.bottom : safeArea.value.top;
 				onScroll(scrollY.value);
 			});
+			content.value.setProp("matrix", matrix.value);
 
 			function onScroll(value: number) {
 				const matrixValue = matrix.value;
-				matrixValue[5] = value * -1 * invertedFactor + height + offsetY.value;
-				content.value.setProp("matrix", matrixValue);
+				matrixValue.identity().translate(0, value * -1 * invertedFactor + height + offsetY.value);
+				// content.value.setProp("matrix", matrixValue);
+				// content.value.setProp("transform", [
+				// 	{
+				// 		translateY: value * -1 * invertedFactor + offsetY.value,
+				// 	},
+				// ]);
+				console.log("onScroll", value, value * -1 * invertedFactor + height + offsetY.value);
 
 				redraw();
 			}

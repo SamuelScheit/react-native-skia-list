@@ -71,12 +71,15 @@ export default function WGPU() {
 		};
 	});
 
-	const paragraph = Skia.ParagraphBuilder.Make({
-		textStyle: {
-			fontSize: 24,
-			fontFamilies: ["Arial"],
+	const paragraph = Skia.ParagraphBuilder.Make(
+		{
+			textStyle: {
+				fontSize: 24,
+				fontFamilies: ["Roboto"],
+			},
 		},
-	})
+		globalThis.fontManager
+	)
 		.addText("Hello, World!")
 		.build();
 

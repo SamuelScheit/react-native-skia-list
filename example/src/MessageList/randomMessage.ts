@@ -18,7 +18,7 @@ const paragraphStyle: SkTextStyle = {
 		weight: FontWeight.Normal,
 		width: FontWidth.Normal,
 	},
-	fontFamilies: ["Inter", "Arial"],
+	fontFamilies: ["Roboto"],
 	heightMultiplier: 1.1,
 };
 
@@ -32,14 +32,12 @@ export const dateStyle = {
 	color: Skia.Color("#6b6c6f"),
 };
 
-const f = Skia.TypefaceFontProvider.Make();
-
 export const textRecipientBuilder = Skia.ParagraphBuilder.Make(
 	{
 		...paragraphParams,
 		textStyle: { ...paragraphStyle, color: black },
 	},
-	f
+	globalThis.fontManager
 );
 
 export const textMeBuilder = Skia.ParagraphBuilder.Make(
@@ -47,7 +45,7 @@ export const textMeBuilder = Skia.ParagraphBuilder.Make(
 		...paragraphParams,
 		textStyle: { ...paragraphStyle, color: white },
 	},
-	f
+	globalThis.fontManager
 );
 
 export const authorFontSize = 15 * scale;
@@ -65,7 +63,7 @@ export const authorBuilder = Skia.ParagraphBuilder.Make(
 			},
 		},
 	},
-	f
+	globalThis.fontManager
 );
 
 export function loadImage(x = 400, y = 400) {
@@ -217,8 +215,12 @@ export function getRandomMessage(
 
 	let avatar = user_id === "1" ? null : user_id === "2" ? avatar2 : avatar1;
 
+	const textParagraph = text ? textBuilder.addText(text).build() : undefined;
+
+	if (textParagraph) globalThis.text = textParagraph;
+
 	return {
-		text: text ? textBuilder.addText(text).build() : undefined,
+		text: textParagraph,
 		test: text,
 		author,
 		user_id,

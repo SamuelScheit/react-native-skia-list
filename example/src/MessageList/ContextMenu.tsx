@@ -29,7 +29,7 @@ import { Gesture, type TouchData } from "react-native-gesture-handler";
 import { type PointProp, PixelRatio } from "react-native";
 import React, { type ReactNode, useLayoutEffect } from "react";
 import { isInBound, useSkiaFlatList, type TapResult } from "react-native-skia-list";
-import { trigger } from "react-native-haptic-feedback";
+import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
 
 export const dpi = 1;
 export const scale = PixelRatio.getFontScale() * 1 * dpi;
@@ -51,16 +51,15 @@ const paragraphStyle: SkTextStyle = {
 		width: FontWidth.Normal,
 	},
 	heightMultiplier: 1.1,
+	fontFamilies: ["Roboto"],
 };
-
-const tf = Skia.TypefaceFontProvider.Make();
 
 const actionBuilder = Skia.ParagraphBuilder.Make(
 	{
 		textAlign: TextAlign.Left,
 		textStyle: { ...paragraphStyle, color: black },
 	},
-	tf
+	globalThis.fontManager
 );
 
 const emojiSize = 25 * scale;
@@ -70,7 +69,7 @@ export const emojiBuilder = Skia.ParagraphBuilder.Make(
 		textAlign: TextAlign.Left,
 		textStyle: { ...paragraphStyle, fontSize: emojiSize, fontFamilies: [emojiFontFamily], color: black },
 	},
-	tf
+	globalThis.fontManager
 );
 
 const actionColor = Skia.Color("#f4f4f6");
@@ -239,7 +238,7 @@ export function getContextMenu(state: ContextMenuProps) {
 						SkiaViewApi.requestRedraw(_nativeId);
 
 						if (newPaint === actionHighlightPaint) {
-							runOnJS(trigger)("impactLight");
+							runOnJS(impactAsync)("light" as ImpactFeedbackStyle);
 							emojiLastSelected.value = i;
 						} else {
 							emojiLastSelected.value = null;
@@ -328,7 +327,7 @@ export function getContextMenu(state: ContextMenuProps) {
 						SkiaViewApi.requestRedraw(_nativeId);
 
 						if (newPaint === actionHighlightPaint) {
-							runOnJS(trigger)("impactLight");
+							runOnJS(impactAsync)("light" as ImpactFeedbackStyle);
 							actionLastSelected.value = i;
 						} else {
 							actionLastSelected.value = null;
@@ -596,7 +595,7 @@ export function getContextMenu(state: ContextMenuProps) {
 
 		createBackdropFilter(result);
 
-		runOnJS(trigger)("impactMedium");
+		runOnJS(impactAsync)("medium" as ImpactFeedbackStyle);
 		// TODO: stop animation
 	}
 

@@ -14,13 +14,16 @@ export default function FlatList() {
 	const white = Skia.Color("#fff");
 
 	const paragraphBuilder = useMemo(() => {
-		return Skia.ParagraphBuilder.Make({
-			textStyle: {
-				fontSize: 24,
-				fontFamilies: ["Arial"],
-				color: Skia.Color("#fff"),
+		return Skia.ParagraphBuilder.Make(
+			{
+				textStyle: {
+					fontSize: 24,
+					fontFamilies: ["Roboto"],
+					color: Skia.Color("#fff"),
+				},
 			},
-		});
+			globalThis.fontManager
+		);
 	}, []);
 
 	const initialData = useCallback(() => {

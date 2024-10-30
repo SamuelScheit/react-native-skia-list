@@ -1,6 +1,6 @@
 import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
-const { default: SkiaDomViewNativeComponent } =
-	require("@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent") as typeof import("@shopify/react-native-skia/lib/typescript/src/specs/SkiaDomViewNativeComponent");
+
+import SkiaDomViewNativeComponent from "./SkiaDomView";
 import type { NativeProps } from "@shopify/react-native-skia/lib/typescript/src/specs/SkiaDomViewNativeComponent";
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
@@ -10,7 +10,7 @@ const { SkiaRoot } =
 import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "./State";
 import { runOnUI, runOnJS } from "react-native-reanimated";
-import { type LayoutRectangle, type NativeMethods, type ScrollViewProps, type ViewStyle } from "react-native";
+import { Platform, type LayoutRectangle, type NativeMethods, type ScrollViewProps, type ViewStyle } from "react-native";
 import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 
@@ -160,7 +160,13 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 
 	useState(() => {
 		function setMode(value: string) {
-			ref.current?.setNativeProps({ mode: value });
+			if (Platform.OS === "web") {
+				console.log(ref.current.props.mode);
+				// @ts-ignore
+				ref.current.setDrawMode(value);
+			} else {
+				ref.current?.setNativeProps?.({ mode: value });
+			}
 		}
 
 		runOnUI(() => {
@@ -196,7 +202,12 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	return (
 		<>
 			<SkiaDomViewNativeComponent
-				ref={(x) => (ref.current = x)}
+				ref={(x) => {
+					ref.current = x;
+					if (Platform.OS === "web") {
+						// x.props = { ...x.props };
+					}
+				}}
 				onLayout={(e) => {
 					scrollViewRef.current?.setLayout(e.nativeEvent.layout);
 					runOnUI((rect: LayoutRectangle) => {
@@ -213,10 +224,11 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 					})(e.nativeEvent.layout);
 				}}
 				nativeID={`${_nativeId}`}
-				// mode={"continuous"}
-				mode={mode.value}
+				mode={"continuous"}
+				// mode={mode.value}
 				debug={debug}
 				style={style || { flex: 1 }}
+				root={state.root.value}
 			/>
 			<GestureDetector gesture={gesture}>
 				<InteractiveScrollView

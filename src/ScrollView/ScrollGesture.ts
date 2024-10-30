@@ -226,7 +226,9 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 
 		startedAnimation?.();
 
-		const animation = withDecay(
+		const animation = { current: null } as any;
+
+		animation.current = withDecay(
 			{
 				velocity: velocityY,
 				deceleration: decelerationRate,
@@ -235,16 +237,16 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 			(finished) => {
 				"worklet";
 
-				if (bounces && finished && animation.clamped) {
-					const newValue = y.value + animation.initialVelocity * 0.03;
+				if (bounces && finished && animation.current.clamped) {
+					const newValue = y.value + animation.current.initialVelocity * 0.03;
 
 					y.value = withSpring(newValue, { duration: 100, dampingRatio: 2 }, onEndClamp);
 				} else {
 					onEndClamp();
 				}
 			}
-		) as any as Animation<DecayAnimation>;
-		y.value = animation as any;
+		) as any;
+		y.value = animation.current as any;
 	}
 
 	function scrollTo(opts: { x: number; y: number; animated?: boolean }) {

@@ -1,7 +1,6 @@
 import { Link } from "expo-router";
 import type { ComponentProps } from "react";
 import { ScrollView, Text, TouchableOpacity } from "react-native";
-import { runOnUI } from "react-native-reanimated";
 
 type LinkProps = ComponentProps<typeof Link>;
 

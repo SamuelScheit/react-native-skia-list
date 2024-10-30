@@ -4,7 +4,7 @@ import { interpolateClamp, useSkiaFlatList, type TapResult } from "react-native-
 import { Gesture } from "react-native-gesture-handler";
 import { getContextMenu } from "./ContextMenu";
 import { getSwipeGesture } from "./Swipe";
-import { trigger } from "react-native-haptic-feedback";
+import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
 import { replyIconFactory } from "./Assets";
 import type { ImageProps, RenderNode, SkImage, SkParagraph } from "@shopify/react-native-skia/lib/typescript/src/";
 const { Skia } =
@@ -44,11 +44,11 @@ export function useMessageListState(props: useMessageListProps & MessageListProp
 	const renderItem = getRenderMessageItem({ ...props, avatars });
 	const [root] = useState(() => {
 		const el = SkiaDomApi.GroupNode({});
-		el.addChild(
-			SkiaDomApi.FillNode({
-				color: "white",
-			})
-		);
+		// el.addChild(
+		// 	SkiaDomApi.FillNode({
+		// 		color: "white",
+		// 	})
+		// );
 		return makeMutable(el);
 	});
 	const swipePosition = useSharedValue(0);
@@ -81,7 +81,7 @@ export function useMessageListState(props: useMessageListProps & MessageListProp
 			},
 			onOverSwipe() {
 				"worklet";
-				runOnJS(trigger)("impactMedium");
+				runOnJS(impactAsync)("medium" as ImpactFeedbackStyle);
 			},
 			onStartSwipe(e) {
 				"worklet";
@@ -139,7 +139,7 @@ export function useMessageListState(props: useMessageListProps & MessageListProp
 
 				const itemHeight = heights.value[swipeItem.value] || 0;
 
-				element.setProp("matrix", Skia.Matrix().translate(x, y).get());
+				// element.setProp("matrix", Skia.Matrix().translate(x, y).get());
 				SkiaViewApi.requestRedraw(_nativeId);
 
 				const replyIconSize = interpolateClamp(value, -swipeTreshold, 0, 1, 0);
