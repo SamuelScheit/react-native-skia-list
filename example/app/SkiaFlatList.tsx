@@ -1,8 +1,9 @@
-import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import { matchFont, Skia } from "@shopify/react-native-skia";
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 import { SkiaFlatList, useSkiaFlatList } from "react-native-skia-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 export default function FlatList() {
 	const safeArea = useSafeAreaInsets();

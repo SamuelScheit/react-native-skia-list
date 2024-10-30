@@ -1,14 +1,17 @@
-// import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
+const { default: SkiaDomViewNativeComponent } =
+	require("@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent") as typeof import("@shopify/react-native-skia/lib/typescript/src/specs/SkiaDomViewNativeComponent");
+import type { NativeProps } from "@shopify/react-native-skia/lib/typescript/src/specs/SkiaDomViewNativeComponent";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+const { SkiaRoot } =
+	require("@shopify/react-native-skia/src/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
+
 import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "./State";
-import { Skia } from "@shopify/react-native-skia";
-import SkiaDomViewNativeComponent, {
-	type NativeProps,
-} from "@shopify/react-native-skia/src/specs/SkiaDomViewNativeComponent";
 import { runOnUI, runOnJS } from "react-native-reanimated";
 import { type LayoutRectangle, type NativeMethods, type ScrollViewProps, type ViewStyle } from "react-native";
 import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 
 /**

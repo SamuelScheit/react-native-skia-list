@@ -1,4 +1,6 @@
-import { Circle, Skia } from "@shopify/react-native-skia";
+const { Skia, Circle } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SkiaScrollView } from "react-native-skia-list";
 

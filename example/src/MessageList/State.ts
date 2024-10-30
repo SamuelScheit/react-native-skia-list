@@ -6,9 +6,13 @@ import { getContextMenu } from "./ContextMenu";
 import { getSwipeGesture } from "./Swipe";
 import { trigger } from "react-native-haptic-feedback";
 import { replyIconFactory } from "./Assets";
-import { Skia, type ImageProps, type RenderNode, type SkImage, type SkParagraph } from "@shopify/react-native-skia";
+import type { ImageProps, RenderNode, SkImage, SkParagraph } from "@shopify/react-native-skia/lib/typescript/src/";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 import { getRenderMessageItem, type MessageListProps } from "./Render";
-import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
+import type { getRandomMessageData } from "./randomMessage";
+const { SkiaViewApi } =
+	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
 
 export type MessageItem = {
 	text: SkParagraph | undefined;
@@ -26,18 +30,18 @@ export type MessageItem = {
 };
 
 export interface useMessageListProps {
-	my_user_id?: string;
-	bubble?: boolean;
-	is_group?: boolean;
-	initialData?: () => MessageItem[];
+	my_user_id: string;
+	bubble: boolean;
+	is_group: boolean;
+	initialData?: () => ReturnType<typeof getRandomMessageData>[];
 }
 
 const replyIcon = replyIconFactory("#6b6c6f");
 
-export function useMessageListState(props: MessageListProps) {
+export function useMessageListState(props: useMessageListProps & MessageListProps) {
 	const avatars = useSharedValue({} as Record<string, RenderNode<ImageProps> | undefined>);
 	const contextMenuMessage = useSharedValue<TapResult<MessageItem> | undefined>(undefined);
-	const renderItem = getRenderMessageItem(props);
+	const renderItem = getRenderMessageItem({ ...props, avatars });
 	const [root] = useState(() => {
 		const el = SkiaDomApi.GroupNode({});
 		el.addChild(
@@ -50,18 +54,21 @@ export function useMessageListState(props: MessageListProps) {
 	const swipePosition = useSharedValue(0);
 	const swipeItem = useSharedValue(undefined as string | undefined | number);
 
-	const list = useSkiaFlatList({
-		root,
-		...props,
-		inverted: true,
+	const list = {
+		...useSkiaFlatList({
+			root,
+			...props,
+			inverted: true,
+			renderItem,
+			keyExtractor: (item: any) => {
+				"worklet";
+				return item.id;
+			},
+		}),
 		contextMenuMessage,
-		renderItem,
 		avatars,
-		keyExtractor: (item: any) => {
-			"worklet";
-			return item.id;
-		},
-	});
+		my_user_id: props.my_user_id,
+	};
 
 	const swipeTreshold = 30;
 	const { getItemFromTouch, scrollY, _nativeId, elements, rowOffsets, heights, layout, safeArea } = list;

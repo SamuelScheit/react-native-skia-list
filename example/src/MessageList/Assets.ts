@@ -1,4 +1,5 @@
-import { Skia } from "@shopify/react-native-skia";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 import { Platform } from "react-native";
 
 export const replyIconFactory = (color: string) =>

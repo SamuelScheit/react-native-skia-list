@@ -1,13 +1,14 @@
 import { PixelRatio, View, Text, TouchableOpacity, Platform } from "react-native";
 import { Canvas, useCanvasEffect } from "react-native-wgpu";
-import { type SkCanvas, Skia, type SkiaContext } from "@shopify/react-native-skia";
 import { cancelAnimation, clamp, runOnUI, useFrameCallback, useSharedValue, withSpring } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getRandomMessage } from "../src/MessageList/randomMessage";
 import { withDecay } from "../../src/Util/Decay";
 import type { MessageItem } from "../src/MessageList/State";
-import { Canvas as SkiaCanvas } from "@shopify/react-native-skia";
+import type { SkCanvas, SkiaContext } from "@shopify/react-native-skia/lib/typescript/src";
+const { Canvas: SkiaCanvas, Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 
 const black = Skia.Color("#000");
 const blackPaint = Skia.Paint();
@@ -32,7 +33,7 @@ export default function WGPU() {
 
 	const data = useSharedValue(
 		new Array(1000).fill(0).map((x, i) => {
-			return getRandomMessage({ my_user_id: "0", i });
+			return getRandomMessage(i);
 		})
 	);
 

@@ -1,8 +1,10 @@
-import { type GroupProps, type RenderNode, Skia } from "@shopify/react-native-skia";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+import type { GroupProps, ImageProps, RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
 import { type MessageItem } from "./State";
-import { makeMutable } from "react-native-reanimated";
+import { makeMutable, type SharedValue } from "react-native-reanimated";
 import { type ShareableState, type SkiaFlatListProps } from "react-native-skia-list";
-import type { MessageListState } from ".";
+import type { getRandomMessageData } from "./randomMessage";
 
 const rectRadius = 20;
 
@@ -38,10 +40,12 @@ export function getRenderMessageItem({
 	bubble,
 	is_group,
 	my_user_id,
+	avatars,
 }: {
 	my_user_id: string;
 	is_group: boolean;
 	bubble: boolean;
+	avatars: SharedValue<Record<string, RenderNode<ImageProps> | undefined>>;
 }) {
 	"worklet";
 
@@ -58,7 +62,7 @@ export function getRenderMessageItem({
 		"worklet";
 
 		const { text, attachments, user_id, avatar, reactions, author } = item;
-		const { layout, safeArea, data, avatars } = state as ShareableState & {
+		const { layout, safeArea, data } = state as ShareableState & {
 			avatars: Record<string, RenderNode<GroupProps> | undefined>;
 		};
 
@@ -338,8 +342,4 @@ export function getRenderMessageItem({
 	return renderItem;
 }
 
-export type MessageListProps = Partial<SkiaFlatListProps<MessageItem>> & {
-	my_user_id: string;
-	bubble: boolean;
-	is_group: boolean;
-};
+export type MessageListProps = Partial<SkiaFlatListProps<ReturnType<typeof getRandomMessageData>, MessageItem>>;

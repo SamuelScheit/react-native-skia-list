@@ -1,18 +1,14 @@
-import {
-	FontSlant,
-	FontWeight,
-	FontWidth,
-	loadData,
-	Skia,
-	type SkParagraphStyle,
-	type SkTextStyle,
-	TextAlign,
-} from "@shopify/react-native-skia";
+const { FontSlant, FontWeight, FontWidth, loadData, Skia, TextAlign } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 import { lipsum } from "./lipsum";
 import { black, emojiBuilder, scale, white } from "./ContextMenu";
 import type { MessageItem } from "./State";
-import type { SkParagraph } from "@shopify/react-native-skia";
-import type { SkImage } from "@shopify/react-native-skia";
+import type {
+	SkParagraph,
+	SkImage,
+	SkParagraphStyle,
+	SkTextStyle,
+} from "@shopify/react-native-skia/lib/typescript/src/";
 
 const paragraphStyle: SkTextStyle = {
 	fontSize: 18,
@@ -103,6 +99,7 @@ export function biasedRandomNumber() {
 let acc = 0;
 
 export function getRandomMessageData(i: number) {
+	"worklet";
 	authorBuilder.reset();
 
 	const date = new Date(Date.now() * Math.random());
@@ -159,33 +156,25 @@ export function getRandomMessageData(i: number) {
 	};
 }
 
-export function getRandomMessage({
-	my_user_id,
-	i,
-	msg,
-	attachment,
-	avatar1,
-	avatar2,
-}: {
-	my_user_id: string;
-	i: number;
-	msg?: ReturnType<typeof getRandomMessageData>;
-	attachment?: SkImage;
-	avatar1?: SkImage;
-	avatar2?: SkImage;
-}) {
+export function getRandomMessage(
+	i: number,
+	msg?: ReturnType<typeof getRandomMessageData>,
+	my_user_id: string = "1",
+	attachment?: SkImage,
+	avatar1?: SkImage,
+	avatar2?: SkImage
+) {
+	"worklet";
 	authorBuilder.reset();
 
 	if (!msg) msg = getRandomMessageData(i);
 
 	const user_id = msg.user_id;
 
-	let len = biasedRandomNumber();
 	// let len = 20;
 	let text = msg.text;
 	// let text: string | undefined = `${i}${lipsum.slice(0, len).trim()}`;
 	// lipsum = lipsum.slice(i * 3);
-	acc += len;
 	const author = authorBuilder
 		.addText(msg.author)
 		.pushStyle(dateStyle)

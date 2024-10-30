@@ -1,18 +1,18 @@
-import type {} from "@shopify/react-native-skia/lib/module/renderer/HostComponents";
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
 import {
 	useSkiaScrollView,
 	type EdgeInsets,
 	type SkiaScrollViewElementProps,
-	type SkiaScrollViewProps,
 	type SkiaScrollViewState,
 } from "../ScrollView";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
-import { Skia } from "@shopify/react-native-skia";
-import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/module/";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
 import type { PointProp } from "react-native";
 import { callOnUI } from "../Util/callOnUI";
-import { SkiaRoot } from "@shopify/react-native-skia/lib/module/renderer/Reconciler";
 
 export interface Dimensions {
 	width: number;
@@ -20,10 +20,10 @@ export interface Dimensions {
 }
 
 /** */
-export type SkiaFlatListProps<T = any, A = {}> = A &
-	Partial<Omit<SkiaFlatListState<T, A>, "safeArea">> &
+export type SkiaFlatListProps<T = any, B = T> = Partial<Omit<SkiaFlatListState<T, B>, "safeArea">> &
 	SkiaScrollViewElementProps & {
 		initialData?: () => T[];
+		initialTransformed?: () => Record<string, B>;
 		/**
 		 * Rough estimate of the height of each item in the list.
 		 * Used to calculate the maximum scroll height.
@@ -55,7 +55,7 @@ export type ShareableState<T = any> = {
 };
 
 /** */
-export type SkiaFlatListState<T = any, A = any> = {
+export type SkiaFlatListState<T = any, B = T> = {
 	/** Contains currently mounted elements */
 	elements: SharedValue<Record<string, RenderNode<GroupProps> | undefined>>;
 	/** Contains the height of each element */
@@ -71,9 +71,13 @@ export type SkiaFlatListState<T = any, A = any> = {
 	/** Specify this function to return a unique key for each item */
 	keyExtractor: (item: T, index: number) => string;
 	/** Renders an item */
-	renderItem: (item: T, index: number, state: ShareableState<T>, element?: RenderNode<GroupProps>) => number;
+	renderItem: (item: B, index: number, state: ShareableState<T>, element?: RenderNode<GroupProps>) => number;
+	/** Transforms the item data */
+	transformItem?: (item: T, index: number, id: any, state: ShareableState<T>) => B;
 	/** The data array */
 	data: SharedValue<T[]>;
+	/** The transformed data array */
+	// transformedData: SharedValue<Record<string, B>>;
 	/** @hidden Time spent on rendering */
 	renderTime: SharedValue<number>;
 
@@ -120,8 +124,7 @@ export type SkiaFlatListState<T = any, A = any> = {
 	 * Receives the touch event as `{ x: number, y: number }`
 	 */
 	getItemFromTouch: (e: PointProp) => TapResult<T> | undefined;
-} & SkiaScrollViewState &
-	A;
+} & SkiaScrollViewState;
 
 /**
  * Result returned by `getItemFromTouch({ x: number, y: number })`
@@ -154,20 +157,21 @@ export type TapResult<T> = {
 };
 
 /** */
-export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any): SkiaFlatListState<T, A> {
+export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as any): SkiaFlatListState<T, B> {
 	const scrollView = useSkiaScrollView(props);
 	const [list] = useState(() => {
-		const renderTime = makeMutable(0);
+		const renderTime = props.renderTime || makeMutable(0);
 		const renderMutex = makeMutable(false);
 		const elements = makeMutable({} as Record<string, RenderNode<GroupProps> | undefined>);
 		const heights = makeMutable({} as Record<string, number>);
 		const rowOffsets = makeMutable({} as Record<string, number>);
 		const firstRenderIndex = makeMutable(0);
 		const firstRenderHeight = makeMutable(0);
-		const start = performance.now();
+		let start = performance.now();
 		const initialData = props.initialData?.() ?? [];
-		console.log("initialData", performance.now() - start, initialData.length);
 		const data = makeMutable(initialData);
+		const transformedData = makeMutable(props.initialTransformed?.() ?? {});
+		console.log("initialData", performance.now() - start, initialData.length);
 		const keyExtractor =
 			props.keyExtractor ??
 			((_item, index) => {
@@ -180,6 +184,17 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				"worklet";
 				return 100;
 			});
+		const { transformItem } = props;
+		const getTransformed = !transformItem
+			? (item: T, index: number, id: any, state: ShareableState<T>) => {
+					return item as any as B;
+				}
+			: (item: T, index: number, id: any, state: ShareableState<T>) => {
+					"worklet";
+					const transformed = transformedData.value[id];
+					if (transformed) return transformed;
+					return (transformedData.value[id] = transformItem(item, index, id, state) as any as B);
+				};
 
 		const maintainVisibleContentPosition = props.maintainVisibleContentPosition ?? true;
 		const estimatedItemHeight = props.estimatedItemHeight ?? 100;
@@ -199,6 +214,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 			maintainVisibleContentPosition,
 			keyExtractor,
 			data,
+			transformedData,
 			renderTime,
 			maxHeight,
 			safeArea,
@@ -283,7 +299,8 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				let itemHeight = heightsValue[id] || 0;
 
 				if (itemHeight === undefined) {
-					itemHeight = renderItem(item, i, shareableState as any);
+					const transformed = getTransformed(item, i, id, shareableState as any);
+					itemHeight = renderItem(transformed, i, shareableState as any);
 					heightsValue[id] = itemHeight;
 				}
 
@@ -341,7 +358,8 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				const id = keyExtractor(item, index);
 				let height = heights.value[id];
 
-				let itemHeight = renderItem(item, index, shareableState);
+				const transformed = getTransformed(item, i, id, shareableState as any);
+				let itemHeight = renderItem(transformed, index, shareableState);
 
 				if (itemHeight !== height && height) {
 					const diff = itemHeight - height;
@@ -403,8 +421,9 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				matrix: translation,
 			});
 			const id = keyExtractor(item, index);
+			const transformed = getTransformed(item, index, id, shareableState as any);
 
-			let itemHeight = renderItem(item, index, shareableState, element);
+			let itemHeight = renderItem(transformed, index, shareableState, element);
 
 			if (invertedFactor === -1) {
 				offset = rowY * invertedFactor - itemHeight;
@@ -458,7 +477,9 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				let id = keyExtractor(item, index);
 				let itemHeight = heightsValue[id];
 				if (itemHeight === undefined) {
-					itemHeight = renderItem(item, index, shareableState);
+					const transformed = getTransformed(item, index, id, shareableState as any);
+
+					itemHeight = renderItem(transformed, index, shareableState);
 					heightsValue[id] = itemHeight;
 
 					const diff = itemHeight - estimatedItemHeight;
@@ -467,7 +488,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 
 				const beforeStart = isBeforeStart(rowY, itemHeight);
 				if (beforeStart) {
-					item = data.value[index];
+					item = dataValue[index];
 					if (!item) break;
 					id = keyExtractor(item, index);
 
@@ -510,7 +531,8 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 						unmountElement(index, item);
 					}
 					if (!itemHeight) {
-						itemHeight = renderItem(item, index, shareableState);
+						const transformed = getTransformed(item, index, id, shareableState as any);
+						itemHeight = renderItem(transformed, index, shareableState);
 					}
 
 					rowY += itemHeight;
@@ -583,6 +605,7 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 		function resetData(newData: T[] = []) {
 			"worklet";
 			data.value = newData;
+			transformedData.value = {};
 			maxHeight.value = estimatedItemHeight * newData.length + 1;
 			heights.value = {};
 			elements.value = {};
@@ -684,6 +707,19 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 				return;
 			}
 
+			for (let i = 0; i < removedData.length; i++) {
+				const item = removedData[i];
+				const id = keyExtractor(item, index + i);
+				const element = elements.value[id];
+				if (element) {
+					content.value.removeChild(element);
+					elements.value[id] = undefined;
+				}
+				delete transformedData.value[id];
+				delete heights.value[id];
+				delete rowOffsets.value[id];
+			}
+
 			const height = getItemsHeight(removedData, index);
 			if (!height) return;
 
@@ -749,5 +785,5 @@ export function useSkiaFlatList<T, A>(props: SkiaFlatListProps<T, A> = {} as any
 		};
 	});
 
-	return list as SkiaFlatListState<T, A>;
+	return list as SkiaFlatListState<T, B>;
 }

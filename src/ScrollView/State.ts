@@ -1,6 +1,14 @@
-import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import { Skia, type GroupProps, type RenderNode } from "@shopify/react-native-skia";
-import { SkiaViewNativeId } from "@shopify/react-native-skia/lib/module/views/SkiaViewNativeId";
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+
+const { SkiaViewNativeId } =
+	require("@shopify/react-native-skia/src/views/SkiaViewNativeId") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/SkiaViewNativeId");
+
+const { SkiaViewApi } =
+	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
+
+import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
 import { cancelAnimation, makeMutable, useSharedValue, withSpring } from "react-native-reanimated";
 import { getScrollGesture, type ScrollGestureProps, type ScrollGestureState } from "./ScrollGesture";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
@@ -10,7 +18,6 @@ import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
 import type { ComposedGesture, GestureType } from "react-native-gesture-handler";
-import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 
 export interface EdgeInsets {
 	top: number;
@@ -74,8 +81,7 @@ export type InitialScrollViewState = {
 
 /**
  */
-export type SkiaScrollViewProps<A = {}> = A &
-	Partial<Omit<SkiaScrollViewState, "safeArea">> &
+export type SkiaScrollViewProps = Partial<Omit<SkiaScrollViewState, "safeArea">> &
 	ScrollGestureProps & {
 		/**
 		 * Specify a custom scroll gesture.
@@ -132,7 +138,7 @@ export type SkiaScrollViewState = InitialScrollViewState &
  * <SkiaScrollView list={state} style={{ flex: 1 }} />
  * ```
  */
-export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any): SkiaScrollViewState {
+export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): SkiaScrollViewState {
 	const keyboardHeight = useSharedValue(0);
 	const scrollingInteractive = useSharedValue(false);
 	const scrollingDisabled = useSharedValue(false);
@@ -237,7 +243,6 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 			...props,
 			startedAnimation: state.startedAnimation,
 			finishedAnimation: state.finishedAnimation,
-			content: state.content,
 			layout,
 			offsetY,
 			// scrollY,
@@ -248,7 +253,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps<A> = {} as any):
 		scrollState.gesture.withRef(scrollGestureRef);
 
 		const { matrix, content, redraw, safeArea } = state;
-		const scrollbar = getScrollbar({ ...scrollState, ...state });
+		const scrollbar = getScrollbar({ ...scrollState, ...state } as any);
 		const scrollbarRef = { current: scrollbar.gesture };
 		scrollbar.gesture.withRef(scrollbarRef);
 

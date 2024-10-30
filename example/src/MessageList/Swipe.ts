@@ -3,7 +3,8 @@ import {
 	type GestureStateChangeEvent,
 	type PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
-import { Extrapolate, interpolate } from "@shopify/react-native-skia";
+const { Extrapolate, interpolate } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 import { makeMutable, type SharedValue, withSpring, type WithSpringConfig } from "react-native-reanimated";
 
 export function getSwipeGesture(props: {

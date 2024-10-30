@@ -1,10 +1,17 @@
-import { Skia } from "@shopify/react-native-skia";
-import { SkiaViewNativeId } from "@shopify/react-native-skia/src/views/SkiaViewNativeId";
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
+const { Skia } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+
+const { SkiaViewNativeId } =
+	require("@shopify/react-native-skia/src/views/SkiaViewNativeId") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/SkiaViewNativeId");
+
+const { default: SkiaPictureViewNativeComponent } =
+	require("@shopify/react-native-skia/src/specs/SkiaPictureViewNativeComponent") as typeof import("@shopify/react-native-skia/lib/typescript/src/specs/SkiaPictureViewNativeComponent");
+
 import { useLayoutEffect } from "react";
 import { runOnUIImmediately } from "react-native-reanimated/src/threads";
 import { makeMutable, type SharedValue, useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import SkiaPictureViewNativeComponent from "@shopify/react-native-skia/src/specs/SkiaPictureViewNativeComponent";
 
 export default function TestSkiaPicture() {
 	const _nativeId = SkiaViewNativeId.current++;

@@ -10,12 +10,8 @@ const RenderMessageList = function RenderMessageList({
 	...props
 }: MessageListProps & {
 	style?: ViewStyle;
-	list?: ReturnType<typeof useMessageListState>;
+	list: ReturnType<typeof useMessageListState>;
 }) {
-	if (!list) {
-		list = useMessageListState(props);
-	}
-
 	return <SkiaFlatList {...(props as SkiaFlatListElementProps)} debug style={style || { flex: 1 }} list={list} />;
 };
 

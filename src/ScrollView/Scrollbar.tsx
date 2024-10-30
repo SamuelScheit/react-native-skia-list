@@ -1,9 +1,12 @@
-import { Skia, RoundedRect } from "@shopify/react-native-skia";
+const { Skia, RoundedRect } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+
 import type { ScrollGestureState } from "./ScrollGesture";
 import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable } from "react-native-reanimated";
-import { interpolateClamp } from "../Util/Interpolate";
+import * as Interpolate from "../Util/Interpolate";
 import { Gesture, type GestureType } from "react-native-gesture-handler";
 import { clearAnimatedTimeout, setAnimatedTimeout } from "../Util/timeout";
+const { interpolateClamp } = Interpolate;
 
 function getHapticsModule() {
 	try {

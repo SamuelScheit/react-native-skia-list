@@ -3,7 +3,7 @@ import { useSkiaFlatList, type SkiaFlatListProps, type SkiaFlatListState } from 
 import type { ReactNode } from "react";
 import { SkiaScrollView, type SkiaScrollViewElementProps } from "../ScrollView";
 
-export type SkiaFlatListElementProps<T = any, A = any> = SkiaScrollViewElementProps & SkiaFlatListProps<T>;
+export type SkiaFlatListElementProps<T = any> = SkiaScrollViewElementProps & SkiaFlatListProps<T>;
 
 /**
  * Use `<SkiaFlatList />` as a replacement for `<FlatList />` to render a list of items.
@@ -111,7 +111,7 @@ export type SkiaFlatListElementProps<T = any, A = any> = SkiaScrollViewElementPr
 
  * ```
  */
-export function SkiaFlatList<T, A>(props: SkiaFlatListElementProps<T, A>) {
+export function SkiaFlatList<T>(props: SkiaFlatListElementProps<T>) {
 	var { list, ...p } = props;
 	if (!list) {
 		list = useSkiaFlatList(p) as any;

@@ -2,8 +2,7 @@
 	"compilerOptions": {
 		"rootDir": ".",
 		"paths": {
-			"react-native-skia-list": ["./src/index"],
-			"@shopify/react-native-skia": ["./node_modules/@shopify/react-native-skia"]
+			"react-native-skia-list": ["./src/index"]
 		},
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,

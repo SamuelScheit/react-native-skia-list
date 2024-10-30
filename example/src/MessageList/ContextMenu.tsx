@@ -1,16 +1,19 @@
-import "@shopify/react-native-skia/lib/module/renderer/HostComponents";
-import type { SkTextStyle, RenderNode, GroupProps, ChildrenProps } from "@shopify/react-native-skia";
-import {
-	FontSlant,
-	FontWeight,
-	FontWidth,
-	TextAlign,
-	Skia,
-	Paragraph,
-	RoundedRect,
-	Line,
-	ImageSVG,
-} from "@shopify/react-native-skia";
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
+import type {
+	SkTextStyle,
+	RenderNode,
+	GroupProps,
+	ChildrenProps,
+} from "@shopify/react-native-skia/lib/typescript/src/";
+const { FontSlant, FontWeight, FontWidth, TextAlign, Skia, Paragraph, RoundedRect, Line, ImageSVG } =
+	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
+const { SkiaRoot } =
+	require("@shopify/react-native-skia/lib/commonjs/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
+const { NATIVE_DOM } =
+	require("@shopify/react-native-skia/lib/commonjs/renderer/HostComponents") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents");
+const { SkiaViewApi } =
+	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
+
 import { copyIconFactory, deleteIconFactory, emojiFontFamily, replyIconFactory } from "./Assets";
 import type { MessageItem } from "./State";
 import {
@@ -25,11 +28,8 @@ import {
 import { Gesture, type TouchData } from "react-native-gesture-handler";
 import { type PointProp, PixelRatio } from "react-native";
 import React, { type ReactNode, useLayoutEffect } from "react";
-import { SkiaRoot } from "@shopify/react-native-skia/lib/commonjs/renderer/Reconciler";
-import { NATIVE_DOM } from "@shopify/react-native-skia/lib/commonjs/renderer/HostComponents";
 import { isInBound, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { trigger } from "react-native-haptic-feedback";
-import { SkiaViewApi } from "@shopify/react-native-skia/lib/module/views/api";
 
 export const dpi = 1;
 export const scale = PixelRatio.getFontScale() * 1 * dpi;

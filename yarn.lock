@@ -5236,7 +5236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@npm:^1.5.0, @shopify/react-native-skia@npm:latest":
+"@shopify/react-native-skia@npm:^1.5.0":
   version: 1.5.0
   resolution: "@shopify/react-native-skia@npm:1.5.0"
   dependencies:
@@ -19366,7 +19366,7 @@ __metadata:
     "@expo/metro-runtime": "npm:~3.2.3"
     "@react-native-menu/menu": "npm:^1.1.3"
     "@shopify/flash-list": "npm:^1.7.1"
-    "@shopify/react-native-skia": "npm:latest"
+    "@shopify/react-native-skia": "npm:^1.5.0"
     expo: "npm:~51.0.28"
     expo-build-properties: "npm:~0.12.5"
     expo-constants: "npm:~16.0.2"
