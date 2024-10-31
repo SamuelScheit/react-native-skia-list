@@ -18,7 +18,7 @@ const paragraphStyle: SkTextStyle = {
 		weight: FontWeight.Normal,
 		width: FontWidth.Normal,
 	},
-	fontFamilies: ["Roboto"],
+	fontFamilies: ["Roboto", "NotoColorEmoji"],
 	heightMultiplier: 1.1,
 };
 

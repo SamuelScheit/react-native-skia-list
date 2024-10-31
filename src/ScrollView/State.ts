@@ -299,7 +299,6 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 				// 		translateY: value * -1 * invertedFactor + offsetY.value,
 				// 	},
 				// ]);
-				console.log("onScroll", value, value * -1 * invertedFactor + height + offsetY.value);
 
 				redraw();
 			}

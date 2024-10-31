@@ -18,4 +18,4 @@ export const deleteIconFactory = (color: string) =>
 	);
 
 export const emojiFontFamily =
-	Platform.select({ ios: "Apple Color Emoji", android: "Noto Color Emoji" }) || "sans-serif";
+	Platform.select({ ios: "Apple Color Emoji", android: "Noto Color Emoji", web: "Noto" }) || "sans-serif";

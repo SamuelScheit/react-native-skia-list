@@ -64,6 +64,8 @@ const actionBuilder = Skia.ParagraphBuilder.Make(
 
 const emojiSize = 25 * scale;
 
+console.log("emojiFontFamily", emojiFontFamily);
+
 export const emojiBuilder = Skia.ParagraphBuilder.Make(
 	{
 		textAlign: TextAlign.Left,

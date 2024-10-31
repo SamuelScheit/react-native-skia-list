@@ -25,7 +25,7 @@ const loadTypefaces = (typefacesToLoad: Record<string, DataModule[]>) => {
 
 const fonts: Record<string, DataModule[]> = {
 	Roboto: [require("./assets/Roboto-Regular.ttf")],
-	// NotoColorEmoji: [require("./assets/NotoColorEmoji.ttf")],
+	Noto: [require("./assets/NotoColorEmoji-Regular.ttf")],
 };
 
 loadTypefaces(fonts).then(async (result) => {

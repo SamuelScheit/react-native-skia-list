@@ -1,10 +1,18 @@
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
-import type { GroupProps, ImageProps, RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
+import type {
+	GroupProps,
+	ImageProps,
+	RenderNode,
+	RoundedRectProps,
+	SkRect,
+	SkRRect,
+} from "@shopify/react-native-skia/lib/typescript/src/";
 import { type MessageItem } from "./State";
 import { makeMutable, type SharedValue } from "react-native-reanimated";
 import { type ShareableState, type SkiaFlatListProps } from "react-native-skia-list";
 import type { getRandomMessageData } from "./randomMessage";
+import { Platform } from "react-native";
 
 const rectRadius = 20;
 
@@ -47,8 +55,6 @@ export function getRenderMessageItem({
 	bubble: boolean;
 	avatars: SharedValue<Record<string, RenderNode<ImageProps> | undefined>>;
 }) {
-	"worklet";
-
 	const reactionFontSize = 15;
 	const bubblePercentageWidth = 0.9;
 	const avatarSize = bubble ? 40 : 35;
@@ -57,6 +63,10 @@ export function getRenderMessageItem({
 	const reactionPaddingY = 5;
 	const reactionPaddingX = 7;
 	const authorSpacing = 3;
+
+	const isWeb = Platform.OS === "web";
+
+	const rects = {} as Record<string, any>;
 
 	function renderItem(item: MessageItem, index: number, state: ShareableState, element?: RenderNode<GroupProps>) {
 		"worklet";
@@ -71,6 +81,7 @@ export function getRenderMessageItem({
 		const below = data.value[index - 1] as MessageItem | undefined;
 		const above = data.value[index + 1] as MessageItem | undefined;
 
+		const id = item.id;
 		const isMe = user_id === my_user_id;
 		const isOther = !isMe;
 		const below_same = below?.user_id === user_id;
@@ -211,7 +222,7 @@ export function getRenderMessageItem({
 			const bubblePaint = isMe ? bubbleMePaint : bubbleOtherPaint;
 
 			if (bubble) {
-				const rrectFull = rrectFullShared.value;
+				let rrectFull = (isWeb ? rects[id] : null) || rrectFullShared.value;
 				rrectFull.bottomLeft = below_same && isOther ? rectRadius0 : rectRadiusFull;
 				rrectFull.topLeft = above_same && isOther ? rectRadius0 : rectRadiusFull;
 				rrectFull.bottomRight = below_same && isMe ? rectRadius0 : rectRadiusFull;
@@ -226,6 +237,10 @@ export function getRenderMessageItem({
 				rrectFull.rect.y = y;
 				rrectFull.rect.width = bubbleWidth;
 				rrectFull.rect.height = bubbleHeight;
+
+				if (isWeb) {
+					rrectFull = rects[id] = { ...rrectFull, rect: { ...rrectFull.rect } };
+				}
 
 				element.addChild(SkiaDomApi.RRectNode({ rect: rrectFull, paint: bubblePaint }));
 			}
