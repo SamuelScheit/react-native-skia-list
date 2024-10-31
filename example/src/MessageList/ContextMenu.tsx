@@ -54,6 +54,8 @@ const paragraphStyle: SkTextStyle = {
 	fontFamilies: ["Roboto"],
 };
 
+if (!globalThis.fontManager) globalThis.fontManager = Skia.TypefaceFontProvider.Make();
+
 const actionBuilder = Skia.ParagraphBuilder.Make(
 	{
 		textAlign: TextAlign.Left,
@@ -173,6 +175,8 @@ export function getContextMenu(state: ContextMenuProps) {
 		_nativeId,
 		my_user_id: user_id,
 		redrawItems,
+		getTransformed,
+		keyExtractor,
 	} = state;
 
 	const scrollListenerId = 4;
@@ -500,7 +504,9 @@ export function getContextMenu(state: ContextMenuProps) {
 		list.value.addChild(element);
 
 		unmountElement(result.index, result.item);
-		renderItem!(result.item, result.index, shareableState, element);
+		const id = keyExtractor(result.item, result.index);
+		const transformed = getTransformed(result.item, result.index, id, shareableState);
+		renderItem!(transformed, result.index, shareableState, element);
 
 		runOnJS(RenderActions)(translation, result);
 

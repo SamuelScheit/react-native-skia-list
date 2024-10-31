@@ -11,8 +11,9 @@ import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "./State";
 import { runOnUI, runOnJS } from "react-native-reanimated";
 import { Platform, type LayoutRectangle, type NativeMethods, type ScrollViewProps, type ViewStyle } from "react-native";
-import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
+import { clamp } from "@shopify/react-native-skia";
 
 /**
  */
@@ -156,7 +157,25 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	if (!state) {
 		state = useSkiaScrollView(p) as any;
 	}
-	const { _nativeId, gesture, layout, safeArea, maxHeight, content, root, Scrollbar, mode } = state;
+	const { _nativeId, gesture, layout, safeArea, maxHeight, content, root, Scrollbar, mode, scrollY } = state;
+
+	useEffect(() => {
+		if (Platform.OS !== "web") return;
+		function onWheel(event: any) {
+			// event.preventDefault();
+			// event.stopPropagation();
+			scrollY.value = clamp(scrollY.value - event.deltaY, 0, maxHeight.value);
+			console.log(event.deltaY, ref.current);
+			// @ts-ignore
+			ref.current?.redraw();
+		}
+
+		globalThis.window.addEventListener("wheel", onWheel, true);
+
+		return () => {
+			globalThis.window.removeEventListener("wheel", onWheel);
+		};
+	}, []);
 
 	useState(() => {
 		function setMode(value: string) {

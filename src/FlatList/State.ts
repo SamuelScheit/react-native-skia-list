@@ -74,6 +74,8 @@ export type SkiaFlatListState<T = any, B = T> = {
 	renderItem: (item: B, index: number, state: ShareableState<T>, element?: RenderNode<GroupProps>) => number;
 	/** Transforms the item data */
 	transformItem?: (item: T, index: number, id: any, state: ShareableState<T>) => B;
+	/** Returns the transformed item */
+	getTransformed: (item: T, index: number, id: any, state: ShareableState<T>) => B;
 	/** The data array */
 	data: SharedValue<T[]>;
 	/** The transformed data array */
@@ -782,6 +784,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			scrollToStart: callOnUI(scrollToStart),
 			scrollToEnd: callOnUI(scrollToEnd),
 			scrollToItem: callOnUI(scrollToItem),
+			getTransformed: callOnUI(getTransformed),
 		};
 	});
 

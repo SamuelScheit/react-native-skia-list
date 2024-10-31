@@ -120,6 +120,10 @@ export function getRenderMessageItem({
 		const bubblePaddingX = 15;
 		const maxTextWidth = listSize * bubblePercentageWidth - bubblePaddingX * 2 - avatarSpace;
 
+		if (text && !text.layout) {
+			console.log("text", text.layout, text);
+		}
+
 		text?.layout(maxTextWidth);
 		if (displayAuthor) author.layout(maxTextWidth);
 

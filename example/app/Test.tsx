@@ -79,8 +79,6 @@ globalThis.paragraph = paragraph;
 paragraph.layout(300);
 console.log("paragraph", paragraph.getHeight());
 
-const font = Skia.Font(globalThis.roboto, 50);
-
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("red"));
 
