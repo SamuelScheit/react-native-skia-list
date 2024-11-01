@@ -9,6 +9,7 @@ import type {
 	SkParagraphStyle,
 	SkTextStyle,
 } from "@shopify/react-native-skia/lib/typescript/src/";
+import { emojiFontFamily } from "./Assets";
 
 const paragraphStyle: SkTextStyle = {
 	fontSize: 18,
@@ -192,12 +193,14 @@ export function getRandomMessage(
 	for (const reaction of msg.reactions) {
 		emojiBuilder.reset();
 		const paragraph = emojiBuilder
-			.pushStyle({ fontSize: 15, color: black })
+			.pushStyle({ fontSize: 15, color: black, fontFamilies: [emojiFontFamily] })
 			.addText(reaction.emoji)
-			.pushStyle({ fontSize: 14, color: black })
+			.pushStyle({ fontSize: 14, color: black, fontFamilies: ["Roboto"] })
 			.addText(" " + reaction.count)
 			.build();
 		paragraph.layout(40);
+
+		console.log(paragraph.getMaxIntrinsicWidth(), reaction.emoji, emojiBuilder);
 
 		reactions.push({
 			...reaction,

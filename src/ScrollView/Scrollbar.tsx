@@ -92,13 +92,13 @@ export function getScrollbar(state: ScrollbarProps): ScrollbarState {
 			if (touch.x < layout.value.width - 30) {
 				state.fail();
 			} else {
-				state.activate();
-				state.begin();
-
 				visible.value = withTiming(1, { duration: 200 });
 				dragging.value = withTiming(1, { duration: 200 });
 				runOnJS(vibrate)();
 				beginY.value = scrollY.value / maxHeight.value;
+
+				state.activate();
+				state.begin();
 			}
 		})
 		.onTouchesUp((_, state) => {

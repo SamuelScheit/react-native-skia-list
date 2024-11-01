@@ -71,7 +71,7 @@ console.log("emojiFontFamily", emojiFontFamily);
 export const emojiBuilder = Skia.ParagraphBuilder.Make(
 	{
 		textAlign: TextAlign.Left,
-		textStyle: { ...paragraphStyle, fontSize: emojiSize, fontFamilies: [emojiFontFamily], color: black },
+		textStyle: { ...paragraphStyle, fontSize: emojiSize, fontFamilies: ["Roboto", "Noto"], color: white },
 	},
 	globalThis.fontManager
 );

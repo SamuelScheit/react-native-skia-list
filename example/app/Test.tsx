@@ -45,14 +45,14 @@ const paragraphBuilder = Skia.ParagraphBuilder.Make(
 		textStyle: {
 			color: Skia.Color("red"),
 			fontSize: 50,
-			fontFamilies: ["Roboto"],
+			fontFamilies: ["Roboto", "Noto"],
 			decoration: TextDecoration.Underline,
 			decorationColor: Skia.Color("green"),
 			decorationStyle: TextDecorationStyle.Wavy,
 			decorationThickness: 1,
 			letterSpacing: 1,
 			fontStyle: {
-				slant: FontSlant.Italic,
+				slant: FontSlant.Upright,
 				weight: FontWeight.Normal,
 				width: FontWidth.Normal,
 			},
@@ -73,7 +73,7 @@ Skia.ParagraphBuilder.Make;
 
 globalThis.paragraphBuilder = paragraphBuilder;
 
-const paragraph = paragraphBuilder.addText("Hello, world!").build();
+const paragraph = paragraphBuilder.addText("test 😂").build();
 
 globalThis.paragraph = paragraph;
 paragraph.layout(300);
@@ -88,8 +88,8 @@ export default function TestSkiaPicture() {
 	// const canvasShared = useSharedValue<SkCanvas>(recorderShared.value.beginRecording());
 	const startY = useSharedValue(0);
 	const startX = useSharedValue(0);
-	const y = useSharedValue(200);
-	const x = useSharedValue(200);
+	const y = useSharedValue(100);
+	const x = useSharedValue(100);
 	// const ref = useRef(null);
 
 	// const setPicture =

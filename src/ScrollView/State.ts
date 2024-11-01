@@ -210,6 +210,8 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 				SkiaViewApi.requestRedraw(_nativeId);
 			},
 			layout,
+			scrollY,
+			startY,
 			...props,
 			root: props.root || makeMutable(root),
 			content: props.content || makeMutable(SkiaDomApi.GroupNode({})),
@@ -241,6 +243,8 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 
 		const scrollState = (props.customScrollGesture || getScrollGesture)({
 			...props,
+			scrollY,
+			startY,
 			startedAnimation: state.startedAnimation,
 			finishedAnimation: state.finishedAnimation,
 			layout,
@@ -253,6 +257,12 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 		scrollState.gesture.withRef(scrollGestureRef);
 
 		const { matrix, content, redraw, safeArea } = state;
+		console.log(
+			"state scrollview scrollY",
+			state.scrollY === scrollState.scrollY,
+			scrollY === scrollState.scrollY,
+			scrollY === state.scrollY
+		);
 		const scrollbar = getScrollbar({ ...scrollState, ...state } as any);
 		const scrollbarRef = { current: scrollbar.gesture };
 		scrollbar.gesture.withRef(scrollbarRef);

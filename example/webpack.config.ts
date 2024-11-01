@@ -123,29 +123,29 @@ module.exports = async function (env, argv) {
 		"react-native-haptic-feedback": `throw new Error("react-native-haptic-feedback is not supported in web")`,
 	};
 
-	// config.plugins.push(
-	// 	new (class CopySkiaPlugin {
-	// 		apply(compiler) {
-	// 			compiler.hooks.thisCompilation.tap("AddSkiaPlugin", (compilation) => {
-	// 				compilation.hooks.processAssets.tapPromise(
-	// 					{
-	// 						name: "copy-skia",
-	// 						stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
-	// 					},
-	// 					async () => {
-	// 						const src = require.resolve("canvaskit-wasm/bin/full/canvaskit.wasm");
-	// 						if (!compilation.getAsset(src)) {
-	// 							compilation.emitAsset(
-	// 								"/canvaskit.wasm",
-	// 								new sources.RawSource(await fs.promises.readFile(src))
-	// 							);
-	// 						}
-	// 					}
-	// 				);
-	// 			});
-	// 		}
-	// 	})()
-	// );
+	config.plugins.push(
+		new (class CopySkiaPlugin {
+			apply(compiler) {
+				compiler.hooks.thisCompilation.tap("AddSkiaPlugin", (compilation) => {
+					compilation.hooks.processAssets.tapPromise(
+						{
+							name: "copy-skia",
+							stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+						},
+						async () => {
+							const src = require.resolve("canvaskit-wasm/bin/full/canvaskit.wasm");
+							if (!compilation.getAsset(src)) {
+								compilation.emitAsset(
+									"/canvaskit.wasm",
+									new sources.RawSource(await fs.promises.readFile(src))
+								);
+							}
+						}
+					);
+				});
+			}
+		})()
+	);
 	// config.plugins.push(new NodePolyfillPlugin());
 
 	config.resolve = {

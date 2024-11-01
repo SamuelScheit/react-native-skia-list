@@ -18,7 +18,7 @@ export default function FlatList() {
 			{
 				textStyle: {
 					fontSize: 24,
-					fontFamilies: ["Roboto"],
+					fontFamilies: ["Roboto", "Noto"],
 					color: Skia.Color("#fff"),
 				},
 			},

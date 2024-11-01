@@ -165,7 +165,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 			// event.preventDefault();
 			// event.stopPropagation();
 			scrollY.value = clamp(scrollY.value - event.deltaY, 0, maxHeight.value);
-			console.log(event.deltaY, ref.current);
+
 			// @ts-ignore
 			ref.current?.redraw();
 		}
@@ -180,9 +180,8 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	useState(() => {
 		function setMode(value: string) {
 			if (Platform.OS === "web") {
-				console.log(ref.current.props.mode);
 				// @ts-ignore
-				ref.current.setDrawMode(value);
+				ref.current?.setDrawMode(value);
 			} else {
 				ref.current?.setNativeProps?.({ mode: value });
 			}
