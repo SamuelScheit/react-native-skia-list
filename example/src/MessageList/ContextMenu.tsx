@@ -30,7 +30,7 @@ import { type PointProp, PixelRatio } from "react-native";
 import React, { type ReactNode, useLayoutEffect } from "react";
 import { isInBound, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
-import type { SkMatrix } from "@shopify/react-native-skia/src/skia/types";
+import type { SkMatrix } from "@shopify/react-native-skia/lib/typescript/src/";
 
 export const dpi = 1;
 export const scale = PixelRatio.getFontScale() * 1 * dpi;

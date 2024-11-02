@@ -116,6 +116,9 @@ export type SkiaFlatListState<T = any, B = T> = {
 	/** Unmounts an element at a specific index or by item */
 	unmountElement: (index: number | undefined, item: T | undefined) => void;
 
+	/** Force redraws a specific element */
+	redrawElement(index: number | undefined, item?: T | undefined): void;
+
 	/** Recalculates the items in the list and (un)mounts elements as needed.
 	 * Is automatically called on scroll or when the data changes.
 	 */
@@ -197,6 +200,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 		const { transformItem } = props;
 		const getTransformed = !transformItem
 			? (item: T, index: number, id: any, state: ShareableState<T>) => {
+					"worklet";
 					return item as any as B;
 				}
 			: (item: T, index: number, id: any, state: ShareableState<T>) => {
@@ -400,9 +404,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			return rowY - addThreshold > scrollY.value + layout.value.height;
 		}
 
-		/**
-		 * Unmounts an element at a specific index or by item
-		 */
 		function unmountElement(index: number | undefined, item?: T | undefined) {
 			"worklet";
 			if (item === undefined && index !== undefined) item = data.value[index];
@@ -435,7 +436,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 			let itemHeight = renderItem(transformed, index, shareableState, element);
 
-			if (invertedFactor === -1) {
+			if (invertedFactor === -1 && rowY > 0) {
 				offset = rowY * invertedFactor - itemHeight;
 				translation.identity().translate(safeArea.value.left, offset);
 			}
@@ -446,6 +447,21 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			content.value.addChild(element);
 
 			return itemHeight;
+		}
+
+		function redrawElement(index: number | undefined, item?: T | undefined) {
+			"worklet";
+			if (item === undefined && index !== undefined) item = data.value[index];
+			if (index === undefined && item !== undefined) index = data.value.indexOf(item);
+			if (index < 0 || index >= data.value.length) return;
+			if (!item) return;
+
+			const id = keyExtractor(item, index!);
+
+			const element = elements.value[id];
+			if (element) content.value.removeChild(element);
+
+			mountElement(rowOffsets.value[id], item, index);
 		}
 
 		/**
@@ -796,6 +812,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			scrollToEnd: callOnUI(scrollToEnd),
 			scrollToItem: callOnUI(scrollToItem),
 			getTransformed: callOnUI(getTransformed),
+			redrawElement: callOnUI(redrawElement),
 		};
 	});
 
