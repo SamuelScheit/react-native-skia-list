@@ -146,7 +146,7 @@ const ctx = { Skia };
 globalThis.SkiaViewApi = {
 	setJsiProperty() {},
 	requestRedraw() {},
-};
+} as any;
 
 globalThis.SkiaDomApi = {
 	RectNode: (props: RectProps) => new RectNode(ctx, props),

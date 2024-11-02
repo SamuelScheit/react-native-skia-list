@@ -158,7 +158,15 @@ export type TapResult<T> = {
 	height: number;
 };
 
-/** */
+/**
+ *
+ * Use this hook to manage and access the state of SkiaFlatList.
+ * ```tsx
+ * const state = useSkiaFlatList({ ... });
+ *
+ * <SkiaFlatList list={state} style={{ flex: 1 }} />
+ * ```
+ */
 export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as any): SkiaFlatListState<T, B> {
 	const scrollView = useSkiaScrollView(props);
 	const [list] = useState(() => {
@@ -245,7 +253,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			const dataValue = data.value;
 			var itemHeight = 0;
 			var id = "";
-			var item = dataValue[0]!;
+			var item: T | undefined;
 
 			for (index = 0; index < dataValue.length; index++) {
 				item = dataValue[index]!;
@@ -418,7 +426,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			"worklet";
 
 			let offset = rowY;
-			const translation = Skia.Matrix().translate(safeArea.value.left, rowY).get();
+			const translation = Skia.Matrix().translate(safeArea.value.left, rowY);
 			const element = SkiaDomApi.GroupNode({
 				matrix: translation,
 			});
@@ -429,8 +437,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 			if (invertedFactor === -1) {
 				offset = rowY * invertedFactor - itemHeight;
-				translation[5] = offset;
-				element.setProp("matrix", translation);
+				translation.identity().translate(safeArea.value.left, offset);
 			}
 
 			heights.value[id] = itemHeight;
@@ -589,7 +596,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			}
 
 			if (index === dataValue.length) {
-				maxHeight.value = rowY - layout.value.height + safeArea.value.bottom + safeArea.value.top;
+				maxHeight.value = Math.max(rowY - layout.value.height + safeArea.value.bottom + safeArea.value.top, 1);
 			}
 
 			const diff = performance.now() - start;
@@ -757,11 +764,15 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 				redrawItems();
 			});
 			layout.addListener(2, (value) => {
-				maxHeight.value =
+				maxHeight.value = Math.max(
 					estimatedItemHeight * initialData.length -
-					value.height +
-					safeArea.value.bottom +
-					safeArea.value.top;
+						value.height +
+						safeArea.value.bottom +
+						safeArea.value.top,
+					1
+				);
+
+				console.log("maxHeight", maxHeight.value, estimatedItemHeight * initialData.length);
 
 				redrawItems();
 			});

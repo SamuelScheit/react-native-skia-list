@@ -249,20 +249,12 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 			finishedAnimation: state.finishedAnimation,
 			layout,
 			offsetY,
-			// scrollY,
-			// startY,
-			// scrollingDisabled,
 		});
 		const scrollGestureRef = { current: scrollState.gesture };
 		scrollState.gesture.withRef(scrollGestureRef);
 
 		const { matrix, content, redraw, safeArea } = state;
-		console.log(
-			"state scrollview scrollY",
-			state.scrollY === scrollState.scrollY,
-			scrollY === scrollState.scrollY,
-			scrollY === state.scrollY
-		);
+
 		const scrollbar = getScrollbar({ ...scrollState, ...state } as any);
 		const scrollbarRef = { current: scrollbar.gesture };
 		scrollbar.gesture.withRef(scrollbarRef);
@@ -303,12 +295,6 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 			function onScroll(value: number) {
 				const matrixValue = matrix.value;
 				matrixValue.identity().translate(0, value * -1 * invertedFactor + height + offsetY.value);
-				// content.value.setProp("matrix", matrixValue);
-				// content.value.setProp("transform", [
-				// 	{
-				// 		translateY: value * -1 * invertedFactor + offsetY.value,
-				// 	},
-				// ]);
 
 				redraw();
 			}
