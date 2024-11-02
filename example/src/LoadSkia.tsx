@@ -1,4 +1,4 @@
-import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { LoadSkiaWeb } from "@shopify/react-native-skia/src/web";
 
 LoadSkiaWeb({
 	locateFile(file) {

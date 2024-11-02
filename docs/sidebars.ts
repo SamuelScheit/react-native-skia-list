@@ -18,18 +18,33 @@ const sidebars: SidebarsConfig = {
 			id: "index",
 			label: "Getting Started",
 		},
+		// {
+		// 	type: "doc",
+		// 	id: "ScrollView/index",
+		// 	label: "<SkiaScrollView />",
+		// },
+		// {
+		// 	type: "doc",
+		// 	id: "FlatList/index",
+		// 	label: "<SkiaFlatList />",
+		// },
 		{
-			type: "doc",
-			id: "ScrollView/index",
-			label: "<SkiaScrollView />",
-		},
-		{
-			type: "doc",
-			id: "FlatList/index",
-			label: "<SkiaFlatList />",
+			type: "category",
+			label: "API",
+			items: [
+				{
+					type: "doc",
+					id: "api/ScrollView/index",
+					label: "<SkiaScrollView />",
+				},
+				{
+					type: "doc",
+					id: "api/FlatList/index",
+					label: "<SkiaFlatList />",
+				},
+			],
 		},
 	],
-
 };
 
 export default sidebars;

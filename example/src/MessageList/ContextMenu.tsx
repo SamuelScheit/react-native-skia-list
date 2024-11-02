@@ -8,9 +8,9 @@ import type {
 const { FontSlant, FontWeight, FontWidth, TextAlign, Skia, Paragraph, RoundedRect, Line, ImageSVG } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 const { SkiaRoot } =
-	require("@shopify/react-native-skia/lib/commonjs/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
+	require("@shopify/react-native-skia/src/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
 const { NATIVE_DOM } =
-	require("@shopify/react-native-skia/lib/commonjs/renderer/HostComponents") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents");
+	require("@shopify/react-native-skia/src/renderer/HostComponents") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents");
 const { SkiaViewApi } =
 	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
 
@@ -30,6 +30,7 @@ import { type PointProp, PixelRatio } from "react-native";
 import React, { type ReactNode, useLayoutEffect } from "react";
 import { isInBound, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
+import type { SkMatrix } from "@shopify/react-native-skia/src/skia/types";
 
 export const dpi = 1;
 export const scale = PixelRatio.getFontScale() * 1 * dpi;
@@ -442,7 +443,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		});
 	}
 
-	function RenderActions(matrix: number[], tap: TapResult<MessageItem>) {
+	function RenderActions(matrix: SkMatrix, tap: TapResult<MessageItem>) {
 		const root = ReactSkiaRender([Actions(tap), Emojis(tap)], () => {
 			SkiaViewApi.requestRedraw(_nativeId);
 		});
@@ -496,7 +497,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		list.value.addChild(filter);
 		backdropFilter.value = filter;
 		// item
-		const translation = Skia.Matrix().translate(0, result.absoluteY).get();
+		const translation = Skia.Matrix().translate(0, result.absoluteY);
 		const element = SkiaDomApi.GroupNode({
 			matrix: translation,
 		});
@@ -517,16 +518,13 @@ export function getContextMenu(state: ContextMenuProps) {
 
 		function onUpdateY() {
 			const offsetY = scrollY.value - startScrollY.value + contextMenuOffsetY.value;
-			translation[5] = result.absoluteY + offsetY;
-			element.setProp("matrix", translation);
-			actionRoot.value?.dom.setProp("matrix", translation);
+			translation.identity().translate(0, result.absoluteY + offsetY);
 		}
 
 		scrollY.addListener(scrollListenerId, onUpdateY);
 		contextMenuOffsetY.addListener(_nativeId, onUpdateY);
 		actionsOpacity.addListener(_nativeId, (value) => {
 			opacityPaint.setAlphaf(value);
-			actionRoot.value?.dom.setProp("layer", opacityPaint);
 		});
 	}
 

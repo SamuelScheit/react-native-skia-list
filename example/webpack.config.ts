@@ -6,6 +6,7 @@ import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import fs from "fs";
 import { sources } from "webpack";
 import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
+import type { Environment } from "@expo/webpack-config/webpack/types";
 
 const isDevelopment = true;
 
@@ -55,7 +56,7 @@ module.exports = async function (env, argv) {
 			config: {
 				...app,
 				web: {
-					...app.web,
+					...app.expo.web,
 					bundler: "webpack",
 					build: {
 						babel: {
@@ -107,7 +108,7 @@ module.exports = async function (env, argv) {
 					},
 				},
 			},
-		},
+		} as unknown as Environment,
 		argv
 	);
 

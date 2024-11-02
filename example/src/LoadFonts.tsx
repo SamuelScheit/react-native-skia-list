@@ -4,11 +4,9 @@ import { Platform } from "react-native";
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 
-const loadTypefaces = (typefacesToLoad: Record<string, DataModule[]>) => {
+const loadTypefaces = (typefacesToLoad: Record<string, string[]>) => {
 	const promises = Object.keys(typefacesToLoad).flatMap((familyName) => {
 		return typefacesToLoad[familyName].map((typefaceToLoad) => {
-			console.log("Loading typeface", familyName, typefaceToLoad, Platform.resolveAsset);
-			// @ts-ignore
 			return Skia.Data.fromURI(typefaceToLoad).then((data) => {
 				console.log("Loaded typeface", familyName, data);
 				const tf = Skia.Typeface.MakeFreeTypeFaceFromData(data);
@@ -23,7 +21,7 @@ const loadTypefaces = (typefacesToLoad: Record<string, DataModule[]>) => {
 	return Promise.all(promises);
 };
 
-const fonts: Record<string, DataModule[]> = {
+const fonts: Record<string, string[]> = {
 	Roboto: [require("./assets/Roboto-Regular.ttf")],
 	Noto: [require("./assets/NotoColorEmoji-Regular.ttf")],
 };

@@ -1,6 +1,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import remarkCode from "remark-code-snippets";
 
 const config: Config = {
 	title: "React Native Skia List",
@@ -46,7 +47,7 @@ const config: Config = {
 		[
 			"docusaurus-plugin-typedoc",
 			{
-				out: "./docs/",
+				out: "./docs/api/",
 				watch: process.env.TYPEDOC_WATCH,
 				entryPoints: [
 					// "../src/index.ts",
@@ -57,10 +58,9 @@ const config: Config = {
 					"../src/FlatList/index.ts",
 				],
 				tsconfig: "../tsconfig.json",
-				entryPointStrategy: "expand",
+				entryPointStrategy: "resolve",
 				skipErrorChecking: true,
-				readme: "../README.md",
-				mergeReadme: true,
+				readme: "none",
 				excludeNotDocumented: true,
 				flattenOutputFiles: false,
 				outputFileStrategy: "members",
@@ -107,6 +107,7 @@ const config: Config = {
 					// Please change this to your repo.
 					// Remove this to remove the "edit this page" links.
 					editUrl: "https://github.com/samuelscheit/react-native-skia-list/tree/main/docs/",
+					remarkPlugins: [remarkCode],
 				},
 				theme: {
 					customCss: "./src/css/custom.css",

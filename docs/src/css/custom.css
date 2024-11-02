@@ -33,3 +33,7 @@ html {
 .markdown h3.anchor {
 	--ifm-h3-font-size: 1.3rem;
 }
+
+.markdown {
+	tab-size: 2rem;
+}

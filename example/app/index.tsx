@@ -31,6 +31,7 @@ export default function App() {
 			<Button href="/FlatList">FlatList</Button>
 			<Button href="/WGPU">WebGPU</Button>
 			<Button href="/Test">Test</Button>
+			<Button href="/GettingStarted">GettingStarted</Button>
 		</ScrollView>
 	);
 }

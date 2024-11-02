@@ -3,13 +3,13 @@ import { useSkiaFlatList, type SkiaFlatListProps, type SkiaFlatListState } from 
 import type { ReactNode } from "react";
 import { SkiaScrollView, type SkiaScrollViewElementProps } from "../ScrollView";
 
-export type SkiaFlatListElementProps<T = any> = SkiaScrollViewElementProps & SkiaFlatListProps<T>;
+export type SkiaFlatListElementProps<T = any, B = T> = SkiaScrollViewElementProps & SkiaFlatListProps<T, B>;
 
 /**
  * Use `<SkiaFlatList />` as a replacement for `<FlatList />` to render a list of items.
  *
  * :::info
- * This component uses the [`<SkiaScrollView />`](../ScrollView/) and inherits all props from it. \
+ * This component uses the `<SkiaScrollView />` and inherits all props from it. \
  * Also it uses the Skia Rendering Engine so you can't use React Native components inside it.
  * :::
  *
@@ -22,96 +22,70 @@ export type SkiaFlatListElementProps<T = any> = SkiaScrollViewElementProps & Ski
  *
  * 
  * ```tsx
- * function FlatList() {
- *  const safeArea = useSafeAreaInsets();
- *
- *  const blue = Skia.Paint();
- *  blue.setColor(Skia.Color("rgb(67, 96, 162)"));
- *
- *  const white = Skia.Color("#fff");
- *
- *  const paragraphBuilder = useMemo(() => {
- *    return Skia.ParagraphBuilder.Make({
- *      textStyle: {
- *        fontSize: 24,
- *        fontFamilies: ["Arial"],
- *        color: Skia.Color("#fff"),
- *      },
- *    });
- *  }, []);
- *
- *  const initialData = useCallback(() => {
- *    return Array.from({ length: 100 }, (_, i) => {
- *      paragraphBuilder.reset();
- *
- *      return {
- *        id: `${i}`,
- *        text: paragraphBuilder.addText(`Item ${i}`).build(),
- *      };
- *    });
- *  }, []);
- *
- *  type Entry = ReturnType<typeof initialData>[number];
- *
- *  const keyExtractor = useCallback((item: Entry) => {
- *    "worklet";
- *    return item.id;
- *  }, []);
- *
- *  const rectPadding = 10;
- *  const rectMargin = 10;
- *
- *  return (
- *    <SkiaFlatList
- *      safeArea={safeArea}
- *      style={{ flex: 1 }}
- *      initialData={initialData}
- *      keyExtractor={keyExtractor}
- *      renderItem={(item, _index, state, element) => {
- *        "worklet";
- *
- *        const { width } = state.layout.value;
- *
- *        let maxTextWidth = width - rectPadding * 2;
- *
- *        item.text.layout(maxTextWidth);
- *
- *        const textHeight = item.text.getHeight();
- *        const rectHeight = textHeight + rectPadding * 2;
- *
- *        const itemHeight = rectHeight + rectMargin;
- *
- *        if (!element) return itemHeight;
- *
- *        element.addChild(
- *           SkiaDomApi.RectNode({
- *             x: 0,
- *             y: 0,
- *             width,
- *             height: rectHeight,
- *             paint: blue,
- *           })
- *        );
- *
- *        element.addChild(
- *          SkiaDomApi.ParagraphNode({
- *            paragraph: item.text,
- *            x: rectPadding,
- *            y: rectPadding,
- *            width: maxTextWidth,
- *            color: white,
- *          })
- *        );
- *
- *        return itemHeight;
- *      }}
- *    />
- *  );
- *}
+ * // needed for SkiaDomApi type
+import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
+import { Skia } from "@shopify/react-native-skia";
+import { SkiaFlatList } from "react-native-skia-list";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Create a Skia ParagraphBuilder that will be used to build the paragraph for each item
+const paragraphBuilder = Skia.ParagraphBuilder.Make({
+  textStyle: {
+    color: Skia.Color("black"),
+    fontSize: 20,
+  },
+});
+
+export default function Test2() {
+  const safeArea = useSafeAreaInsets();
+
+  return (
+    <SkiaFlatList
+	  safeArea={safeArea}
+      // Provide an initialData array that can be serialized and passed to the worklet thread
+      initialData={() => [0, 1, 2, 3, 4, 5, 6, 7, 8]}
+      // To optimize performance for the initial mount you can provide a transformItem function
+      // It will be called once for each item when it is mounted the first time
+      transformItem={(item, index, id, state) => {
+        "worklet";
+
+        paragraphBuilder.reset(); // reuses the paragraphBuilder for each item
+
+        return paragraphBuilder.addText(`Item ${item}`).build();
+      }}
+      // renderItem will be called whenever an item visibility changes
+      renderItem={(item, index, state, element) => {
+        "worklet";
+
+        const { width } = state.layout.value;
+
+        item.layout(width); // calculates the paragraph layout
+
+        const height = item.getHeight(); // gets the height of the paragraph
+
+        // element is a Skia.GroupNode or will be undefined if only the height of the element is needed
+        if (!element) return height;
+
+        element.addChild(
+          // see the following link for all element types
+          // https://github.com/Shopify/react-native-skia/blob/5c38b27d72cea9c158290adb7d23c6109369ac2f/packages/skia/src/renderer/HostComponents.ts#L72-L191
+          SkiaDomApi.ParagraphNode({
+            paragraph: item,
+            x: 0,
+            y: 0,
+            width,
+          }),
+        );
+
+        return height;
+      }}
+    />
+  );
+}
 
  * ```
  */
-export function SkiaFlatList<T>(props: SkiaFlatListElementProps<T>) {
+export function SkiaFlatList<T, B = T>(props: SkiaFlatListElementProps<T, B>) {
 	var { list, ...p } = props;
 	if (!list) {
 		list = useSkiaFlatList(p) as any;
