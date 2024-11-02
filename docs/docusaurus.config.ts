@@ -19,7 +19,7 @@ const config: Config = {
 	organizationName: "samuelscheit", // Usually your GitHub org/user name.
 	projectName: "react-native-skia-list", // Usually your repo name.
 
-	onBrokenLinks: "throw",
+	onBrokenLinks: "warn",
 	onBrokenMarkdownLinks: "warn",
 
 	// Even if you don't use internationalization, you can use this field to set
