@@ -9,7 +9,7 @@ import { useState } from "react";
 import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
-import type { GroupProps, RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
+import { ColorShader, type GroupProps, type RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
 import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
 import type { PointProp } from "react-native";
 import { callOnUI } from "../Util/callOnUI";
@@ -183,7 +183,9 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 		let start = performance.now();
 		const initialData = props.initialData?.() ?? [];
 		const data = makeMutable(initialData);
+		globalThis.data = data;
 		const transformedData = makeMutable(props.initialTransformed?.() ?? {});
+		globalThis.transformed = transformedData;
 		console.log("initialData", performance.now() - start, initialData.length);
 		const keyExtractor =
 			props.keyExtractor ??
@@ -790,6 +792,14 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 				);
 
 				console.log("maxHeight", maxHeight.value, estimatedItemHeight * initialData.length);
+
+				Object.keys(elements.value).forEach((id) => {
+					const element = elements.value[id];
+					if (element) {
+						content.value.removeChild(element);
+					}
+					delete elements.value[id];
+				});
 
 				redrawItems();
 			});

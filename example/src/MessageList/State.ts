@@ -85,9 +85,8 @@ export function useMessageListState(props: useMessageListProps & MessageListProp
 			},
 			onStartSwipe(e) {
 				"worklet";
-				const item = getItemFromTouch(e);
-				console.log("onStartSwipe", item?.id);
-				swipeItem.value = item?.id;
+				const result = getItemFromTouch(e);
+				swipeItem.value = result?.item?.id;
 			},
 			onSwipe() {
 				"worklet";
@@ -129,17 +128,19 @@ export function useMessageListState(props: useMessageListProps & MessageListProp
 			"worklet";
 
 			swipePosition.addListener(_nativeId, (value) => {
+				console.log("swipePosition", value, !!swipeItem.value);
 				if (!swipeItem.value) return;
 				const element = elements.value[swipeItem.value];
 				if (!element) return;
 
 				const x = value;
 				const y = rowOffsets.value[swipeItem.value];
+				console.log("swipePosition", value, x, y);
 				if (y === undefined) return;
 
 				const itemHeight = heights.value[swipeItem.value] || 0;
 
-				// element.setProp("matrix", Skia.Matrix().translate(x, y).get());
+				element.setProp("matrix", Skia.Matrix().translate(x, y).get());
 				SkiaViewApi.requestRedraw(_nativeId);
 
 				const replyIconSize = interpolateClamp(value, -swipeTreshold, 0, 1, 0);

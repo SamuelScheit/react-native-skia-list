@@ -179,12 +179,23 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 
 	useState(() => {
 		function setMode(value: string) {
+			if (!ref.current) return;
+
 			if (Platform.OS === "web") {
 				// @ts-ignore
-				ref.current?.setDrawMode(value);
+				ref.current._mode = value;
+				// @ts-ignore
+				ref.current.redraw();
 			} else {
-				ref.current?.setNativeProps?.({ mode: value });
+				ref.current.setNativeProps?.({ mode: value });
 			}
+		}
+
+		if (Platform.OS === "web") {
+			globalThis.SkiaViewApi.requestRedraw = () => {
+				// @ts-ignore
+				ref.current?.redraw();
+			};
 		}
 
 		runOnUI(() => {
@@ -242,8 +253,8 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 					})(e.nativeEvent.layout);
 				}}
 				nativeID={`${_nativeId}`}
-				mode={"continuous"}
-				// mode={mode.value}
+				// mode={"continuous"}
+				mode={mode.value}
 				debug={debug}
 				style={style || { flex: 1 }}
 				root={state.root.value}
