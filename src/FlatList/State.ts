@@ -439,6 +439,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			if (invertedFactor === -1 && rowY > 0) {
 				offset = rowY * invertedFactor - itemHeight;
 				translation.identity().translate(safeArea.value.left, offset);
+				element.setProp("matrix", translation);
 			}
 
 			heights.value[id] = itemHeight;

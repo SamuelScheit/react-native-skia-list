@@ -242,9 +242,9 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 		SkiaViewApi.setJsiProperty(_nativeId, "root", root);
 
 		const scrollState = (props.customScrollGesture || getScrollGesture)({
-			...props,
 			scrollY,
 			startY,
+			...props,
 			startedAnimation: state.startedAnimation,
 			finishedAnimation: state.finishedAnimation,
 			layout,
