@@ -2,10 +2,12 @@ const { Skia, RoundedRect } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 
 import type { ScrollGestureState } from "./ScrollGesture";
-import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable } from "react-native-reanimated";
+import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable, type SharedValue } from "react-native-reanimated";
 import * as Interpolate from "../Util/Interpolate";
 import { Gesture, type GestureType } from "react-native-gesture-handler";
 import { clearAnimatedTimeout, setAnimatedTimeout } from "../Util/timeout";
+import type { LayoutRectangle } from "react-native";
+import type { EdgeInsets } from "./State";
 const { interpolateClamp } = Interpolate;
 
 function getHapticsModule() {
@@ -35,6 +37,7 @@ export type ScrollbarProps = ScrollGestureState & {
 	redraw: () => void;
 	startedAnimation: () => void;
 	finishedAnimation: () => void;
+	safeArea: SharedValue<EdgeInsets>;
 };
 
 /** */
@@ -54,6 +57,7 @@ export function getScrollbar(state: ScrollbarProps): ScrollbarState {
 		invertedFactor,
 		startedAnimation,
 		finishedAnimation,
+		safeArea,
 	} = state;
 	const visible = makeMutable(0);
 	const dragging = makeMutable(0);
@@ -144,7 +148,7 @@ export function getScrollbar(state: ScrollbarProps): ScrollbarState {
 			const scroll = scrollY.value;
 			const max = maxHeight.value;
 			const percentage = Math.max(maxHeight.value / layout.value.height, 1);
-			const base = Math.max((baseScrollHeight / percentage) * 8, minScrollHeight * 4);
+			const base = Math.max(layout.value.height / percentage, minScrollHeight * 4);
 			if (scroll <= 0) {
 				return base - Math.min(Math.pow(-scroll, 0.8), base - minScrollHeight);
 			} else if (scroll >= max) {
@@ -154,9 +158,9 @@ export function getScrollbar(state: ScrollbarProps): ScrollbarState {
 		});
 		const y = useDerivedValue(() => {
 			const percentage = scrollY.value / maxHeight.value;
-			const end = layout.value.height - scrollBarHeight.value;
+			const end = layout.value.height - scrollBarHeight.value - safeArea.value.top - safeArea.value.bottom;
 
-			const result = Math.min(Math.max(percentage * end, 0), end);
+			const result = Math.min(Math.max(percentage * end, 0), end) + safeArea.value.bottom;
 			return inverted ? layout.value.height - result - scrollBarHeight.value : result;
 		});
 
