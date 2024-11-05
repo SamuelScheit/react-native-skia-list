@@ -54,6 +54,7 @@ export type ShareableState<T = any> = {
 	maintainVisibleContentPosition: boolean;
 	keyExtractor: (item: T, index: number) => string;
 	data: SharedValue<T[]>;
+	transformedData: SharedValue<Record<string, any>>;
 	renderTime: SharedValue<number>;
 	maxHeight: SharedValue<number>;
 	safeArea: SharedValue<EdgeInsets>;
@@ -61,6 +62,7 @@ export type ShareableState<T = any> = {
 	startY: SharedValue<number>;
 	pressing: SharedValue<boolean>;
 	invertedFactor: number;
+	redrawItem: SkiaFlatListState<T>["redrawItem"];
 };
 
 /** */
@@ -76,9 +78,9 @@ export type SkiaFlatListState<T = any, B = T> = {
 	/** The y position of the first visible element on the screen */
 	firstRenderHeight: SharedValue<number>;
 	/** The index of the last rendered element */
-	lastRenderIndex: number;
+	lastRenderIndex: SharedValue<number>;
 	/** The y position of the last rendered element */
-	lastRenderHeight: number;
+	lastRenderHeight: SharedValue<number>;
 	/** Whether to maintain the visible content position when adding new items. Defaults to true. */
 	maintainVisibleContentPosition: boolean;
 	/** Specify this function to return a unique key for each item */
@@ -92,7 +94,7 @@ export type SkiaFlatListState<T = any, B = T> = {
 	/** The data array */
 	data: SharedValue<T[]>;
 	/** The transformed data array */
-	// transformedData: SharedValue<Record<string, B>>;
+	transformedData: SharedValue<Record<string, B>>;
 	/** @hidden Time spent on rendering */
 	renderTime: SharedValue<number>;
 
@@ -130,7 +132,7 @@ export type SkiaFlatListState<T = any, B = T> = {
 	unmountElement: (index: number | undefined, item: T | undefined) => void;
 
 	/** Force redraws a specific element */
-	redrawElement(index: number | undefined, item?: T | undefined): void;
+	redrawItem(index: number | undefined, item?: T | undefined): void;
 
 	/** Recalculates the items in the list and (un)mounts elements as needed.
 	 * Is automatically called on scroll or when the data changes.
@@ -211,7 +213,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 		globalThis.data = data;
 		const transformedData = makeMutable(props.initialTransformed?.() ?? {});
 		globalThis.transformed = transformedData;
-		console.log("initialData", performance.now() - start, initialData.length);
 		const keyExtractor =
 			props.keyExtractor ??
 			((_item, index) => {
@@ -248,6 +249,12 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 		const { maxHeight, scrollY, startY, redraw, pressing, layout, safeArea, content, invertedFactor, root } =
 			scrollView;
 
+		const redrawItemShareable = makeMutable({
+			function: (index: number | undefined, item?: T | undefined) => {
+				"worklet";
+			},
+		});
+
 		const shareableState = {
 			layout,
 			scrollY,
@@ -270,6 +277,10 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			startY,
 			pressing, // @ts-ignore
 			avatars: props.avatars,
+			redrawItem: (index: number | undefined, item?: T | undefined) => {
+				"worklet";
+				return redrawItemShareable.value.function(index, item);
+			},
 		};
 
 		const state = {
@@ -353,8 +364,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 				rowY += itemHeight;
 			}
-
-			console.log("scrollToIndex", index, rowY, performance.now() - start);
 
 			const newY = Math.min(rowY, maxHeight.value);
 
@@ -458,6 +467,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 		 */
 		function mountElement(rowY: number, item: T, index: number) {
 			"worklet";
+			if (rowY === undefined) return;
 
 			let offset = rowY;
 			const translation = Skia.Matrix().translate(safeArea.value.left, rowY);
@@ -483,7 +493,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			return itemHeight;
 		}
 
-		function redrawElement(index: number | undefined, item?: T | undefined) {
+		function redrawItem(index: number | undefined, item?: T | undefined) {
 			"worklet";
 			if (item === undefined && index !== undefined) item = data.value[index];
 			if (index === undefined && item !== undefined) index = data.value.indexOf(item);
@@ -497,6 +507,8 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 			mountElement(rowOffsets.value[id], item, index);
 		}
+
+		redrawItemShareable.value = { function: redrawItem };
 
 		/**
 		 * Recalculates the items in the list and (un)mounts elements as needed.
@@ -747,8 +759,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			const height = getItemsHeight(newData, index);
 			if (!height) return;
 
-			console.log("insertAt", height);
-
 			if (firstRenderIndex.value >= index && maintainVisibleContentPosition) {
 				firstRenderIndex.value += newData.length;
 				firstRenderHeight.value += height;
@@ -815,8 +825,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			const height = getItemsHeight(removedData, index);
 			if (!height) return;
 
-			console.log("removeAt", height);
-
 			if (firstRenderIndex.value > index && maintainVisibleContentPosition) {
 				firstRenderIndex.value -= 1;
 				firstRenderHeight.value -= height;
@@ -855,8 +863,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 					1
 				);
 
-				console.log("maxHeight", maxHeight.value, estimatedItemHeight * initialData.length);
-
 				Object.keys(elements.value).forEach((id) => {
 					const element = elements.value[id];
 					if (element) {
@@ -882,12 +888,12 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			getItemFromTouch: callOnUI(getItemFromTouch),
 			unmountElement: callOnUI(unmountElement),
 			redrawItems: callOnUI(redrawItems),
+			redrawItem: callOnUI(redrawItem),
 			scrollToIndex: callOnUI(scrollToIndex),
 			scrollToStart: callOnUI(scrollToStart),
 			scrollToEnd: callOnUI(scrollToEnd),
 			scrollToItem: callOnUI(scrollToItem),
 			getTransformed: callOnUI(getTransformed),
-			redrawElement: callOnUI(redrawElement),
 		};
 	});
 
