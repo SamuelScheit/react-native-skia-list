@@ -34,13 +34,13 @@ const sidebars: SidebarsConfig = {
 			items: [
 				{
 					type: "doc",
-					id: "api/ScrollView/index",
-					label: "<SkiaScrollView />",
+					id: "api/FlatList/index",
+					label: "<SkiaFlatList />",
 				},
 				{
 					type: "doc",
-					id: "api/FlatList/index",
-					label: "<SkiaFlatList />",
+					id: "api/ScrollView/index",
+					label: "<SkiaScrollView />",
 				},
 			],
 		},

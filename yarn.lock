@@ -5591,9 +5591,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@shopify/react-native-skia@npm:1.5.0"
+"@shopify/react-native-skia@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "@shopify/react-native-skia@npm:1.5.1"
   dependencies:
     canvaskit-wasm: "npm:0.39.1"
     react-reconciler: "npm:0.27.0"
@@ -5608,7 +5608,7 @@ __metadata:
       optional: true
   bin:
     setup-skia-web: ./scripts/setup-canvaskit.js
-  checksum: 10c0/d55784982bfd04d5c9fdd2b27e80faa10bea558a47d8f091f388d56ac2a98c5328bda63607093ebe43332e64c533b65514354872cdb232c64d39a662a3609f7f
+  checksum: 10c0/f26858a4af664ff425829e8c631c064ce78b037da5916d922ff751cb0df0906f1eb815c7c952baa9da94c10080ba259c4bbd1c0b4c598944310ecf1a542b6921
   languageName: node
   linkType: hard
 
@@ -21327,7 +21327,7 @@ __metadata:
     "@pmmmwh/react-refresh-webpack-plugin": "npm:^0.5.15"
     "@react-native-menu/menu": "npm:^1.1.3"
     "@shopify/flash-list": "npm:^1.7.1"
-    "@shopify/react-native-skia": "npm:^1.5.0"
+    "@shopify/react-native-skia": "npm:^1.5.1"
     "@types/react-refresh": "npm:^0"
     expo: "npm:~51.0.28"
     expo-build-properties: "npm:~0.12.5"
@@ -21373,7 +21373,7 @@ __metadata:
     "@evilmartians/lefthook": "npm:^1.5.0"
     "@react-native/eslint-config": "npm:^0.73.1"
     "@release-it/conventional-changelog": "npm:^5.0.0"
-    "@shopify/react-native-skia": "npm:^1.5.0"
+    "@shopify/react-native-skia": "npm:^1.5.1"
     "@types/jest": "npm:^29.5.5"
     "@types/react": "npm:^18.3.12"
     "@types/react-native": "npm:^0.73.0"
@@ -21394,7 +21394,6 @@ __metadata:
     release-it: "npm:^15.0.0"
     typescript: "npm:^5.2.2"
   peerDependencies:
-    "@shopify/react-native-skia": "*"
     react: "*"
     react-native: "*"
     react-native-gesture-handler: "*"

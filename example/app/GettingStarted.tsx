@@ -12,7 +12,7 @@ const paragraphBuilder = Skia.ParagraphBuilder.Make({
 	},
 });
 
-export default function Test2() {
+export default function Test() {
 	const safeArea = useSafeAreaInsets();
 
 	return (
