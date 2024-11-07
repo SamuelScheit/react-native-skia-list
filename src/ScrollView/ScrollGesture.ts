@@ -7,15 +7,17 @@ import {
 	type SharedValue,
 } from "react-native-reanimated";
 import { withDecay } from "../Util/Decay";
-import { Gesture } from "react-native-gesture-handler";
+import { Gesture, State } from "react-native-gesture-handler";
 import type {
 	GestureType,
 	GestureUpdateEvent,
 	PanGestureChangeEventPayload,
 	PanGestureHandlerEventPayload,
+	TouchData,
 } from "react-native-gesture-handler";
 import { interpolateOutside } from "../Util/Interpolate";
 import type { Animation, DecayAnimation } from "react-native-reanimated";
+import type { TapResult } from "../FlatList";
 
 /**
  */
@@ -164,6 +166,10 @@ export type ScrollGestureState = {
 	 */
 	scrollToEnd: (opts: { animated?: boolean }) => void;
 	/**
+	 * Scroll to start of the scroll view.
+	 */
+	scrollToStart: (opts: { animated?: boolean }) => void;
+	/**
 	 * If you manually handle scrolling, e.g. with a custom ScrollBar, you can call this function to start momentum scrolling.
 	 */
 	startMomentumScroll: (velocityY: number) => void;
@@ -194,6 +200,7 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 		layout,
 	} = state;
 	const inverted = props.inverted ? -1 : 1;
+	const touchStart = makeMutable({ x: 0, y: 0, absoluteX: 0, absoluteY: 0, id: 0 } as TouchData);
 
 	const onMomentumScrollEndProps = props.onMomentumScrollEnd;
 
@@ -269,14 +276,44 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 		}
 	}
 
+	function scrollToStart(opts: { animated?: boolean }) {
+		"worklet";
+
+		if (opts.animated) {
+			y.value = withSpring(0, { stiffness: 80, damping: 10, mass: 0.2 });
+		} else {
+			y.value = 0;
+		}
+	}
+
 	const gesture = Gesture.Pan()
-		.minDistance(10)
 		.onTouchesDown((e, manager) => {
 			startedAnimation?.();
 			const [touch] = e.allTouches;
 			if (!touch) return manager.fail();
 
+			touchStart.value = touch;
+
 			if (touch.x <= 20) return manager.fail();
+		})
+		.onTouchesMove((e, manager) => {
+			const [touch] = e.allTouches;
+			if (!touch) return;
+			if (e.state === State.FAILED) return;
+			if (e.state === State.ACTIVE) return;
+
+			const { x, y } = touchStart.value;
+
+			const diffX = Math.abs(touch.x - x);
+			const diffY = Math.abs(touch.y - y);
+
+			if (diffX > 8 || diffY > 8) {
+				if (diffY > diffX) {
+					manager.activate();
+				} else {
+					manager.fail();
+				}
+			}
 		})
 		.onBegin(() => {
 			// begin touch down
@@ -330,7 +367,8 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 			}
 
 			finishedAnimation?.();
-		});
+		})
+		.manualActivation(true);
 
 	return {
 		gesture,
@@ -338,6 +376,7 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 		invertedFactor: inverted,
 		scrollTo,
 		scrollToEnd,
+		scrollToStart,
 		startMomentumScroll: onEnd,
 	};
 }

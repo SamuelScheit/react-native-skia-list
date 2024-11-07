@@ -1,6 +1,3 @@
-import type { DataModule } from "@shopify/react-native-skia";
-import { registerRootComponent } from "expo";
-import { Platform } from "react-native";
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 

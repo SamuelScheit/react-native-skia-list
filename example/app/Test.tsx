@@ -6,31 +6,19 @@ const { Skia } =
 const { SkiaViewNativeId } =
 	require("@shopify/react-native-skia/src/views/SkiaViewNativeId") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/SkiaViewNativeId");
 
-import SkiaPictureViewNativeComponent from "../src/Util/SkiaPictureView";
-
-import { useLayoutEffect, useRef, useState } from "react";
-import { runOnUI as runOnUIImmediately, useFrameCallback } from "react-native-reanimated";
-import { makeMutable, type SharedValue, useSharedValue } from "react-native-reanimated";
+import { useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { Platform } from "react-native";
 import {
 	Canvas,
 	FontSlant,
 	FontWeight,
 	FontWidth,
-	matchFont,
 	Paragraph,
-	Rect,
-	Text,
-	TextAlign,
 	TextBaseline,
 	TextDecoration,
 	TextDecorationStyle,
-	type SkPicture,
 	type SkTypefaceFontProvider,
 } from "@shopify/react-native-skia";
-const { JsiSkParagraphBuilder } =
-	require("@shopify/react-native-skia/src/skia/web/JsiSkParagraphBuilder") as typeof import("@shopify/react-native-skia/lib/typescript/src/skia/web/JsiSkParagraphBuilder");
 
 declare global {
 	var fontManager: SkTypefaceFontProvider;

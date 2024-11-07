@@ -64,6 +64,11 @@ export function useMessageListState(props: useMessageListProps & MessageListProp
 				"worklet";
 				return item.id;
 			},
+			onTap: (result) => {
+				"worklet";
+
+				console.log("onTap", result);
+			},
 		}),
 		contextMenuMessage,
 		avatars,
@@ -102,13 +107,15 @@ export function useMessageListState(props: useMessageListProps & MessageListProp
 		const contextMenuRef = { current: contextMenu.gesture };
 
 		list.gesture = Gesture.Simultaneous(
-			list.tapGesture,
+			list.touchGesture,
 			Gesture.Race(
 				contextMenu.gesture,
-				Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture)
+				Gesture.Exclusive(list.scrollbarGesture, swipeGesture, list.scrollGesture, list.tapGesture)
 			)
 		);
 		list.simultaneousHandlers.push(swipeGestureRef, contextMenuRef);
+
+		console.log("message list", list.tapGesture);
 
 		const replyIconElement = SkiaDomApi.ImageSVGNode({
 			svg: replyIcon,

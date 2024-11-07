@@ -2,7 +2,9 @@
 	"compilerOptions": {
 		"rootDir": ".",
 		"paths": {
-			"react-native-skia-list": ["./src/index"]
+			"react-native-skia-list": ["./src/index"],
+			"react-native-gesture-handler": ["./node_modules/react-native-gesture-handler"],
+			"@shopify/react-native-skia/*": ["./node_modules/@shopify/react-native-skia/*"]
 		},
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,

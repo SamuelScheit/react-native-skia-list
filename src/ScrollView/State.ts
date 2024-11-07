@@ -9,7 +9,7 @@ const { SkiaViewApi } =
 	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
 
 import type { GroupProps, RenderNode, SkMatrix } from "@shopify/react-native-skia/lib/typescript/src/";
-import { cancelAnimation, makeMutable, useSharedValue, withSpring } from "react-native-reanimated";
+import { cancelAnimation, makeMutable, useDerivedValue, useSharedValue, withSpring } from "react-native-reanimated";
 import { getScrollGesture, type ScrollGestureProps, type ScrollGestureState } from "./ScrollGesture";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
 import { runOnUI, type SharedValue } from "react-native-reanimated";
@@ -119,7 +119,7 @@ export type SkiaScrollViewProps = Partial<Omit<SkiaScrollViewState, "safeArea">>
 
 export type SkiaScrollViewState = InitialScrollViewState &
 	Omit<ScrollGestureState, "gesture"> & {
-		tapGesture: GestureType;
+		touchGesture: GestureType;
 		scrollGesture: GestureType | ComposedGesture;
 		scrollbarGesture: GestureType | ComposedGesture;
 		Scrollbar: () => JSX.Element;
@@ -188,7 +188,8 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 		[]
 	);
 
-	const offsetY = makeMutable(0);
+	const offsetY = useDerivedValue(() => keyboardHeight.value);
+	// const offsetY = keyboardHeight.value;
 
 	const [list] = useState(() => {
 		const _nativeId = SkiaViewNativeId.current++;
@@ -259,8 +260,8 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 		const scrollbarRef = { current: scrollbar.gesture };
 		scrollbar.gesture.withRef(scrollbarRef);
 
-		const tapGestureRef = { current: null };
-		const tapGesture = Gesture.Manual()
+		const touchGestureRef = { current: null };
+		const touchGesture = Gesture.Manual()
 			.onTouchesDown(() => {
 				pressing.value = true;
 			})
@@ -270,12 +271,12 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 			.onTouchesCancelled(() => {
 				pressing.value = false;
 			})
-			.withRef(tapGestureRef);
+			.withRef(touchGestureRef);
 
 		const customGesture =
 			props.customGesture ||
 			(({ scrollbar, gesture }) =>
-				Gesture.Simultaneous(tapGesture, Gesture.Exclusive(scrollbar.gesture, gesture)));
+				Gesture.Simultaneous(touchGesture, Gesture.Exclusive(scrollbar.gesture, gesture)));
 
 		const gesture = customGesture({ scrollbar, ...scrollState, ...state } as any);
 
@@ -310,8 +311,8 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 			gesture,
 			scrollGesture: scrollState.gesture,
 			scrollbarGesture: scrollbar.gesture,
-			tapGesture,
-			simultaneousHandlers: [tapGestureRef, scrollGestureRef, scrollbarRef],
+			touchGesture: touchGesture,
+			simultaneousHandlers: [touchGestureRef, scrollGestureRef, scrollbarRef],
 		};
 	});
 
@@ -320,5 +321,5 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 		maxHeight.value = Math.max(props.height - layout.value.height + safeArea.value.top + safeArea.value.bottom, 1);
 	}
 
-	return list;
+	return list as any;
 }

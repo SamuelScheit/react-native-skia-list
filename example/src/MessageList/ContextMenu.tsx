@@ -467,10 +467,13 @@ export function getContextMenu(state: ContextMenuProps) {
 		rowOffsets: state.rowOffsets,
 		firstRenderIndex: state.firstRenderIndex,
 		firstRenderHeight: state.firstRenderHeight,
+		lastRenderIndex: state.lastRenderIndex,
+		lastRenderHeight: state.lastRenderHeight,
 		maintainVisibleContentPosition: state.maintainVisibleContentPosition,
 		keyExtractor: state.keyExtractor,
 		renderItem: state.renderItem,
 		data: state.data,
+		transformedData: state.transformedData,
 		renderTime: state.renderTime,
 		maxHeight: state.maxHeight,
 		safeArea: state.safeArea,
@@ -482,6 +485,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		pressing: state.pressing,
 		// @ts-ignore
 		avatars: state.avatars,
+		redrawItem: () => {},
 	};
 
 	function createBackdropFilter(result: TapResult<any>) {

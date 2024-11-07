@@ -1,13 +1,6 @@
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
-import type {
-	GroupProps,
-	ImageProps,
-	RenderNode,
-	RoundedRectProps,
-	SkRect,
-	SkRRect,
-} from "@shopify/react-native-skia/lib/typescript/src/";
+import type { GroupProps, ImageProps, RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
 import { type MessageItem } from "./State";
 import { makeMutable, type SharedValue } from "react-native-reanimated";
 import { type ShareableState, type SkiaFlatListProps } from "react-native-skia-list";

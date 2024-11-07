@@ -9,10 +9,11 @@ import { useState } from "react";
 import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
-import { ColorShader, type GroupProps, type RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
+import { type GroupProps, type RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
 import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
 import type { PointProp } from "react-native";
 import { callOnUI } from "../Util/callOnUI";
+import { Gesture, type GestureType } from "react-native-gesture-handler";
 
 export interface Dimensions {
 	width: number;
@@ -97,6 +98,7 @@ export type SkiaFlatListState<T = any, B = T> = {
 	transformedData: SharedValue<Record<string, B>>;
 	/** @hidden Time spent on rendering */
 	renderTime: SharedValue<number>;
+	tapGesture: GestureType;
 
 	/** Scrolls to a specific index */
 	scrollToIndex: (index: number, animated?: boolean) => void;
@@ -128,6 +130,12 @@ export type SkiaFlatListState<T = any, B = T> = {
 	/** Removes a specific item from the list */
 	removeItem: (item: T, animated?: boolean) => void;
 
+	/** Removes a specific item by id from the list */
+	removeItemId: (id: string, animated?: boolean) => void;
+
+	/** Updates a data item in the list. Must have the same id as the previous item. Use `redrawItem` to force a redraw without data changes. */
+	updateItem: (updatedData: T, id?: string) => void;
+
 	/** Unmounts an element at a specific index or by item */
 	unmountElement: (index: number | undefined, item: T | undefined) => void;
 
@@ -141,6 +149,8 @@ export type SkiaFlatListState<T = any, B = T> = {
 
 	/** Called when the visible items change */
 	onViewableItemsChanged: (changed: ViewToken<T>[], viewableItems: ViewToken<T>[]) => void;
+
+	onTap?: (event: TapResult<T>, state: ShareableState<T>) => void;
 
 	/**
 	 * Determines the maximum number of items rendered outside of the visible area in screen heights.
@@ -207,12 +217,10 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 		const firstRenderHeight = makeMutable(0);
 		const lastRenderIndex = makeMutable(0);
 		const lastRenderHeight = makeMutable(0);
-		let start = performance.now();
 		const initialData = props.initialData?.() ?? [];
 		const data = makeMutable(initialData);
-		globalThis.data = data;
+		const idIndexMap = makeMutable({} as Record<string, number>);
 		const transformedData = makeMutable(props.initialTransformed?.() ?? {});
-		globalThis.transformed = transformedData;
 		const keyExtractor =
 			props.keyExtractor ??
 			((_item, index) => {
@@ -241,6 +249,8 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 					if (transformed) return transformed;
 					return (transformedData.value[id] = transformItem(item, index, id, state) as any as B);
 				};
+
+		const { onTap } = props;
 
 		const maintainVisibleContentPosition = props.maintainVisibleContentPosition ?? true;
 		const estimatedItemHeight = props.estimatedItemHeight ?? 100;
@@ -459,7 +469,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			if (!element) return;
 
 			content.value.removeChild(element);
-			elements.value[id] = undefined;
+			delete elements.value[id];
 		}
 
 		/**
@@ -506,6 +516,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			if (element) content.value.removeChild(element);
 
 			mountElement(rowOffsets.value[id], item, index);
+			redraw();
 		}
 
 		redrawItemShareable.value = { function: redrawItem };
@@ -710,6 +721,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			"worklet";
 			data.value = newData;
 			transformedData.value = {};
+			idIndexMap.value = {};
 			maxHeight.value = estimatedItemHeight * newData.length + 1;
 			heights.value = {};
 			elements.value = {};
@@ -729,12 +741,35 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			redrawItems();
 		}
 
+		function updateItem(newItem: T, id?: string) {
+			"worklet";
+
+			if (!id) id = keyExtractor(newItem, 0);
+			const index = idIndexMap.value[id];
+
+			if (!index) throw new Error("Item not found");
+			if (index < 0 || index >= data.value.length) throw new Error("Index out of bounds");
+
+			const element = elements.value[id];
+			if (element) {
+				content.value.removeChild(element);
+				delete elements.value[id];
+			}
+			delete transformedData.value[id];
+			data.value[index] = newItem;
+
+			// will automatically recalculate the height of the previous and next elements and adjust the y position accordingly
+			getItemsHeight([newItem], index);
+
+			redrawItems();
+		}
+
 		/**
 		 * Inserts new data at a specific index
 		 */
 		function insertAt(d: T | T[], index: number, animated?: boolean) {
 			"worklet";
-			if (index < 0 || index >= data.value.length) throw new Error("Index out of bounds");
+			if (index < 0 || index > data.value.length) throw new Error("Index out of bounds");
 
 			if (animated === undefined) {
 				animated = Math.abs(scrollY.value) < 500;
@@ -744,14 +779,20 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 			data.value.splice(index, 0, ...newData);
 
+			for (let i = 0; i < newData.length; i++) {
+				const dataIndex = index + i;
+				console.log("inserting", dataIndex);
+				const item = newData[i];
+				const id = keyExtractor(item, dataIndex);
+				idIndexMap.value[id] = dataIndex;
+			}
+
 			// will recalculate the height of the previous and next elements and adjust the y position accordingly
 			if (index > 0) {
 				unmountElement(index - 1);
-				// getItemsHeight([data.value[index - 1]!], index - 1);
 			}
 			if (index + newData.length < data.value.length) {
 				unmountElement(index + newData.length);
-				// getItemsHeight([data.value[index + newData.length]!], index + newData.length);
 			}
 
 			let oldY = scrollY.value;
@@ -812,11 +853,13 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			for (let i = 0; i < removedData.length; i++) {
 				const item = removedData[i];
 				const id = keyExtractor(item, index + i);
+				delete idIndexMap.value[id];
 				const element = elements.value[id];
 				if (element) {
 					content.value.removeChild(element);
-					elements.value[id] = undefined;
+					delete elements.value[id];
 				}
+				delete idIndexMap.value[id];
 				delete transformedData.value[id];
 				delete heights.value[id];
 				delete rowOffsets.value[id];
@@ -839,17 +882,37 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			redrawItems();
 		}
 
-		/**
-		 * Removes a specific item from the list
-		 */
 		function removeItem(item: T, animated?: boolean) {
 			"worklet";
-			const index = data.value.findIndex((d) => d === item);
+			const index = data.value.indexOf(item);
 			if (index !== -1) removeAt(index, animated);
+		}
+
+		function removeItemId(id: string, animated?: boolean) {
+			"worklet";
+			const index = idIndexMap.value[id];
+			if (index !== undefined) return removeAt(index, animated);
+
+			// fallback if user manually inserted data and didn't update idIndexMap
+			for (let i = 0; i < data.value.length; i++) {
+				const item = data.value[i];
+				const itemId = keyExtractor(item, i);
+				if (itemId === id) return removeAt(i, animated);
+			}
+
+			throw new Error("Item not found");
 		}
 
 		runOnUI(() => {
 			"worklet";
+
+			const dataValue = data.value;
+
+			for (let index = 0; index < dataValue.length; index++) {
+				const item = dataValue[index];
+				const id = keyExtractor(item, index);
+				idIndexMap.value[id] = index;
+			}
 
 			scrollY.addListener(2, () => {
 				redrawItems();
@@ -875,6 +938,25 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			});
 		})();
 
+		const tapGestureRef = { current: null };
+		const tapGesture = Gesture.Tap()
+			.onEnd((e) => {
+				const result = getItemFromTouch(e);
+				if (!result) return;
+
+				if (onTap) onTap(result, shareableState);
+			})
+			.withRef(tapGestureRef);
+
+		state.tapGesture = tapGesture;
+
+		scrollView.simultaneousHandlers.push(tapGestureRef);
+
+		scrollView.gesture = Gesture.Simultaneous(
+			scrollView.touchGesture,
+			Gesture.Exclusive(scrollView.scrollbarGesture, scrollView.scrollGesture, tapGesture)
+		);
+
 		redrawItems();
 
 		return {
@@ -885,6 +967,8 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			prepend: callOnUI(prepend),
 			removeAt: callOnUI(removeAt),
 			removeItem: callOnUI(removeItem),
+			removeItemId: callOnUI(removeItemId),
+			updateItem: callOnUI(updateItem),
 			getItemFromTouch: callOnUI(getItemFromTouch),
 			unmountElement: callOnUI(unmountElement),
 			redrawItems: callOnUI(redrawItems),

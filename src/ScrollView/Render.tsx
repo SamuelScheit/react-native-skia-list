@@ -2,7 +2,7 @@ import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/Host
 
 import SkiaDomViewNativeComponent from "./SkiaDomView";
 import type { NativeProps } from "@shopify/react-native-skia/lib/typescript/src/specs/SkiaDomViewNativeComponent";
-const { Skia } =
+const { Skia, clamp } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 const { SkiaRoot } =
 	require("@shopify/react-native-skia/src/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
@@ -10,10 +10,16 @@ const { SkiaRoot } =
 import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "./State";
 import { runOnUI, runOnJS } from "react-native-reanimated";
-import { Platform, type LayoutRectangle, type NativeMethods, type ScrollViewProps, type ViewStyle } from "react-native";
+import {
+	Platform,
+	View,
+	type LayoutRectangle,
+	type NativeMethods,
+	type ScrollViewProps,
+	type ViewStyle,
+} from "react-native";
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
-import { clamp } from "@shopify/react-native-skia";
 
 /**
  */
@@ -265,6 +271,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 					keyboardShouldPersistTaps={keyboardShouldPersistTaps || "handled"}
 					ref={scrollViewRef}
 					simultaneousHandlers={state.simultaneousHandlers}
+					scrollToStart={list.scrollToStart}
 				/>
 			</GestureDetector>
 		</>
@@ -275,6 +282,7 @@ type InteractiveScrollViewProps = {
 	simultaneousHandlers: BaseGestureHandlerProps["simultaneousHandlers"];
 	keyboardDismissMode?: ScrollViewProps["keyboardDismissMode"];
 	keyboardShouldPersistTaps?: ScrollViewProps["keyboardShouldPersistTaps"];
+	scrollToStart: (opts: { animated?: boolean }) => void;
 };
 
 type InteractiveScrollViewRef = {
@@ -294,6 +302,29 @@ const InteractiveScrollView = forwardRef<InteractiveScrollViewRef, InteractiveSc
 		return (
 			<ScrollView
 				{...props}
+				collapsable={false}
+				ref={(x) => {
+					x.scrollResponderHandleResponderGrant;
+				}}
+				children={<View style={{ width: 200, height: 200, backgroundColor: "red" }}></View>}
+				contentContainerStyle={{
+					width: layout.width,
+					height: layout.height * 100,
+				}}
+				contentOffset={{ x: 0, y: layout.height * 50 }}
+				persistentScrollbar={false}
+				showsHorizontalScrollIndicator={false}
+				showsVerticalScrollIndicator={false}
+				decelerationRate={0}
+				directionalLockEnabled
+				scrollsToTop
+				disableScrollViewPanResponder
+				onScrollToTop={() => {
+					props.scrollToStart({ animated: true });
+				}}
+				pinchGestureEnabled={false}
+				snapToInterval={1}
+				disableIntervalMomentum
 				style={{
 					zIndex: 1,
 					position: "absolute",
