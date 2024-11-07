@@ -5,6 +5,9 @@
 
 ![](./docs/static/img/banner.png)
 
+React Native Skia List is a high-performance list component for React Native. \
+It is built on top of [@shopify/react-native-skia](https://shopify.github.io/react-native-skia/), a powerful 2D graphics library designed to be fast and customizable.
+
 ## Installation
 
 > [!CAUTION]
@@ -15,6 +18,8 @@ npm install react-native-skia-list
 ```
 
 ## [Documentation](https://samuelscheit.github.io/react-native-skia-list/)
+
+You can achieve good looking, interactive and high-performance lists with a lot of items like the following example:
 
 <a href="https://samuelscheit.github.io/react-native-skia-list/#demo">
 	<img width="230" src="./docs/static/demo.gif" />
