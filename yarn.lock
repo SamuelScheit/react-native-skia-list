@@ -24796,7 +24796,7 @@ __metadata:
   resolution: "typedoc-plugin-markdown@https://gitpkg.vercel.app/SamuelScheit/typedoc-plugin-markdown/packages/typedoc-plugin-markdown?main"
   peerDependencies:
     typedoc: 0.26.x
-  checksum: 10c0/4be48fcce4a4aa27652de185a0207933e239697be0dd576fe91a4047c5dbe8ccbf258ab51820ccf1b8027bc572e5eddd28b4aca1960c0ff677b6030c02f35331
+  checksum: 10c0/0bc03e941bca8ac98904d4f88fe9345fd1020c6360a12496f45fb77719901e69901709387f7d6040a36cbb91459524f7a3c897b90f69c3656305d70a649c0703
   languageName: node
   linkType: hard
 
