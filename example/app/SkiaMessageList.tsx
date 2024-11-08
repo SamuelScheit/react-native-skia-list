@@ -48,8 +48,6 @@ function SkiaMessageList({ renderTime }: { renderTime: SharedValue<number> }) {
 		transformItem(item, index, id, state) {
 			"worklet";
 
-			let start = performance.now();
-
 			const result = getRandomMessage(index, item, my_user_id, attachment, avatar1, avatar2);
 
 			return result;

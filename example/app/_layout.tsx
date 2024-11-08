@@ -7,14 +7,12 @@ export default function Layout() {
 	return (
 		<GestureHandlerRootView>
 			<KeyboardProvider>
-				<KeyboardGestureArea interpolator="ios">
-					<Stack
-						screenOptions={{
-							fullScreenGestureEnabled: true,
-							headerShown: false,
-						}}
-					/>
-				</KeyboardGestureArea>
+				<Stack
+					screenOptions={{
+						fullScreenGestureEnabled: true,
+						headerShown: false,
+					}}
+				/>
 			</KeyboardProvider>
 		</GestureHandlerRootView>
 	);

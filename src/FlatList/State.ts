@@ -28,7 +28,7 @@ export interface ViewToken<T> {
 }
 
 /** */
-export type SkiaFlatListProps<T = any, B = T> = Partial<Omit<SkiaFlatListState<T, B>, "safeArea">> &
+export type SkiaFlatListProps<T = any, B = T> = Partial<Omit<SkiaFlatListState<T, B>, "safeArea" | "mode">> &
 	SkiaScrollViewElementProps & {
 		initialData?: () => T[];
 		initialTransformed?: () => Record<string, B>;
@@ -265,6 +265,12 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			},
 		});
 
+		const redrawItemsShareable = makeMutable({
+			function: (index: number | undefined, item?: T | undefined) => {
+				"worklet";
+			},
+		});
+
 		const shareableState = {
 			layout,
 			scrollY,
@@ -290,6 +296,10 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			redrawItem: (index: number | undefined, item?: T | undefined) => {
 				"worklet";
 				return redrawItemShareable.value.function(index, item);
+			},
+			redrawItems: (index: number | undefined, item?: T | undefined) => {
+				"worklet";
+				return redrawItemsShareable.value.function(index, item);
 			},
 		};
 
@@ -453,7 +463,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			"worklet";
 			// item is above the end
 			// when inverted it is above the top of the screen
-			return rowY - threshold > scrollY.value + layout.value.height;
+			return rowY - threshold >= scrollY.value + layout.value.height;
 		}
 
 		function unmountElement(index: number | undefined, item?: T | undefined) {
@@ -655,6 +665,10 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 					} else if (beforeStart) continue;
 				}
 
+				if (viewableItem && onViewableItemsChanged) {
+					viewableItem.isViewable = true;
+				}
+
 				if (!firstWasSet) {
 					firstRenderIndex.value = index;
 					firstRenderHeight.value = rowY;
@@ -713,6 +727,8 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 			renderMutex.value = false;
 		}
+
+		redrawItemsShareable.value = { function: redrawItem };
 
 		/**
 		 * Sets a new data array and resets the list position and cache

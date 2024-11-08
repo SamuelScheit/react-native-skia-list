@@ -200,8 +200,6 @@ export function getRandomMessage(
 			.build();
 		paragraph.layout(40);
 
-		console.log(paragraph.getMaxIntrinsicWidth(), reaction.emoji, emojiBuilder);
-
 		reactions.push({
 			...reaction,
 			width: paragraph.getMaxIntrinsicWidth(),

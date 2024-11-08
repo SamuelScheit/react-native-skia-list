@@ -204,11 +204,13 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 			};
 		}
 
-		runOnUI(() => {
-			mode.addListener(1, (value) => {
-				runOnJS(setMode)(value);
-			});
-		})();
+		if (!props.mode) {
+			runOnUI(() => {
+				mode.addListener(1, (value) => {
+					runOnJS(setMode)(value);
+				});
+			})();
+		}
 	});
 
 	const [fixedReconciler] = useState(() => {
@@ -260,7 +262,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 				}}
 				nativeID={`${_nativeId}`}
 				// mode={"continuous"}
-				mode={mode.value}
+				mode={props.mode || mode.value}
 				debug={debug}
 				style={style || { flex: 1 }}
 				root={state.root.value}
@@ -303,9 +305,7 @@ const InteractiveScrollView = forwardRef<InteractiveScrollViewRef, InteractiveSc
 			<ScrollView
 				{...props}
 				collapsable={false}
-				ref={(x) => {
-					x.scrollResponderHandleResponderGrant;
-				}}
+				ref={(x) => {}}
 				children={<View style={{ width: 200, height: 200, backgroundColor: "red" }}></View>}
 				contentContainerStyle={{
 					width: layout.width,

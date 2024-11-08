@@ -27,6 +27,7 @@ export default function App() {
 			<Button href="/SkiaScrollView">SkiaScrollView</Button>
 			<Button href="/SkiaFlatList">SkiaFlatList</Button>
 			<Button href="/SkiaMessageList">SkiaMessageList</Button>
+			<Button href="/SkiaVideoList">SkiaVideoList</Button>
 			<Button href="/FlashList">FlashList</Button>
 			<Button href="/FlatList">FlatList</Button>
 			<Button href="/WGPU">WebGPU</Button>

@@ -67,8 +67,6 @@ const actionBuilder = Skia.ParagraphBuilder.Make(
 
 const emojiSize = 25 * scale;
 
-console.log("emojiFontFamily", emojiFontFamily);
-
 export const emojiBuilder = Skia.ParagraphBuilder.Make(
 	{
 		textAlign: TextAlign.Left,
@@ -563,7 +561,6 @@ export function getContextMenu(state: ContextMenuProps) {
 		if (!action) return;
 
 		contextMenuActivated.value = false;
-		console.log("long press", action.label);
 	}
 
 	function onContextMenuEmoji(index: number | null) {
@@ -574,7 +571,6 @@ export function getContextMenu(state: ContextMenuProps) {
 		if (!emoji) return;
 
 		contextMenuActivated.value = false;
-		console.log("long press", emoji.label);
 	}
 
 	function onLongPressIn(e: TouchData) {

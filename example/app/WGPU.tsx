@@ -157,8 +157,6 @@ export default function WGPU() {
 
 			rowY += itemHeight;
 
-			console.log("index", index, rowY, height, -y.value);
-
 			if (rowY - height + windowSize >= -y.value) break; // out of lower view
 			if (rowY - windowSize + itemHeight < -y.value) {
 				// out of upper view
@@ -180,7 +178,6 @@ export default function WGPU() {
 		maxTook.value = Math.max(maxTook.value, diff);
 		if (diff > 8) {
 		}
-		console.log("diff", diff);
 	}
 
 	// 	draw();

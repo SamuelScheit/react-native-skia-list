@@ -19,12 +19,11 @@ import {
 	TextDecorationStyle,
 	type SkTypefaceFontProvider,
 } from "@shopify/react-native-skia";
+import { View } from "react-native";
 
 declare global {
 	var fontManager: SkTypefaceFontProvider;
 }
-
-console.log("Skia", globalThis.fontManager);
 
 globalThis.Skia = Skia;
 
@@ -65,7 +64,6 @@ const paragraph = paragraphBuilder.addText("test 😂").build();
 
 globalThis.paragraph = paragraph;
 paragraph.layout(300);
-console.log("paragraph", paragraph.getHeight());
 
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("red"));
@@ -127,12 +125,14 @@ export default function TestSkiaPicture() {
 		.onFinalize((g, success) => {});
 
 	return (
-		<GestureDetector gesture={gesture}>
-			<Canvas style={{ flex: 1 }} mode="continuous">
-				{/* <Rect x={x} y={y} width={300} height={300} color="red" /> */}
-				<Paragraph paragraph={paragraph} x={x} y={y} width={300} />
-				{/* <Text x={x} y={y} text="Hello, world!" font={font} color="red" /> */}
-			</Canvas>
-		</GestureDetector>
+		<View style={{ flex: 1, marginLeft: 10 }}>
+			<GestureDetector gesture={gesture}>
+				<Canvas style={{ flex: 1 }} mode="continuous">
+					{/* <Rect x={x} y={y} width={300} height={300} color="red" /> */}
+					<Paragraph paragraph={paragraph} x={x} y={y} width={300} />
+					{/* <Text x={x} y={y} text="Hello, world!" font={font} color="red" /> */}
+				</Canvas>
+			</GestureDetector>
+		</View>
 	);
 }

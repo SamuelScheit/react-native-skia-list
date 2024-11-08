@@ -81,7 +81,7 @@ export type InitialScrollViewState = {
 
 /**
  */
-export type SkiaScrollViewProps = Partial<Omit<SkiaScrollViewState, "safeArea">> &
+export type SkiaScrollViewProps = Partial<Omit<SkiaScrollViewState, "safeArea" | "mode">> &
 	ScrollGestureProps & {
 		/**
 		 * Specify a custom scroll gesture.
@@ -115,6 +115,10 @@ export type SkiaScrollViewProps = Partial<Omit<SkiaScrollViewState, "safeArea">>
 		 * SkiaScrollView so that the elements start rendering from the bottom screen to the top.
 		 */
 		inverted?: boolean;
+		/**
+		 * manually overwrite the rendering mode. The default value is undefined meaning it only rerenders when needed
+		 */
+		mode?: "default" | "continuous";
 	};
 
 export type SkiaScrollViewState = InitialScrollViewState &
@@ -202,7 +206,6 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 
 		const state = {
 			_nativeId,
-			mode,
 			pressing,
 			matrix: makeMutable(Skia.Matrix().translate(0, 0)),
 			redraw() {
@@ -214,6 +217,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 			scrollY,
 			startY,
 			...props,
+			mode,
 			root: props.root || makeMutable(root),
 			content: props.content || makeMutable(SkiaDomApi.GroupNode({})),
 			safeArea: makeMutable({
