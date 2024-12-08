@@ -1,3 +1,4 @@
+import React from "react";
 import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
 
 import SkiaDomViewNativeComponent from "./SkiaDomView";
@@ -18,7 +19,7 @@ import {
 	type ScrollViewProps,
 	type ViewStyle,
 } from "react-native";
-import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from "react";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 
 /**
@@ -159,11 +160,11 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	var { list, style, children, debug, fixedChildren, keyboardDismissMode, keyboardShouldPersistTaps, ...p } = props;
 	const ref = useRef<(React.Component<NativeProps, {}, any> & Readonly<NativeMethods>) | null>(null);
 	const scrollViewRef = useRef<InteractiveScrollViewRef>(null);
-	var state = list;
+	var state = list!;
 	if (!state) {
 		state = useSkiaScrollView(p) as any;
 	}
-	const { _nativeId, gesture, layout, safeArea, maxHeight, content, root, Scrollbar, mode, scrollY } = state;
+	const { _nativeId, gesture, layout, safeArea, maxHeight, content, root, Scrollbar, mode, scrollY } = state!;
 
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
@@ -273,7 +274,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 					keyboardShouldPersistTaps={keyboardShouldPersistTaps || "handled"}
 					ref={scrollViewRef}
 					simultaneousHandlers={state.simultaneousHandlers}
-					scrollToStart={list.scrollToStart}
+					scrollToStart={state.scrollToStart}
 				/>
 			</GestureDetector>
 		</>
@@ -306,7 +307,7 @@ const InteractiveScrollView = forwardRef<InteractiveScrollViewRef, InteractiveSc
 				{...props}
 				collapsable={false}
 				ref={(x) => {}}
-				children={<View style={{ width: 200, height: 200, backgroundColor: "red" }}></View>}
+				children={<View style={{ width: 200, height: 200 }} />}
 				contentContainerStyle={{
 					width: layout.width,
 					height: layout.height * 100,

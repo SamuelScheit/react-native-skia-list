@@ -1,3 +1,4 @@
+import { type JSX } from "react";
 import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
@@ -13,7 +14,7 @@ import { cancelAnimation, makeMutable, useDerivedValue, useSharedValue, withSpri
 import { getScrollGesture, type ScrollGestureProps, type ScrollGestureState } from "./ScrollGesture";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
 import { runOnUI, type SharedValue } from "react-native-reanimated";
-import { useLayoutEffect, useState } from "react";
+import { useMemo } from "react";
 import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
@@ -195,7 +196,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 	const offsetY = useDerivedValue(() => keyboardHeight.value);
 	// const offsetY = keyboardHeight.value;
 
-	const [list] = useState(() => {
+	const list = useMemo(() => {
 		const _nativeId = SkiaViewNativeId.current++;
 		const invertedFactor = props.inverted ? -1 : 1;
 		let animations = makeMutable(0);
@@ -318,7 +319,7 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 			touchGesture: touchGesture,
 			simultaneousHandlers: [touchGestureRef, scrollGestureRef, scrollbarRef],
 		};
-	});
+	}, []);
 
 	if (props.height) {
 		const { safeArea, maxHeight, layout } = list;

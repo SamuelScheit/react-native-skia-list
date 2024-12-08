@@ -1,3 +1,4 @@
+import { type JSX } from "react";
 const { Skia, RoundedRect } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 
@@ -6,7 +7,6 @@ import { useDerivedValue, withTiming, runOnUI, runOnJS, makeMutable, type Shared
 import * as Interpolate from "../Util/Interpolate";
 import { Gesture, type GestureType } from "react-native-gesture-handler";
 import { clearAnimatedTimeout, setAnimatedTimeout } from "../Util/timeout";
-import type { LayoutRectangle } from "react-native";
 import type { EdgeInsets } from "./State";
 const { interpolateClamp } = Interpolate;
 

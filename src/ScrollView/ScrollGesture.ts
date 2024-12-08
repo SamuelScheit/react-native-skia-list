@@ -1,11 +1,4 @@
-import {
-	cancelAnimation,
-	clamp,
-	makeMutable,
-	useSharedValue,
-	withSpring,
-	type SharedValue,
-} from "react-native-reanimated";
+import { cancelAnimation, clamp, makeMutable, withSpring, type SharedValue } from "react-native-reanimated";
 import { withDecay } from "../Util/Decay";
 import { Gesture, State } from "react-native-gesture-handler";
 import type {
@@ -16,8 +9,6 @@ import type {
 	TouchData,
 } from "react-native-gesture-handler";
 import { interpolateOutside } from "../Util/Interpolate";
-import type { Animation, DecayAnimation } from "react-native-reanimated";
-import type { TapResult } from "../FlatList";
 
 /**
  */

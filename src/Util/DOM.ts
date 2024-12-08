@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Browser only polyfill
 
 import type {
