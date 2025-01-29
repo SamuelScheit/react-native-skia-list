@@ -217,7 +217,7 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	const [fixedReconciler] = useState(() => {
 		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
 
-		root.value.insertChildBefore(reconciler.dom, content.value);
+		root.value.addChild(reconciler.dom);
 
 		return reconciler;
 	});

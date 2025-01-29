@@ -158,7 +158,7 @@ export function getScrollbar(state: ScrollbarProps): ScrollbarState {
 		});
 		const y = useDerivedValue(() => {
 			const percentage = scrollY.value / maxHeight.value;
-			const end = layout.value.height - scrollBarHeight.value - safeArea.value.top - safeArea.value.bottom;
+			const end = layout.value.height - scrollBarHeight.value - safeArea.value.bottom;
 
 			const result = Math.min(Math.max(percentage * end, 0), end) + safeArea.value.bottom;
 			return inverted ? layout.value.height - result - scrollBarHeight.value : result;

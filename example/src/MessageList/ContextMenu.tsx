@@ -509,7 +509,7 @@ export function getContextMenu(state: ContextMenuProps) {
 		unmountElement(result.index, result.item);
 		const id = keyExtractor(result.item, result.index);
 		const transformed = getTransformed(result.item, result.index, id, shareableState);
-		renderItem!(transformed, result.index, shareableState, element);
+		renderItem.value.function!(transformed, result.index, shareableState, element);
 
 		runOnJS(RenderActions)(translation, result);
 

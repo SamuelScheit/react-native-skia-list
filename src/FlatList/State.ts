@@ -671,6 +671,10 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 					if (!itemHeight) {
 						const transformed = getTransformed(item, index, id, shareableState as any);
 						itemHeight = renderItem.value.function(transformed, index, shareableState);
+						heightsValue[id] = itemHeight;
+
+						// const diff = itemHeight - estimatedItemHeight;
+						// maxHeight.value += diff;
 					}
 
 					rowY += itemHeight;
@@ -781,7 +785,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 		function resetTransformedItems() {
 			"worklet";
-
 			transformedData.value = {};
 
 			Object.keys(elements.value).forEach((id) => {
@@ -1032,7 +1035,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 	});
 
 	const { safeArea } = list;
-	const { safeArea: safeAreaProps } = props;
+	const safeAreaProps = props.safeArea;
 	const { renderItem, transformItem, resetTransformedItems } = list;
 	const { renderItem: renderItemProps, transformItem: transformItemProps } = props;
 
@@ -1048,10 +1051,12 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 		let { bottom, left, right, top } = safeArea.value;
 
-		if (safeAreaProps.bottom !== bottom) bottom = safeAreaProps.bottom;
-		if (safeAreaProps.left !== left) left = safeAreaProps.left;
-		if (safeAreaProps.right !== right) right = safeAreaProps.right;
-		if (safeAreaProps.top !== top) top = safeAreaProps.top;
+		if (safeAreaProps) {
+			if (safeAreaProps.bottom !== bottom) bottom = safeAreaProps.bottom;
+			if (safeAreaProps.left !== left) left = safeAreaProps.left;
+			if (safeAreaProps.right !== right) right = safeAreaProps.right;
+			if (safeAreaProps.top !== top) top = safeAreaProps.top;
+		}
 
 		if (
 			bottom !== safeArea.value.bottom ||
