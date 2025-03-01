@@ -1,31 +1,40 @@
 {
-	"compilerOptions": {
-		"rootDir": ".",
-		"paths": {
-			"react-native-skia-list": ["./src/index"],
-			"react-native-gesture-handler": ["./node_modules/react-native-gesture-handler"],
-			"@shopify/react-native-skia/*": ["./node_modules/@shopify/react-native-skia/*"]
-		},
-		"allowUnreachableCode": false,
-		"allowUnusedLabels": false,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"jsx": "react-jsx",
-		"lib": ["ESNext"],
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"noEmit": true,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitReturns": false,
-		"noImplicitUseStrict": false,
-		"noStrictGenericChecks": false,
-		"noUncheckedIndexedAccess": true,
-		"noUnusedLocals": false,
-		"noUnusedParameters": false,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
-		"strict": false,
-		"target": "ESNext",
-		"verbatimModuleSyntax": true
-	}
+  "compilerOptions": {
+    "rootDir": ".",
+    "paths": {
+      "react-native-skia-list": [
+        "./src/index"
+      ],
+      "react-native-gesture-handler": [
+        "./node_modules/react-native-gesture-handler"
+      ],
+      "@shopify/react-native-skia/*": [
+        "./node_modules/@shopify/react-native-skia/*"
+      ]
+    },
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "lib": [
+      "ESNext"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": false,
+    "noImplicitUseStrict": false,
+    "noStrictGenericChecks": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "target": "ESNext",
+    "verbatimModuleSyntax": true
+  },
+  "extends": "expo/tsconfig.base"
 }

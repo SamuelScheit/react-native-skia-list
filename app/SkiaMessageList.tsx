@@ -1,12 +1,12 @@
 const { Skia, loadData } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 
-import { getRandomMessage, getRandomMessageData, loadImage } from "../src/MessageList/randomMessage";
+import { getRandomMessage, getRandomMessageData, loadImage } from "../example/MessageList/randomMessage";
 import Animated, { runOnUI, useAnimatedStyle, useSharedValue, type SharedValue } from "react-native-reanimated";
-import { useMessageListState } from "../src/MessageList/State";
+import { useMessageListState } from "../example/MessageList/State";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MessageList } from "../src/MessageList";
-import { SharedText } from "../src/Util/SharedText";
+import { MessageList } from "../example/MessageList";
+import { SharedText } from "../example/Util/SharedText";
 import { Profiler, useLayoutEffect, useRef } from "react";
 import { StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useKeyboardHandler } from "react-native-keyboard-controller";

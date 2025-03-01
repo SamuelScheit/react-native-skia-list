@@ -215,14 +215,14 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	});
 
 	const [fixedReconciler] = useState(() => {
-		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
+		const reconciler = new SkiaRoot(state.redraw, () => _nativeId);
 
 		root.value.addChild(reconciler.dom);
 
 		return reconciler;
 	});
 	const [contentReconciler] = useState(() => {
-		const reconciler = new SkiaRoot(Skia, !!global.SkiaDomApi, state.redraw);
+		const reconciler = new SkiaRoot(state.redraw, () => _nativeId);
 
 		content.value.addChild(reconciler.dom);
 

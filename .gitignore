@@ -81,7 +81,7 @@ lib/
 ios/generated
 android/generated
 
-example/android
-example/ios
+android/
+ios/
 
 dist/

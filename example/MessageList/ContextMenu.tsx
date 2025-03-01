@@ -9,8 +9,6 @@ const { FontSlant, FontWeight, FontWidth, TextAlign, Skia, Paragraph, RoundedRec
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 const { SkiaRoot } =
 	require("@shopify/react-native-skia/src/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
-const { NATIVE_DOM } =
-	require("@shopify/react-native-skia/src/renderer/HostComponents") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents");
 const { SkiaViewApi } =
 	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
 
@@ -149,7 +147,7 @@ const emojis = [{ label: "❤️" }, { label: "👍" }, { label: "👎" }, { lab
 });
 
 function ReactSkiaRender(children: ReactNode, redraw: () => void) {
-	const root = new SkiaRoot(Skia, NATIVE_DOM, redraw);
+	const root = new SkiaRoot(redraw, () => -1);
 
 	root.render(children);
 

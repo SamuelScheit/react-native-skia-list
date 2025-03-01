@@ -3,9 +3,9 @@ import { Canvas, useCanvasEffect } from "react-native-wgpu";
 import { cancelAnimation, clamp, runOnUI, useFrameCallback, useSharedValue, withSpring } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getRandomMessage } from "../src/MessageList/randomMessage";
-import { withDecay } from "../../src/Util/Decay";
-import type { MessageItem } from "../src/MessageList/State";
+import { getRandomMessage } from "../example/MessageList/randomMessage";
+import { withDecay } from "../src/Util/Decay";
+import type { MessageItem } from "../example/MessageList/State";
 import type { SkCanvas, SkiaContext } from "@shopify/react-native-skia/lib/typescript/src";
 const { Canvas: SkiaCanvas, Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");

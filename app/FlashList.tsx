@@ -1,18 +1,18 @@
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
-import { getRandomMessageData } from "../src/MessageList/randomMessage";
+import { FlashList } from "@shopify/flash-list";
+import { Text, TouchableOpacity, View } from "react-native";
+import { getRandomMessageData } from "../example/MessageList/randomMessage";
 import { Profiler, useRef } from "react";
-import { SharedText } from "../src/Util/SharedText";
+import { SharedText } from "../example/Util/SharedText";
 import { useSharedValue } from "react-native-reanimated";
-import { Message } from "../src/Message";
+import { Message } from "../example/Message";
 
-export default function FlatListTest() {
-	const ref = useRef<FlatList>();
+export default function FlashListTest() {
+	const ref = useRef<FlashList<any>>(null);
 	const time = useRef(0);
 	const text = useSharedValue<any>("");
 	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageData(i));
 
 	async function scrollToEnd(index = 0) {
-
 		if (index >= data.length) return;
 
 		ref.current?.scrollToIndex({ index, animated: false });
@@ -25,21 +25,22 @@ export default function FlatListTest() {
 			<Profiler
 				id={"list"}
 				onRender={(_id, _phase, actualDuration) => {
-					time.current += actualDuration;
-					text.value = `Total Render time: ${time.current.toFixed(2)}ms`;
+					// time.current += actualDuration;
+					// text.value = `Total Render time: ${time.current.toFixed(2)}ms`;
 				}}
 			>
-				<FlatList
+				<FlashList
 					ref={ref as any}
 					data={data}
 					inverted
 					contentInsetAdjustmentBehavior="automatic"
+					estimatedItemSize={100}
 					renderItem={({ item }) => {
 						return <Message key={item.id} item={item} />;
 					}}
 				/>
 			</Profiler>
-			<View
+			{/* <View
 				style={{
 					position: "absolute",
 					top: 40,
@@ -81,7 +82,7 @@ export default function FlatListTest() {
 				>
 					<SharedText shared={text} />
 				</View>
-			</View>
+			</View> */}
 		</>
 	);
 }
