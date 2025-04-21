@@ -5,8 +5,6 @@ import SkiaDomViewNativeComponent from "./SkiaDomView";
 import type { NativeProps } from "@shopify/react-native-skia/lib/typescript/src/specs/SkiaDomViewNativeComponent";
 const { Skia, clamp } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
-const { SkiaRoot } =
-	require("@shopify/react-native-skia/src/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
 
 import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 import { useSkiaScrollView, type SkiaScrollViewProps, type SkiaScrollViewState } from "./State";
@@ -21,6 +19,7 @@ import {
 } from "react-native";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from "react";
 import type { BaseGestureHandlerProps } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
+import { SkiaRoot } from "../Util/Reconciler";
 
 /**
  */
@@ -215,27 +214,27 @@ export function SkiaScrollView(props: SkiaScrollViewElementProps) {
 	});
 
 	const [fixedReconciler] = useState(() => {
-		const reconciler = new SkiaRoot(state.redraw, () => _nativeId);
+		const reconciler = new SkiaRoot(Skia, true, state.redraw, () => _nativeId);
 
 		root.value.addChild(reconciler.dom);
 
 		return reconciler;
 	});
 	const [contentReconciler] = useState(() => {
-		const reconciler = new SkiaRoot(state.redraw, () => _nativeId);
+		const reconciler = new SkiaRoot(Skia, true, state.redraw, () => _nativeId);
 
 		content.value.addChild(reconciler.dom);
 
 		return reconciler;
 	});
 
-	contentReconciler.render(children);
-	fixedReconciler.render(
-		<>
-			{fixedChildren}
-			<Scrollbar />
-		</>
-	);
+	// contentReconciler.render(children);
+	// fixedReconciler.render(
+	// 	<>
+	// 		{fixedChildren}
+	// 		<Scrollbar />
+	// 	</>
+	// );
 
 	return (
 		<>

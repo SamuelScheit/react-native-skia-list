@@ -359,7 +359,8 @@ export function getScrollGesture(props: ScrollGestureProps): ScrollGestureState 
 
 			finishedAnimation?.();
 		})
-		.manualActivation(true);
+		.manualActivation(true)
+		.enableTrackpadTwoFingerGesture(true);
 
 	return {
 		gesture,

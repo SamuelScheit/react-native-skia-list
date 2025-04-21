@@ -6,7 +6,7 @@ import { useSharedValue } from "react-native-reanimated";
 import { Message } from "../example/Message";
 
 export default function FlatListTest() {
-	const ref = useRef<FlatList>();
+	const ref = useRef<FlatList>(null);
 	const time = useRef(0);
 	const text = useSharedValue<any>("");
 	const data = Array.from({ length: 500 }, (_, i) => getRandomMessageData(i));

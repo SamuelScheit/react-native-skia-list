@@ -19,6 +19,7 @@ import type { ReanimatedContext } from "react-native-keyboard-controller";
 import { Gesture } from "react-native-gesture-handler";
 import { getScrollbar } from "./Scrollbar";
 import type { ComposedGesture, GestureType } from "react-native-gesture-handler";
+import { callOnUI } from "../Util/callOnUI";
 
 export interface EdgeInsets {
 	top: number;
@@ -233,6 +234,19 @@ export function useSkiaScrollView<A>(props: SkiaScrollViewProps = {} as any): Sk
 
 				animations.value++;
 				mode.value = "continuous";
+
+				// if (animations.value === 1) {
+				// 	function loop() {
+				// 		"worklet";
+
+				// 		if (animations.value <= 0) return;
+
+				// 		SkiaViewApi.requestRedraw(_nativeId);
+				// 		requestAnimationFrame(loop);
+				// 	}
+
+				// 	callOnUI(loop)();
+				// }
 			},
 			finishedAnimation() {
 				"worklet";

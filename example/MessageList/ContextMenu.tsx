@@ -7,8 +7,6 @@ import type {
 } from "@shopify/react-native-skia/lib/typescript/src/";
 const { FontSlant, FontWeight, FontWidth, TextAlign, Skia, Paragraph, RoundedRect, Line, ImageSVG } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
-const { SkiaRoot } =
-	require("@shopify/react-native-skia/src/renderer/Reconciler") as typeof import("@shopify/react-native-skia/lib/typescript/src/renderer/Reconciler");
 const { SkiaViewApi } =
 	require("@shopify/react-native-skia/src/views/api") as typeof import("@shopify/react-native-skia/lib/typescript/src/views/api");
 
@@ -23,12 +21,13 @@ import {
 	withSpring,
 	withTiming,
 } from "react-native-reanimated";
-import { Gesture, type TouchData } from "react-native-gesture-handler";
+import { Gesture, MouseButton, type TouchData } from "react-native-gesture-handler";
 import { type PointProp, PixelRatio } from "react-native";
 import React, { type ReactNode, useLayoutEffect } from "react";
 import { isInBound, useSkiaFlatList, type TapResult } from "react-native-skia-list";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
 import type { SkMatrix } from "@shopify/react-native-skia/lib/typescript/src/";
+import { SkiaRoot } from "../../src/Util/Reconciler";
 
 export const dpi = 1;
 export const scale = PixelRatio.getFontScale() * 1 * dpi;
@@ -147,9 +146,9 @@ const emojis = [{ label: "❤️" }, { label: "👍" }, { label: "👎" }, { lab
 });
 
 function ReactSkiaRender(children: ReactNode, redraw: () => void) {
-	const root = new SkiaRoot(redraw, () => -1);
+	const root = new SkiaRoot(Skia, true, redraw, () => -1);
 
-	root.render(children);
+	// root.render(children);
 
 	return root;
 }
