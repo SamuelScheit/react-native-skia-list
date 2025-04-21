@@ -6,14 +6,14 @@ import {
 	type SkiaScrollViewState,
 } from "../ScrollView";
 import { useState } from "react";
-import { makeMutable, cancelAnimation, withTiming, runOnUI, type SharedValue } from "react-native-reanimated";
+import { makeMutable, cancelAnimation, withTiming, runOnUI, runOnJS, type SharedValue } from "react-native-reanimated";
 const { Skia } =
 	require("@shopify/react-native-skia/src/") as typeof import("@shopify/react-native-skia/lib/typescript/src/");
 import { type GroupProps, type RenderNode } from "@shopify/react-native-skia/lib/typescript/src/";
 import type {} from "@shopify/react-native-skia/lib/typescript/src/renderer/HostComponents";
 import type { PointProp } from "react-native";
 import { callOnUI } from "../Util/callOnUI";
-import { Gesture, type GestureType } from "react-native-gesture-handler";
+import { Gesture, HoverEffect, type GestureType } from "react-native-gesture-handler";
 
 export interface Dimensions {
 	width: number;
@@ -44,13 +44,23 @@ export type SkiaFlatListProps<T = any, B = T> = Partial<
 		keyExtractor?: (item: T, index: number) => string;
 		renderItem?: RenderItem<T, B>;
 		transformItem?: TransformItem<T, B>;
+		/** Called once when scrolling within threshold of the end; resets when scrolling away */
+		onEndReached?: () => void;
+		/** Called once when scrolling within threshold of the start; resets when scrolling away */
+		onStartReached?: () => void;
+		/** Distance in pixels from end at which to call onEndReached */
+		onEndReachedThreshold?: number;
+		/** Distance in pixels from start at which to call onStartReached */
+		onStartReachedThreshold?: number;
 	};
 
 export type RenderItem<T, B> = (
 	item: B,
 	index: number,
 	state: ShareableState<T>,
-	element?: RenderNode<GroupProps>
+	element?: RenderNode<GroupProps>,
+	touch?: TapResult<T>,
+	hover?: TapResult<T>
 ) => number;
 
 export type TransformItem<T, B> = (item: T, index: number, id: any, state: ShareableState<T>) => B;
@@ -77,6 +87,8 @@ export type ShareableState<T = any> = {
 	pressing: SharedValue<boolean>;
 	invertedFactor: number;
 	redrawItem: SkiaFlatListState<T>["redrawItem"];
+	hasReachedEnd: SharedValue<boolean>;
+	hasReachedStart: SharedValue<boolean>;
 };
 
 /** */
@@ -114,6 +126,7 @@ export type SkiaFlatListState<T = any, B = T> = {
 	/** @hidden Time spent on rendering */
 	renderTime: SharedValue<number>;
 	tapGesture: GestureType;
+	hoverGesture: GestureType;
 
 	/** Scrolls to a specific index */
 	scrollToIndex: (index: number, animated?: boolean) => void;
@@ -155,7 +168,7 @@ export type SkiaFlatListState<T = any, B = T> = {
 	unmountElement: (index: number | undefined, item?: T | undefined) => void;
 
 	/** Force redraws a specific element */
-	redrawItem(index: number | undefined, item?: T | undefined): void;
+	redrawItem(index: number | undefined, item?: T | undefined, touch?: TapResult<T>, hover?: TapResult<T>): void;
 
 	/** Recalculates the items in the list and (un)mounts elements as needed.
 	 * Is automatically called on scroll or when the data changes.
@@ -166,6 +179,7 @@ export type SkiaFlatListState<T = any, B = T> = {
 	onViewableItemsChanged: (changed: ViewToken<T>[], viewableItems: ViewToken<T>[]) => void;
 
 	onTap?: (event: TapResult<T>, state: ShareableState<T>) => void;
+	onHover?: (event: TapResult<T> | undefined, state: ShareableState<T>) => void;
 
 	/**
 	 * Determines the maximum number of items rendered outside of the visible area in screen heights.
@@ -179,7 +193,10 @@ export type SkiaFlatListState<T = any, B = T> = {
 	 * Receives the touch event as `{ x: number, y: number }`
 	 */
 	getItemFromTouch: (e: PointProp) => TapResult<T> | undefined;
-} & SkiaScrollViewState;
+
+	shareableState: ShareableState<T>;
+} & SkiaScrollViewState &
+	ShareableState<T>;
 
 /**
  * Result returned by `getItemFromTouch({ x: number, y: number })`
@@ -222,7 +239,14 @@ export type TapResult<T> = {
  */
 export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as any): SkiaFlatListState<T, B> {
 	const scrollView = useSkiaScrollView(props);
+	// scroll threshold callbacks
 	const [list] = useState(() => {
+		const onEndReached = props.onEndReached;
+		const onStartReached = props.onStartReached;
+		const onEndReachedThreshold = props.onEndReachedThreshold ?? 0;
+		const onStartReachedThreshold = props.onStartReachedThreshold ?? 0;
+		const hasReachedEnd = makeMutable(false);
+		const hasReachedStart = makeMutable(false);
 		const renderTime = props.renderTime || makeMutable(0);
 		const renderMutex = makeMutable(false);
 		const elements = makeMutable({} as Record<string, RenderNode<GroupProps> | undefined>);
@@ -270,7 +294,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			return (transformedData.value[id] = transformItem.value.function(item, index, id, state) as any as B);
 		};
 
-		const { onTap } = props;
+		const { onTap, onHover } = props;
 
 		const maintainVisibleContentPosition = props.maintainVisibleContentPosition ?? true;
 		const estimatedItemHeight = props.estimatedItemHeight ?? 100;
@@ -280,7 +304,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			scrollView;
 
 		const redrawItemShareable = makeMutable({
-			function: (index: number | undefined, item?: T | undefined) => {
+			function: (index: number | undefined, item?: T | undefined, touch?: TapResult<T>, hover?: TapResult<T>) => {
 				"worklet";
 			},
 		});
@@ -313,9 +337,14 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			startY,
 			pressing, // @ts-ignore
 			avatars: props.avatars,
-			redrawItem: (index: number | undefined, item?: T | undefined) => {
+			redrawItem: (
+				index: number | undefined,
+				item?: T | undefined,
+				touch?: TapResult<T>,
+				hover?: TapResult<T>
+			) => {
 				"worklet";
-				return redrawItemShareable.value.function(index, item);
+				return redrawItemShareable.value.function(index, item, touch, hover);
 			},
 			redrawItems: (index: number | undefined, item?: T | undefined) => {
 				"worklet";
@@ -323,6 +352,8 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			},
 			renderItem,
 			transformItem,
+			hasReachedEnd,
+			hasReachedStart,
 		};
 
 		const state = {
@@ -337,7 +368,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			// const y = matrix.value[5]!;
 
 			const y = scrollY.value + layout.value.height - e.y - safeArea.value.bottom;
-			let rowY = 0;
+			let rowY = firstRenderHeight.value;
 			let index = 0;
 
 			const dataValue = data.value;
@@ -345,7 +376,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			var id = "";
 			var item: T | undefined;
 
-			for (index = 0; index < dataValue.length; index++) {
+			for (index = firstRenderIndex.value; index < dataValue.length; index++) {
 				item = dataValue[index]!;
 				if (!item) continue;
 				id = keyExtractor(item, index);
@@ -388,8 +419,6 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			let rowY = 0;
 			const dataValue = data.value;
 			const heightsValue = heights.value;
-
-			let start = performance.now();
 
 			for (let i = 0; i < index; i++) {
 				const item = dataValue[i];
@@ -507,7 +536,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 		/**
 		 * Mounts an element at a specific y position
 		 */
-		function mountElement(rowY: number, item: T, index: number) {
+		function mountElement(rowY: number, item: T, index: number, touch?: TapResult<T>, hover?: TapResult<T>) {
 			"worklet";
 			if (rowY === undefined) return;
 
@@ -519,7 +548,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			const id = keyExtractor(item, index);
 			const transformed = getTransformed(item, index, id, shareableState as any);
 
-			let itemHeight = renderItem.value.function(transformed, index, shareableState, element);
+			let itemHeight = renderItem.value.function(transformed, index, shareableState, element, touch, hover);
 
 			if (invertedFactor === -1 && rowY > 0) {
 				offset = rowY * invertedFactor - itemHeight;
@@ -535,7 +564,12 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			return itemHeight;
 		}
 
-		function redrawItem(index: number | undefined, item?: T | undefined) {
+		function redrawItem(
+			index: number | undefined,
+			item?: T | undefined,
+			touch?: TapResult<T>,
+			hover?: TapResult<T>
+		) {
 			"worklet";
 			if (item === undefined && index !== undefined) item = data.value[index];
 			if (index === undefined && item !== undefined) index = data.value.indexOf(item);
@@ -547,7 +581,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			const element = elements.value[id];
 			if (element) content.value.removeChild(element);
 
-			mountElement(rowOffsets.value[id], item, index);
+			mountElement(rowOffsets.value[id], item, index, touch, hover);
 			redraw();
 		}
 
@@ -966,8 +1000,29 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 				idIndexMap.value[id] = index;
 			}
 
-			scrollY.addListener(2, () => {
+			scrollY.addListener(2, (value) => {
+				"worklet";
+
 				redrawItems();
+				// start threshold
+				if (value <= onStartReachedThreshold) {
+					if (!hasReachedStart.value && onStartReached) {
+						hasReachedStart.value = true;
+						runOnJS(onStartReached)?.();
+					}
+				} else {
+					hasReachedStart.value = false;
+				}
+				// end threshold
+				const distanceToEnd = maxHeight.value - value;
+				if (distanceToEnd <= onEndReachedThreshold) {
+					if (!hasReachedEnd.value && onEndReached) {
+						hasReachedEnd.value = true;
+						runOnJS(onEndReached)?.();
+					}
+				} else {
+					hasReachedEnd.value = false;
+				}
 			});
 			layout.addListener(2, (value) => {
 				maxHeight.value = Math.max(
@@ -1000,12 +1055,26 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 			})
 			.withRef(tapGestureRef);
 
+		const hoverGestureRef = { current: null };
+		const hoverGesture = Gesture.Hover()
+			.enabled(!!onHover)
+			.withRef(hoverGestureRef)
+			.onUpdate((e) => {
+				const result = getItemFromTouch(e);
+				if (!result) return;
+
+				if (onHover) onHover(result, shareableState);
+			});
+
+		state.hoverGesture = hoverGesture;
 		state.tapGesture = tapGesture;
 
+		scrollView.simultaneousHandlers.push(hoverGestureRef);
 		scrollView.simultaneousHandlers.push(tapGestureRef);
 
 		scrollView.gesture = Gesture.Simultaneous(
 			scrollView.touchGesture,
+			hoverGesture,
 			Gesture.Exclusive(scrollView.scrollbarGesture, scrollView.scrollGesture, tapGesture)
 		);
 
@@ -1013,6 +1082,7 @@ export function useSkiaFlatList<T, B = T>(props: SkiaFlatListProps<T, B> = {} as
 
 		return {
 			...state,
+			shareableState,
 			resetData: callOnUI(resetData),
 			insertAt: callOnUI(insertAt),
 			append: callOnUI(append),
